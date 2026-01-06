@@ -32,7 +32,7 @@ This document defines the Email Verification Protocol (EVP), which enables web a
 
 *Note: This section is to be removed before publishing as an RFC.*
 
-Source for this draft and an issue tracker can be found at https://github.com/dickhardt/draft-hardt-email-verification.
+Source for this draft and an issue tracker can be found at https://github.com/dickhardt/email-verification.
 
 The browser API aspects are developed separately at the W3C WICG: https://github.com/WICG/email-verification-protocol
 

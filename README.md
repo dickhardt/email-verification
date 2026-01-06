@@ -2,10 +2,10 @@
 
 This is the working area for the individual Internet-Draft, "Email Verification Protocol".
 
-* [Editor's Copy](https://dickhardt.github.io/draft-hardt-email-verification/draft-hardt-email-verification.html)
+* [Editor's Copy](https://dickhardt.github.io/email-verification/draft-hardt-email-verification.html)
 * [Datatracker Page](https://datatracker.ietf.org/doc/draft-hardt-email-verification)
 * [Individual Draft](https://datatracker.ietf.org/doc/html/draft-hardt-email-verification)
-* [Compare Editor's Copy to Individual Draft](https://dickhardt.github.io/draft-hardt-email-verification/#go.draft-hardt-email-verification.diff)
+* [Compare Editor's Copy to Individual Draft](https://dickhardt.github.io/email-verification/#go.draft-hardt-email-verification.diff)
 
 ## Abstract
 
@@ -17,7 +17,7 @@ This document defines the Email Verification Protocol (EVP), which enables web a
 
 ## Contributing
 
-See the [guidelines for contributions](https://github.com/dickhardt/draft-hardt-email-verification/blob/main/CONTRIBUTING.md).
+See the [guidelines for contributions](https://github.com/dickhardt/email-verification/blob/main/CONTRIBUTING.md).
 
 Contributions can be made by creating pull requests.
 The GitHub interface supports creating pull requests using the Edit (✏) button.
