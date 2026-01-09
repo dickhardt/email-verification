@@ -1202,7 +1202,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
             <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-http-message-signatures" class="internal xref">HTTP Message Signatures</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1">
-                <p id="section-toc.1-1.4.2.1.1"><a href="#section-4.1" class="auto internal xref">4.1</a>.  <a href="#name-request-signing" class="internal xref">Request Signing</a></p>
+                <p id="section-toc.1-1.4.2.1.1"><a href="#section-4.1" class="auto internal xref">4.1</a>.  <a href="#name-http-request-signing" class="internal xref">HTTP Request Signing</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1.2.1">
                     <p id="section-toc.1-1.4.2.1.2.1.1"><a href="#section-4.1.1" class="auto internal xref">4.1.1</a>.  <a href="#name-request-body" class="internal xref">Request Body</a></p>
@@ -1219,7 +1219,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
                 </ul>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2">
-                <p id="section-toc.1-1.4.2.2.1"><a href="#section-4.2" class="auto internal xref">4.2</a>.  <a href="#name-request-verification" class="internal xref">Request Verification</a></p>
+                <p id="section-toc.1-1.4.2.2.1"><a href="#section-4.2" class="auto internal xref">4.2</a>.  <a href="#name-http-request-verification" class="internal xref">HTTP Request Verification</a></p>
 </li>
             </ul>
 </li>
@@ -1763,8 +1763,8 @@ signature
 <p id="section-4-1">This section defines how HTTP Message Signatures (<span>[<a href="#RFC9421" class="cite xref">RFC9421</a>]</span>) are used in token requests. The browser signs requests to prove possession of a key pair, and the issuer verifies these signatures.<a href="#section-4-1" class="pilcrow">¶</a></p>
 <div id="request-signing">
 <section id="section-4.1">
-        <h3 id="name-request-signing">
-<a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-request-signing" class="section-name selfRef">Request Signing</a>
+        <h3 id="name-http-request-signing">
+<a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-http-request-signing" class="section-name selfRef">HTTP Request Signing</a>
         </h3>
 <p id="section-4.1-1">The browser creates a signed request by:<a href="#section-4.1-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="compact type-1" id="section-4.1-2">
@@ -1864,8 +1864,8 @@ Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; \
 </div>
 <div id="request-verification">
 <section id="section-4.2">
-        <h3 id="name-request-verification">
-<a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-request-verification" class="section-name selfRef">Request Verification</a>
+        <h3 id="name-http-request-verification">
+<a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-http-request-verification" class="section-name selfRef">HTTP Request Verification</a>
         </h3>
 <p id="section-4.2-1">The issuer MUST verify the request headers:<a href="#section-4.2-1" class="pilcrow">¶</a></p>
 <ul class="compact">
@@ -2326,7 +2326,7 @@ Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; x="JrQLj5P_89iXES9-vFgrIy29clF
         <h3 id="name-webauthn-verification">
 <a href="#section-7.3" class="section-number selfRef">7.3. </a><a href="#name-webauthn-verification" class="section-name selfRef">WebAuthn Verification</a>
         </h3>
-<p id="section-7.3-1">The issuer verifies the WebAuthn response against its stored credentials for the email address. If verification succeeds, the issuer returns the EVT as described in <a href="#token-issuance">Token Issuance</a>.<a href="#section-7.3-1" class="pilcrow">¶</a></p>
+<p id="section-7.3-1">The issuer verifies the WebAuthn response against its stored credentials for the email address. If verification succeeds, the issuer returns the EVT as described in <a href="#evt-issuance">EVT Issuance</a>.<a href="#section-7.3-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
