@@ -1560,7 +1560,16 @@ svg :is([fill="white"], [fill^="#fff"]) {
             <p id="section-2.3-2.2.1">The browser generates a fresh private/public key pair. The browser SHOULD select an algorithm from the issuer's <code>signing_alg_values_supported</code> array, or use "EdDSA" if not present.<a href="#section-2.3-2.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-2.3-2.3">
-            <p id="section-2.3-2.3.1">The browser creates a signed request per <a href="#http-signatures">HTTP Message Signatures</a> and POSTs to the <code>issuance_endpoint</code>, including the issuer's cookies:<a href="#section-2.3-2.3.1" class="pilcrow">¶</a></p>
+            <p id="section-2.3-2.3.1">The browser creates a signed request per <a href="#http-signatures">HTTP Message Signatures</a> and POSTs to the <code>issuance_endpoint</code>, including the issuer's cookies. The request body is a JSON object with the following parameters:<a href="#section-2.3-2.3.1" class="pilcrow">¶</a></p>
+<ul class="compact">
+<li class="compact" id="section-2.3-2.3.2.1">
+                <code>email</code> (REQUIRED): The email address to verify<a href="#section-2.3-2.3.2.1" class="pilcrow">¶</a>
+</li>
+              <li class="compact" id="section-2.3-2.3.2.2">See <a href="#private-email">Private Email Addresses</a> for parameters to request private email addresses<a href="#section-2.3-2.3.2.2" class="pilcrow">¶</a>
+</li>
+              <li class="compact" id="section-2.3-2.3.2.3">See <a href="#webauthn-authentication">WebAuthn Authentication</a> for parameters to respond to a WebAuthn challenge<a href="#section-2.3-2.3.2.3" class="pilcrow">¶</a>
+</li>
+            </ul>
 </li>
         </ol>
 <div class="lang-http sourcecode" id="section-2.3-3">
