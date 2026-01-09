@@ -183,7 +183,11 @@ Once the browser has the email address and nonce:
 
 2. The browser generates a fresh private/public key pair. The browser SHOULD select an algorithm from the issuer's `signing_alg_values_supported` array, or use "EdDSA" if not present.
 
-3. The browser creates a signed request per [HTTP Message Signatures](#http-signatures) and POSTs to the `issuance_endpoint`, including the issuer's cookies:
+3. The browser creates a signed request per [HTTP Message Signatures](#http-signatures) and POSTs to the `issuance_endpoint`, including the issuer's cookies. The request body is a JSON object with the following parameters:
+
+   - `email` (REQUIRED): The email address to verify
+   - See [Private Email Addresses](#private-email) for parameters to request private email addresses
+   - See [WebAuthn Authentication](#webauthn-authentication) for parameters to respond to a WebAuthn challenge
 
 ```http
 POST /email-verification/issuance HTTP/1.1
