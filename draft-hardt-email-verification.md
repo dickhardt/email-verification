@@ -213,14 +213,17 @@ On receipt of a token request:
 
 2. The issuer checks if the cookies represent a logged-in user who controls the requested email address. If the issuer supports WebAuthn (`webauthn_supported: true`) and cookies are not present or invalid, the issuer MAY return a WebAuthn challenge (see [WebAuthn Authentication](#webauthn-authentication)).
 
-3. If authentication succeeds, the issuer creates an EVT per [EVT Creation](#evt-creation) and returns it as the value of `issuance_token` in an `application/json` response:
+3. If authentication succeeds, the issuer creates an EVT per [EVT Creation](#evt-creation) and returns it as the value of `issuance_token` in an `application/json` response. The issuer MAY include `Set-Cookie` headers to establish or update session state:
 
 ```http
 HTTP/1.1 200 OK
 Content-Type: application/json
+Set-Cookie: session=...; Secure; HttpOnly; SameSite=None
 
 {"issuance_token":"eyJhbGciOiJFZERTQSIsImtpZCI6IjIwMjQtMDgtMTkiLCJ0eXAiOiJldnQrand0In0...~"}
 ```
+
+The browser MUST process any `Set-Cookie` headers in the response.
 
 ## KB Creation {#kb-creation}
 
@@ -591,10 +594,14 @@ When the issuer supports WebAuthn (`webauthn_supported: true` in metadata) and a
 
 ## WebAuthn Challenge Response
 
-Instead of returning an error or an EVT, the issuer returns a WebAuthn challenge:
+Instead of returning an error or an EVT, the issuer returns a WebAuthn challenge. The issuer MAY include `Set-Cookie` headers to maintain challenge state:
 
 **HTTP 401 Unauthorized**
-```json
+```http
+HTTP/1.1 401 Unauthorized
+Content-Type: application/json
+Set-Cookie: webauthn_state=...; Secure; HttpOnly; SameSite=None; Max-Age=300
+
 {
   "webauthn_challenge": {
     "challenge": "dGVzdC1jaGFsbGVuZ2UtZGF0YQ",
@@ -613,17 +620,20 @@ Instead of returning an error or an EVT, the issuer returns a WebAuthn challenge
 
 The `webauthn_challenge` object follows the structure of PublicKeyCredentialRequestOptions as defined in [@WebAuthn].
 
+The browser MUST process any `Set-Cookie` headers in the response. The issuer can use cookies to maintain challenge state, enabling stateless verification of the WebAuthn response. Alternatively, the issuer MAY store challenges server-side with a short TTL.
+
 ## WebAuthn Response
 
-After the browser obtains a WebAuthn assertion (this mechanism is being defined by the W3C ([@EVP-Browser])), it sends a new request to the issuance endpoint with the `webauthn_response`:
+After the browser obtains a WebAuthn assertion (this mechanism is being defined by the W3C ([@EVP-Browser])), it sends a new request to the issuance endpoint with the `webauthn_response`. The browser MUST include any cookies set by the challenge response:
 
 ```http
 POST /email-verification/issuance HTTP/1.1
 Host: accounts.issuer.example
+Cookie: webauthn_state=...
 Content-Type: application/json
 Content-Digest: sha-256=:...:
 Sec-Fetch-Dest: email-verification
-Signature-Input: sig=("@method" "@authority" "@path" "content-digest" "signature-key");created=1692345600
+Signature-Input: sig=("@method" "@authority" "@path" "content-digest" "cookie" "signature-key");created=1692345600
 Signature: sig=:...:
 Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; x="JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs"
 
@@ -644,7 +654,7 @@ Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; x="JrQLj5P_89iXES9-vFgrIy29clF
 
 The `webauthn_response` object follows the structure of PublicKeyCredential as defined in [@WebAuthn].
 
-> Note: The WebAuthn request omits `cookie` from the signature components because WebAuthn authentication is used when the user lacks valid authentication cookies.
+> Note: The `cookie` component MUST be included in the signature when cookies are present (such as those set by the challenge response). If no cookies are present, the `cookie` component is omitted per [HTTP Request Signing](#request-signing).
 
 ## WebAuthn Verification
 
