@@ -332,8 +332,8 @@ The browser creates a signed request by:
 The request body is a JSON object with the following fields:
 
 - `email` (REQUIRED): The email address to verify
-- `disposable` (OPTIONAL): Request a private email address. See [Private Email Addresses](#private-email).
-- `directed_email` (OPTIONAL): Identifier for a previously issued private email address. See [Private Email Addresses](#private-email).
+- `private_email` (OPTIONAL): Request a new private email address. See [Private Email Addresses](#private-email).
+- `directed_email` (OPTIONAL): A previously issued private email address to reuse. See [Private Email Addresses](#private-email).
 
 Example:
 ```json
@@ -653,36 +653,38 @@ The issuer verifies the WebAuthn response against its stored credentials for the
 
 # Private Email Addresses {#private-email}
 
-Private email addresses allow users to provide site-specific email addresses to RPs, preventing RP-to-RP correlation of users by email address. There are two modes:
+Private email addresses allow users to provide site-specific email addresses to RPs, preventing RP-to-RP correlation of users by email address. A private email address can be:
 
-- **Disposable**: A new private email address is generated for each request
-- **Directed**: A previously issued private email address is reused for account continuity
+- **Single-use**: The browser requests a new private email and does not store it
+- **Reusable**: The browser stores the private email and passes it back via `directed_email` for account continuity
+
+The choice between single-use and reusable is made by the browser or user, not the issuer. The first request to an RP always uses `private_email: true` to obtain a new private email address. For subsequent requests, the browser can either request another new private email or reuse an existing one by passing it in `directed_email`.
 
 ## Request Parameters
 
 The token request body supports one of the following parameters for private email addresses (mutually exclusive):
 
-- `disposable` (OPTIONAL): Boolean. When set to `true`, requests a new private email address instead of the user's actual email.
+- `private_email` (OPTIONAL): Boolean. When set to `true`, requests a new private email address instead of the user's actual email.
 
-- `directed_email` (OPTIONAL): String. An opaque identifier for a previously issued private email address. When provided, the issuer returns the same private email address if the identifier is valid and linked to the `email` in the request.
+- `directed_email` (OPTIONAL): String. A previously issued private email address. When provided, the issuer returns the same private email address if it is valid and linked to the `email` in the request.
 
 ## Example Requests
 
-Request for a new private email address (disposable):
+Request for a new private email address:
 
 ```json
 {
   "email": "user@example.com",
-  "disposable": true
+  "private_email": true
 }
 ```
 
-Request to reuse a previously issued private email address (directed):
+Request to reuse a previously issued private email address:
 
 ```json
 {
   "email": "user@example.com",
-  "directed_email": "d8f3a2b1-9c4e-4f6a-8b7d-1e2f3a4b5c6d"
+  "directed_email": "u7x9k2m4@privaterelay.example"
 }
 ```
 
@@ -722,7 +724,7 @@ When a private email is issued, the EVT contains the private address in the `ema
 }
 ```
 
-The browser MAY store the `directed_email` identifier so it can provide it in future requests if the user wants to reuse the same private email address at an RP.
+The browser MAY store the private email address so it can provide it as `directed_email` in future requests if the user wants to reuse the same private email address at an RP.
 
 See [Privacy Considerations](#privacy-considerations) for privacy analysis of private email addresses.
 
@@ -805,7 +807,7 @@ When the request body is malformed, missing the `email` field, or contains inval
 
 ## Private Email Not Supported
 
-When the request includes `disposable` or `directed_email` but the issuer does not support private email addresses (`private_email_supported` is `false` or absent in metadata):
+When the request includes `private_email` or `directed_email` but the issuer does not support private email addresses (`private_email_supported` is `false` or absent in metadata):
 
 **HTTP 400 Bad Request**
 ```json
@@ -817,13 +819,13 @@ When the request includes `disposable` or `directed_email` but the issuer does n
 
 ## Invalid Directed Email
 
-When the request includes `directed_email` but the identifier is invalid or not linked to the `email` address in the request:
+When the request includes `directed_email` but the private email address is invalid or not linked to the `email` address in the request:
 
 **HTTP 400 Bad Request**
 ```json
 {
   "error": "invalid_directed_email",
-  "error_description": "The directed_email identifier is invalid or not linked to this email address"
+  "error_description": "The directed_email is invalid or not linked to this email address"
 }
 ```
 
@@ -879,7 +881,7 @@ The RP can infer whether the user is logged into the issuer: the RP receives an 
 
 ## Browser Storage
 
-The browser MAY store the `directed_email` identifier per RP origin to enable account continuity with private email addresses.
+The browser MAY store the private email address per RP origin to enable account continuity by passing it as `directed_email` in future requests.
 
 # Security Considerations
 
