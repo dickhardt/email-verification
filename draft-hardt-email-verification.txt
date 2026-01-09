@@ -927,7 +927,7 @@ Table of Contents
    domain and validating the signature against that issuer's JWKS.  This
    allows email providers to delegate private email functionality to a
    separate service.  It also enables privacy for users with vanity
-   domains (e.g., user@dickhardt.example) where the domain itself is a
+   domains (e.g., me@dickhardt.example) where the domain itself is a
    unique identifier that would otherwise reveal the user's identity.
 
 8.5.  Example EVT Payload
@@ -952,7 +952,8 @@ Table of Contents
 
    The browser MAY store the private email address so it can provide it
    as directed_email in future requests if the user wants to reuse the
-   same private email address at an RP.
+   same private email address at an RP.  This is analogous to how
+   browsers store usernames and passwords for sites.
 
    See Privacy Considerations (#privacy-considerations) for privacy
    analysis of private email addresses.
@@ -1137,7 +1138,8 @@ Table of Contents
 
    The browser MAY store the private email address per RP origin to
    enable account continuity by passing it as directed_email in future
-   requests.
+   requests.  This is analogous to how browsers store usernames and
+   passwords for sites.
 
 11.  Security Considerations
 
