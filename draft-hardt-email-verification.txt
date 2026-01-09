@@ -926,7 +926,9 @@ Table of Contents
    verifies the EVT by performing issuer discovery on the private email
    domain and validating the signature against that issuer's JWKS.  This
    allows email providers to delegate private email functionality to a
-   separate service.
+   separate service.  It also enables privacy for users with vanity
+   domains (e.g., user@dickhardt.example) where the domain itself is a
+   unique identifier that would otherwise reveal the user's identity.
 
 8.5.  Example EVT Payload
 
