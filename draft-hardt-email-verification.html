@@ -1335,7 +1335,10 @@ svg :is([fill="white"], [fill^="#fff"]) {
                 <p id="section-toc.1-1.9.2.7.1"><a href="#section-9.7" class="auto internal xref">9.7</a>.  <a href="#name-private-email-not-supported" class="internal xref">Private Email Not Supported</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.8">
-                <p id="section-toc.1-1.9.2.8.1"><a href="#section-9.8" class="auto internal xref">9.8</a>.  <a href="#name-server-errors" class="internal xref">Server Errors</a></p>
+                <p id="section-toc.1-1.9.2.8.1"><a href="#section-9.8" class="auto internal xref">9.8</a>.  <a href="#name-invalid-directed-email" class="internal xref">Invalid Directed Email</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.9">
+                <p id="section-toc.1-1.9.2.9.1"><a href="#section-9.9" class="auto internal xref">9.9</a>.  <a href="#name-server-errors" class="internal xref">Server Errors</a></p>
 </li>
             </ul>
 </li>
@@ -2350,13 +2353,13 @@ Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; x="JrQLj5P_89iXES9-vFgrIy29clF
         <h3 id="name-request-parameters">
 <a href="#section-8.1" class="section-number selfRef">8.1. </a><a href="#name-request-parameters" class="section-name selfRef">Request Parameters</a>
         </h3>
-<p id="section-8.1-1">The token request body supports the following parameters for private email addresses:<a href="#section-8.1-1" class="pilcrow">¶</a></p>
+<p id="section-8.1-1">The token request body supports one of the following parameters for private email addresses (mutually exclusive):<a href="#section-8.1-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-8.1-2.1">
             <p id="section-8.1-2.1.1"><code>disposable</code> (OPTIONAL): Boolean. When set to <code>true</code>, requests a new private email address instead of the user's actual email.<a href="#section-8.1-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-8.1-2.2">
-            <p id="section-8.1-2.2.1"><code>directed_email</code> (OPTIONAL): String. An opaque identifier for a previously issued private email address. When provided along with <code>disposable: true</code>, the issuer returns the same private email address if the identifier is valid and linked to the <code>email</code> in the request.<a href="#section-8.1-2.2.1" class="pilcrow">¶</a></p>
+            <p id="section-8.1-2.2.1"><code>directed_email</code> (OPTIONAL): String. An opaque identifier for a previously issued private email address. When provided, the issuer returns the same private email address if the identifier is valid and linked to the <code>email</code> in the request.<a href="#section-8.1-2.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 </section>
@@ -2379,7 +2382,6 @@ Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; x="JrQLj5P_89iXES9-vFgrIy29clF
 <div class="lang-json sourcecode" id="section-8.2-4">
 <pre>{
   "email": "user@example.com",
-  "disposable": true,
   "directed_email": "d8f3a2b1-9c4e-4f6a-8b7d-1e2f3a4b5c6d"
 }
 
@@ -2399,7 +2401,7 @@ Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; x="JrQLj5P_89iXES9-vFgrIy29clF
 </li>
           <li class="compact" id="section-8.3-1.3">If <code>directed_email</code> is provided and is linked to the <code>email</code> address in the request, the issuer MUST return the same private email address<a href="#section-8.3-1.3" class="pilcrow">¶</a>
 </li>
-          <li class="compact" id="section-8.3-1.4">If <code>directed_email</code> is not provided or is invalid, the issuer generates a new private email address<a href="#section-8.3-1.4" class="pilcrow">¶</a>
+          <li class="compact" id="section-8.3-1.4">If <code>directed_email</code> is provided but is invalid or not linked to the <code>email</code>, the issuer MUST return an error<a href="#section-8.3-1.4" class="pilcrow">¶</a>
 </li>
           <li class="compact" id="section-8.3-1.5">The private email address is included in the EVT <code>email</code> claim<a href="#section-8.3-1.5" class="pilcrow">¶</a>
 </li>
@@ -2558,7 +2560,7 @@ Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; x="JrQLj5P_89iXES9-vFgrIy29clF
         <h3 id="name-private-email-not-supported">
 <a href="#section-9.7" class="section-number selfRef">9.7. </a><a href="#name-private-email-not-supported" class="section-name selfRef">Private Email Not Supported</a>
         </h3>
-<p id="section-9.7-1">When the request includes <code>disposable: true</code> but the issuer does not support private email addresses (<code>private_email_supported</code> is <code>false</code> or absent in metadata):<a href="#section-9.7-1" class="pilcrow">¶</a></p>
+<p id="section-9.7-1">When the request includes <code>disposable</code> or <code>directed_email</code> but the issuer does not support private email addresses (<code>private_email_supported</code> is <code>false</code> or absent in metadata):<a href="#section-9.7-1" class="pilcrow">¶</a></p>
 <p id="section-9.7-2"><strong>HTTP 400 Bad Request</strong><a href="#section-9.7-2" class="pilcrow">¶</a></p>
 <div class="lang-json sourcecode" id="section-9.7-3">
 <pre>{
@@ -2570,20 +2572,37 @@ Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; x="JrQLj5P_89iXES9-vFgrIy29clF
 </div>
 </section>
 </div>
-<div id="server-errors">
+<div id="invalid-directed-email">
 <section id="section-9.8">
-        <h3 id="name-server-errors">
-<a href="#section-9.8" class="section-number selfRef">9.8. </a><a href="#name-server-errors" class="section-name selfRef">Server Errors</a>
+        <h3 id="name-invalid-directed-email">
+<a href="#section-9.8" class="section-number selfRef">9.8. </a><a href="#name-invalid-directed-email" class="section-name selfRef">Invalid Directed Email</a>
         </h3>
-<p id="section-9.8-1">For internal server errors or temporary unavailability:<a href="#section-9.8-1" class="pilcrow">¶</a></p>
-<p id="section-9.8-2"><strong>HTTP 500 Internal Server Error</strong><a href="#section-9.8-2" class="pilcrow">¶</a></p>
+<p id="section-9.8-1">When the request includes <code>directed_email</code> but the identifier is invalid or not linked to the <code>email</code> address in the request:<a href="#section-9.8-1" class="pilcrow">¶</a></p>
+<p id="section-9.8-2"><strong>HTTP 400 Bad Request</strong><a href="#section-9.8-2" class="pilcrow">¶</a></p>
 <div class="lang-json sourcecode" id="section-9.8-3">
+<pre>{
+  "error": "invalid_directed_email",
+  "error_description": "The directed_email identifier is invalid or not linked to this email address"
+}
+
+</pre><a href="#section-9.8-3" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="server-errors">
+<section id="section-9.9">
+        <h3 id="name-server-errors">
+<a href="#section-9.9" class="section-number selfRef">9.9. </a><a href="#name-server-errors" class="section-name selfRef">Server Errors</a>
+        </h3>
+<p id="section-9.9-1">For internal server errors or temporary unavailability:<a href="#section-9.9-1" class="pilcrow">¶</a></p>
+<p id="section-9.9-2"><strong>HTTP 500 Internal Server Error</strong><a href="#section-9.9-2" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-9.9-3">
 <pre>{
   "error": "server_error",
   "error_description": "Temporary server error, please try again later"
 }
 
-</pre><a href="#section-9.8-3" class="pilcrow">¶</a>
+</pre><a href="#section-9.9-3" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
