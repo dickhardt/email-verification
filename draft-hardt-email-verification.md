@@ -660,11 +660,11 @@ Private email addresses allow users to provide site-specific email addresses to 
 
 ## Request Parameters
 
-The token request body supports the following parameters for private email addresses:
+The token request body supports one of the following parameters for private email addresses (mutually exclusive):
 
 - `disposable` (OPTIONAL): Boolean. When set to `true`, requests a new private email address instead of the user's actual email.
 
-- `directed_email` (OPTIONAL): String. An opaque identifier for a previously issued private email address. When provided along with `disposable: true`, the issuer returns the same private email address if the identifier is valid and linked to the `email` in the request.
+- `directed_email` (OPTIONAL): String. An opaque identifier for a previously issued private email address. When provided, the issuer returns the same private email address if the identifier is valid and linked to the `email` in the request.
 
 ## Example Requests
 
@@ -682,7 +682,6 @@ Request to reuse a previously issued private email address (directed):
 ```json
 {
   "email": "user@example.com",
-  "disposable": true,
   "directed_email": "d8f3a2b1-9c4e-4f6a-8b7d-1e2f3a4b5c6d"
 }
 ```
@@ -692,7 +691,7 @@ Request to reuse a previously issued private email address (directed):
 - The private email MUST be a valid email address that the issuer can route to the user's actual mailbox
 - The private email SHOULD be unique per user and per RP origin (derived from the browser's context)
 - If `directed_email` is provided and is linked to the `email` address in the request, the issuer MUST return the same private email address
-- If `directed_email` is not provided or is invalid, the issuer generates a new private email address
+- If `directed_email` is provided but is invalid or not linked to the `email`, the issuer MUST return an error
 - The private email address is included in the EVT `email` claim
 - The EVT MUST include `is_private_email: true` when a private email address is issued
 
@@ -806,13 +805,25 @@ When the request body is malformed, missing the `email` field, or contains inval
 
 ## Private Email Not Supported
 
-When the request includes `disposable: true` but the issuer does not support private email addresses (`private_email_supported` is `false` or absent in metadata):
+When the request includes `disposable` or `directed_email` but the issuer does not support private email addresses (`private_email_supported` is `false` or absent in metadata):
 
 **HTTP 400 Bad Request**
 ```json
 {
   "error": "private_email_not_supported",
   "error_description": "This issuer does not support private email addresses"
+}
+```
+
+## Invalid Directed Email
+
+When the request includes `directed_email` but the identifier is invalid or not linked to the `email` address in the request:
+
+**HTTP 400 Bad Request**
+```json
+{
+  "error": "invalid_directed_email",
+  "error_description": "The directed_email identifier is invalid or not linked to this email address"
 }
 ```
 
