@@ -705,7 +705,7 @@ Request to reuse a previously issued private email address:
 
 The domain of the private email address does not need to match the domain of the user's actual email address. Additionally, the `iss` claim in the EVT corresponds to the issuer for the private email domain, which may differ from the issuer the browser initially contacted.
 
-For example, a user with `user@example.com` may receive a private email address `u7x9k2m4@privaterelay.different.example`. The EVT's `iss` claim would be the issuer for `privaterelay.different.example`. The browser verifies the EVT by performing issuer discovery on the private email domain and validating the signature against that issuer's JWKS. This allows email providers to delegate private email functionality to a separate service.
+For example, a user with `user@example.com` may receive a private email address `u7x9k2m4@privaterelay.different.example`. The EVT's `iss` claim would be the issuer for `privaterelay.different.example`. The browser verifies the EVT by performing issuer discovery on the private email domain and validating the signature against that issuer's JWKS. This allows email providers to delegate private email functionality to a separate service. It also enables privacy for users with vanity domains (e.g., `user@dickhardt.example`) where the domain itself is a unique identifier that would otherwise reveal the user's identity.
 
 ## Example EVT Payload
 
