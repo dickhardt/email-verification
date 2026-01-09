@@ -316,7 +316,7 @@ Following is an example `.well-known/email-verification` file:
 
 This section defines how HTTP Message Signatures ([@!RFC9421]) are used in token requests. The browser signs requests to prove possession of a key pair, and the issuer verifies these signatures.
 
-## Request Signing {#request-signing}
+## HTTP Request Signing {#request-signing}
 
 The browser creates a signed request by:
 
@@ -378,7 +378,7 @@ Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; \
 {"email":"user@example.com"}
 ```
 
-## Request Verification {#request-verification}
+## HTTP Request Verification {#request-verification}
 
 The issuer MUST verify the request headers:
 
@@ -648,7 +648,7 @@ The `webauthn_response` object follows the structure of PublicKeyCredential as d
 
 ## WebAuthn Verification
 
-The issuer verifies the WebAuthn response against its stored credentials for the email address. If verification succeeds, the issuer returns the EVT as described in [Token Issuance](#token-issuance).
+The issuer verifies the WebAuthn response against its stored credentials for the email address. If verification succeeds, the issuer returns the EVT as described in [EVT Issuance](#evt-issuance).
 
 
 # Private Email Addresses {#private-email}
