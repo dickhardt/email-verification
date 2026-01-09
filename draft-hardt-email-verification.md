@@ -22,7 +22,64 @@ organization = "Hellō"
   [author.address]
   email = "dick.hardt@gmail.com"
 
+[[author]]
+initials = "S."
+surname = "Goto"
+fullname = "Sam Goto"
+organization = "Google"
+  [author.address]
+  email = "goto@google.com"
+
 %%%
+
+<reference anchor="OpenID.Core" target="https://openid.net/specs/openid-connect-core-1_0.html">
+  <front>
+    <title>OpenID Connect Core 1.0</title>
+    <author initials="N." surname="Sakimura" fullname="Nat Sakimura">
+      <organization>NRI</organization>
+    </author>
+    <author initials="J." surname="Bradley" fullname="John Bradley">
+      <organization>Ping Identity</organization>
+    </author>
+    <author initials="M." surname="Jones" fullname="Michael B. Jones">
+      <organization>Microsoft</organization>
+    </author>
+    <author initials="B." surname="de Medeiros" fullname="Breno de Medeiros">
+      <organization>Google</organization>
+    </author>
+    <author initials="C." surname="Mortimore" fullname="Chuck Mortimore">
+      <organization>Salesforce</organization>
+    </author>
+    <date year="2014" month="November"/>
+  </front>
+</reference>
+
+<reference anchor="WebAuthn" target="https://www.w3.org/TR/webauthn-3/">
+  <front>
+    <title>Web Authentication: An API for accessing Public Key Credentials - Level 3</title>
+    <author initials="M." surname="Jones" fullname="Michael B. Jones">
+      <organization>Microsoft</organization>
+    </author>
+    <author initials="A." surname="Kumar" fullname="Akshay Kumar">
+      <organization>Microsoft</organization>
+    </author>
+    <author initials="E." surname="Lundberg" fullname="Emil Lundberg">
+      <organization>Yubico</organization>
+    </author>
+    <date year="2023"/>
+  </front>
+  <seriesInfo name="W3C" value="Recommendation"/>
+</reference>
+
+<reference anchor="EVP-Browser" target="https://github.com/WICG/email-verification-protocol">
+  <front>
+    <title>Email Verification Protocol Browser API</title>
+    <author>
+      <organization>W3C</organization>
+    </author>
+    <date year="2025"/>
+  </front>
+</reference>
 
 .# Abstract
 
@@ -34,169 +91,177 @@ This document defines the Email Verification Protocol (EVP), which enables web a
 
 Source for this draft and an issue tracker can be found at https://github.com/dickhardt/email-verification.
 
-The browser API aspects are developed separately at the W3C WICG: https://github.com/WICG/email-verification-protocol
+The browser API aspects are being developed separately by the W3C ([@EVP-Browser]).
 
 {mainmatter}
 
 # Introduction
 
-## The Problem
+Web applications verify email addresses to send emails to users (transactional notifications, marketing, password resets) and to identify users (as a stable identifier for account creation and authentication). The standard verification method—sending a one-time code via email—has two problems: verification friction and privacy leakage.
 
-Web applications verify email addresses for two purposes:
+## Verification Friction
 
-1. **To send emails to the user** — transactional notifications, marketing, password resets
-2. **To identify the user** — as a stable identifier for account creation and authentication
+The email one-time code flow requires the user to switch to their email client, wait for the message to arrive, find it (possibly in spam), read the code, return to the application, and enter it. Many users abandon this process before completing it.
 
-The standard verification method is to send a one-time code to the email address and have the user enter it. This requires the user to switch to their email client, wait for the message, find it, read the code, and return to enter it. Studies show non-completion rates of 20-40%.
+Some approaches to reduce this friction:
 
-**SMS verification had the same problem**
+- **Social login**: When a user has an account with Google, Apple, or another identity provider, the application can obtain a verified email without sending a verification message. However, this requires the user to have and use a social account, and requires developers to integrate with each provider separately.
 
-Phone number verification uses the same one-time code pattern: send a code via SMS, have the user enter it. This had similar friction until the industry developed standards to streamline it.
+- **Magic links**: Instead of a code, the verification email contains a link the user clicks to verify. This eliminates copying and pasting the code, but still requires switching to the email client, waiting for delivery, and finding the email.
 
-**How SMS solved it**
+## Privacy Leakage
 
-The WebOTP API and the `autocomplete="one-time-code"` HTML attribute enable SMS codes to auto-fill with a single tap. The SMS arrives within seconds, the operating system parses the origin-bound code format, and the browser offers to fill it automatically. The user never leaves the application.
+Email verification creates two privacy problems:
 
-**Why email cannot use the same approach**
+1. **RP-to-RP correlation**: When a user provides their real email address to multiple relying parties (RPs), those RPs can correlate the user across sites by comparing email addresses.
 
-Email verification cannot benefit from these standards:
+2. **User-RP visibility**: The email provider learns which RPs the user visits and when. With email OTP, the provider sees verification emails from the sender and the delivery timing for every verification. With social login, the identity provider sees every RP request.
 
-- **Latency**: SMS arrives in seconds; email takes seconds to minutes depending on server processing, spam filtering, and delivery queues.
-- **Spam filtering**: Verification emails frequently land in spam or promotions folders. SMS has no equivalent filtering.
-- **Distraction**: When users switch to their email client, they see their entire inbox. Many get sidetracked by other messages and never return. SMS notifications appear briefly; there is no "SMS inbox" to get lost in.
-- **No autofill path**: There is no mechanism for the operating system to parse an email and offer one-tap autofill back to the originating browser tab.
+Reducing friction in email verification accelerates both privacy problems — users verify to more sites, increasing correlation potential and provider visibility.
 
-**Optimizations that exist today**
+## Friction Solution
 
-Two approaches optimize away the email code flow:
+The Email Verification Protocol (EVP) enables a web application to obtain a verified email address **without sending an email** and **without the user leaving the web page**. The browser intermediates between the RP and an issuer, obtaining a signed token that contains an email address for the user that the RP can verify. This eliminates the email delivery step entirely.
 
-1. **Social login**: When a user is already authenticated with Google, Apple, or another identity provider, the application can obtain a verified email without sending any verification message. However, this requires the user to have and use a social account, and requires developers to integrate with each provider.
+**Note on deliverability**: Like social login, this protocol verifies that the user controls an email address — it does not verify that the email address can receive mail.
 
-2. **Email Verification Protocol (EVP)**: This specification. When the user is logged into their email provider (as most users are in their browser), EVP enables instant verification without sending an email and without leaving the page.
+## Privacy Solution
 
-Both are optimizations. The email code flow remains the universal fallback—it works for any email address regardless of provider support. But for users who are logged into a supporting provider, these optimizations eliminate the friction entirely.
+EVP addresses both privacy problems:
 
-**The privacy advantage of EVP**
+**Three-party model**: The browser intermediates between the RP and issuer, ensuring the issuer never learns which RP requested verification. See [Protocol Flow](#protocol-flow) for details.
 
-Beyond user experience, there is a privacy dimension. Both email OTP and social login reveal to a third party which applications the user interacts with—the email provider sees verification emails, and the identity provider sees OAuth redirects. EVP is designed to prevent this: the issuer never learns which application requested verification. See [Privacy Protection](#privacy-protection) for details.
-
-## The Solution
-
-The Email Verification Protocol enables a web application to obtain a verified email address **without sending an email** and **without the user leaving the web page**. The user simply selects their email address from the browser's autocomplete, and verification happens instantly in the background.
-
-To enable this functionality, the mail domain delegates email verification to an issuer that has authentication cookies for the user. When the user provides an email to the HTML form field, the browser calls the issuer using an HTTP Message Signed request ([RFC 9421](https://datatracker.ietf.org/doc/html/rfc9421)), passing authentication cookies and the browser's public key via the Signature-Key header ([draft-hardt-httpbis-signature-key](https://datatracker.ietf.org/doc/draft-hardt-httpbis-signature-key/)). The issuer returns a token, which the browser verifies and updates and provides to the web application. The web application then verifies the token and has a verified email address for the user.
-
-## Privacy Protection
-
-When an application only wants the email address to identify the user—not to send emails—the verification method determines what third parties learn about the user's activity:
-
-**Email OTP**: The email provider learns which applications the user is interacting with and when, through the verification emails it delivers. The provider sees the sender, subject line, and delivery timing for every verification. If the application will send emails anyway (welcome messages, notifications), this disclosure is unavoidable. But for applications that only need the email for identification, sending a verification email creates an unnecessary privacy leak.
-
-**Social login**: The identity provider learns which applications the user visits, because the application redirects the user to the provider and identifies itself in the OAuth request. The provider sees every login across every application.
-
-**EVP's three-party model**: EVP is designed so the issuer never learns which application requested verification. The browser intermediates between the RP and the issuer, obtaining an issuance token (EVT) from the issuer and then creating a separate presentation token (EVT+KB) for the RP. This architectural indirection—rather than a simple API where the issuer creates a token directly for the application—ensures the issuer cannot track which applications the user interacts with.
-
-This is accomplished through key binding: the browser generates a fresh key pair, the issuer binds the EVT to that public key (in the `cnf` claim), and the browser uses the private key to create a Key Binding JWT (KB-JWT) that includes the RP's audience and nonce. The issuer never sees the RP's identity; it only sees the browser's ephemeral public key.
-
-**When privacy protection matters**: This protection is most important when the email is being used by the RP to identify the user (e.g., for login or account linking). If the RP subsequently sends an email to the user anyway (e.g., a welcome email), the email provider will learn about that interaction through traditional email transmission. However, even in these cases, the issuer (which may be separate from the email provider) does not learn which RPs requested verification, and the timing of verification requests is not revealed through email metadata.
-
-
-## Key Concepts
-
-
-- **EVT (Email Verification Token)**: An Email Verification Token is a JWT issued by an issuer that asserts the user controls a specific email address. The EVT contains the `email` and `email_verified` claims for the user, and the public key used by the browser to make the request in the `cnf` (confirmation) claim. The EVT uses the same structure as an SD-JWT (Selective Disclosure JWT) as specified in [Selective Disclosure for JWT](https://datatracker.ietf.org/doc/draft-ietf-oauth-selective-disclosure-jwt/), but does not use the selective disclosure features - it only uses the key binding capability. EVTs can be parsed and validated using standard SD-JWT libraries.
-
-- **EVT+KB (Email Verification Token with Key Binding)**: The presentation token composed of an EVT and a Key Binding JWT (KB-JWT) separated by the `~` character. The KB-JWT is signed by the browser and contains a hash of the EVT along with the RP's audience and nonce. This two-part structure enables a separation of token issuance and token presentation: the issuer creates the EVT without knowing which RP will receive it, and the browser binds the EVT to a specific RP through the KB-JWT. This enables the RP to verify the issuer provided the email address for the user without the issuer learning about the specific application.
-
-- **Issuer**: The service that verifies the user controls an email address. A DNS record for the email domain delegates email verification to the issuer. The issuer serves a `.well-known/email-verification` metadata file that contains its `issuance_endpoint` that is called to obtain an EVT, and its `jwks_uri` that points to the JWKS file containing the public keys used to verify the EVT. The issuer is identified by its domain, an eTLD+1 (eg `issuer.example`). The hostname in all URLs from the issuer's metadata MUST end with the issuer's domain. This identifier is what binds the EVT, the DNS delegation, with the issuer.
-
-- **HTTP Message Signatures**: This protocol uses [RFC 9421](https://datatracker.ietf.org/doc/html/rfc9421) to sign the HTTP request from the browser to the issuer. The signature binds the browser's public key, the cookies, and the request content together in a verifiable way.
-
-- **Signature-Key Header**: The browser's public key is transmitted using the Signature-Key header with the `hwk` (Header Web Key) scheme as defined in [draft-hardt-httpbis-signature-key](https://datatracker.ietf.org/doc/draft-hardt-httpbis-signature-key/). This provides a self-contained, pseudonymous way to distribute the public key inline with the request.
-
-## Scope
-
-This document specifies the IETF protocol aspects of email verification: the HTTP-level interactions between the browser, issuer, and relying party. How the browser obtains the email address from the user (browser APIs, user interface elements, etc.) is out of scope for this specification and is addressed in separate W3C work.
-
-**Note on deliverability**: This protocol verifies that the user controls an email address. It does not verify that the email address can receive mail. An issuer may verify addresses that exist only as aliases, or addresses at domains with misconfigured mail servers. RPs that intend to send email should still handle delivery failures appropriately.
+**Private email addresses**: The browser can request a private email address instead of the user's actual email. Private addresses that differ per RP cannot be correlated across sites. See [Private Email Addresses](#private-email) for details.
 
 # Protocol Flow
 
-The protocol consists of five steps:
+This document specifies the IETF protocol aspects of email verification: the HTTP-level interactions between the browser, issuer, and the application, aka relying party (RP). How the browser obtains the email address from the user (browser APIs, user interface elements, etc.) and how the browser communicates with the RP is being defined by the W3C ([@EVP-Browser]).
 
-1. Nonce Generation
-2. Token Request
-3. Token Issuance
-4. Token Presentation
-5. Token Verification
+- **Issuer**: The service that verifies the user controls an email address. See [Issuer Discovery](#issuer-discovery) for how email domains delegate to issuers.
 
+- **Three-party model**: The protocol uses a three-party model where the browser intermediates between the RP and issuer. The issuer issues a email verification token (EVT) to the browser containing the email address and the browser's key material—but not the RP identity. The browser then creates a key binding token (KB-JWT) that ties the EVT to a specific RP. The combined token (EVT+KB) is what the RP receives. This separation hides the RP from the issuer during verification.
 
-```mermaid
-sequenceDiagram
-    participant B as Browser
-    participant RPS as RP Server
-    participant I as Issuer
-    participant DNS as DNS
+The following diagram illustrates the protocol flow between the RP Server, Browser, and Issuer:
 
-    Note over B,DNS: Step 1: Nonce Generation
-    B->>RPS: Request nonce
-    RPS->>RPS: Generate nonce, bind to session
-    RPS->>B: Return nonce
-
-    Note over B,DNS: Step 2: Token Request
-    Note over B: Browser has email address<br/>(mechanism out of scope)
-    B->>DNS: DNS TXT lookup<br/>_email-verification.$EMAIL_DOMAIN
-    DNS->>B: Return iss=issuer.example
-    B->>I: GET /.well-known/email-verification
-    I->>B: Return metadata
-    B->>B: Generate key pair<br/>Create signed request
-    B->>I: POST with HTTP Message Signature<br/>Signature-Key: sig=hwk
-
-    Note over B,DNS: Step 3: Token Issuance
-    I->>I: Verify HTTP signature<br/>Extract public key from Signature-Key
-    I->>I: Generate EVT
-    I->>B: {"issuance_token":"EVT"}
-
-    Note over B,DNS: Step 4: Token Presentation
-    B->>B: Verify EVT
-    B->>I: GET jwks_uri for public keys
-    I->>B: Return JWKS
-    B->>B: Create KB-JWT
-    B->>RPS: Send EVT+KB
-
-    Note over B,DNS: Step 5: Token Verification
-    RPS->>RPS: Parse EVT+KB
-    RPS->>DNS: DNS TXT lookup for email domain
-    DNS->>RPS: Return iss=issuer.example
-    RPS->>I: GET /.well-known/email-verification
-    I->>RPS: Return metadata with jwks_uri
-    RPS->>I: GET jwks_uri
-    I->>RPS: Return JWKS public keys
-    RPS->>RPS: Verify EVT
-    RPS->>RPS: Verify KB-JWT
-    RPS->>RPS: Email verification complete
+```
+Step                      RP Server     Browser              Issuer
+                               |            |                    |
+2.1 Session Binding            |--- nonce ->|                    |
+                               |            |                    |
+2.2 Email Acquisition          |      [obtain email from user]   |
+                               |            |                    |
+2.3 Token Request              |            |-- POST /issuance ->|
+                               |            |    (email, ...)    |
+                               |            |                    |
+2.4 EVT Creation               |            |           [create EVT]
+                               |            |                    |
+2.5 Token Issuance             |            |<------ EVT --------|
+                               |            |                    |
+2.6 KB Creation                |        [create KB-JWT]          |
+                               |            |                    |
+2.7 Token Presentation         |<-- EVT+KB -|                    |
+                               |            |                    |
+2.8 Token Verification    [verify EVT+KB]   |                    |
+                               |            |                    |
 ```
 
 
 
-## Nonce Generation
+## Session Binding {#session-binding}
 
-Before requesting email verification, the browser obtains a nonce from the RP:
+The RP Server generates a cryptographically random nonce with at least 128 bits of entropy and binds it to a session it has with the browser. The nonce MUST be unique per verification request and SHOULD be valid for a limited time window. How the RP Server provides the nonce to the browser is being defined by the W3C ([@EVP-Browser]).
 
-- **1.1** - The browser requests a nonce from the RP Server (mechanism for this request is out of scope - may be via XHR, fetch, or server-rendered in HTML)
+## Email Acquisition {#email-acquisition}
 
-- **1.2** - The RP Server generates a cryptographically random nonce and binds it to the user's session
+The browser obtains an email address from the user. This mechanism is being defined by the W3C ([@EVP-Browser]).
 
-- **1.3** - The RP Server returns the nonce to the browser
+## Token Request {#token-request}
 
-The nonce will be included in the Key Binding JWT (step 4) to bind the verification to this specific RP session and prevent replay attacks.
+Once the browser has the email address and nonce:
+
+1. The browser performs [Issuer Discovery](#issuer-discovery) for the email address to obtain the issuer's metadata, including the `issuance_endpoint`.
+
+2. The browser generates a fresh private/public key pair. The browser SHOULD select an algorithm from the issuer's `signing_alg_values_supported` array, or use "EdDSA" if not present.
+
+3. The browser creates a signed request per [HTTP Message Signatures](#http-signatures) and POSTs to the `issuance_endpoint`, including the issuer's cookies:
+
+```http
+POST /email-verification/issuance HTTP/1.1
+Host: accounts.issuer.example
+Cookie: session=...
+Content-Type: application/json
+Content-Digest: sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:
+Sec-Fetch-Dest: email-verification
+Signature-Input: sig=("@method" "@authority" "@path" \
+    "content-digest" "cookie" "signature-key");created=1692345600
+Signature: sig=:MEQCIHd8Y8qYKm5e3dV8y....:
+Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; \
+    x="JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs"
+
+{"email":"user@example.com"}
+```
+
+## EVT Issuance {#evt-issuance}
+
+On receipt of a token request:
+
+1. The issuer verifies the request per [Request Verification](#request-verification).
+
+2. The issuer checks if the cookies represent a logged-in user who controls the requested email address. If the issuer supports WebAuthn (`webauthn_supported: true`) and cookies are not present or invalid, the issuer MAY return a WebAuthn challenge (see [WebAuthn Authentication](#webauthn-authentication)).
+
+3. If authentication succeeds, the issuer creates an EVT per [EVT Creation](#evt-creation) and returns it as the value of `issuance_token` in an `application/json` response:
+
+```http
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+{"issuance_token":"eyJhbGciOiJFZERTQSIsImtpZCI6IjIwMjQtMDgtMTkiLCJ0eXAiOiJldnQrand0In0...~"}
+```
+
+## KB Creation {#kb-creation}
+
+On receiving the `issuance_token`:
+
+1. The browser verifies the EVT per [EVT Verification](#evt-verification), additionally confirming:
+   - The `email` claim matches the email address being verified
+   - The `cnf.jwk` claim matches the public key the browser generated
+
+2. The browser creates a KB-JWT per [KB-JWT Creation](#kb-creation-detail), binding the EVT to the RP's origin and session nonce.
+
+3. The browser concatenates the EVT and KB-JWT to form the EVT+KB.
+
+Example EVT+KB (line breaks for display):
+```
+eyJhbGciOiJFZERTQSIsImtpZCI6IjIwMjQtMDgtMTkiLCJ0eXAiOiJldnQrand0In0.
+eyJpc3MiOiJpc3N1ZXIuZXhhbXBsZSIsImlhdCI6MTcyNDA4MzIwMCwiY25mIjp7...}.
+signature~
+eyJhbGciOiJFZERTQSIsInR5cCI6ImtiK2p3dCJ9.
+eyJhdWQiOiJodHRwczovL3JwLmV4YW1wbGUiLCJub25jZSI6IjI1OWM1ZWFlLTQ4...}.
+signature
+```
+
+## Token Presentation {#token-presentation}
+
+The browser provides the EVT+KB to the RP. This mechanism is being defined by the W3C ([@EVP-Browser]).
+
+## Token Verification {#token-verification}
+
+The RP receives the EVT+KB and verifies it by:
+
+1. Verifying the KB-JWT per [KB-JWT Verification](#kb-verification)
+2. Verifying the EVT per [EVT Verification](#evt-verification)
+3. Verifying the KB-JWT signature using the public key from the EVT's `cnf.jwk` claim
+
+If all verification steps pass, the RP has successfully verified that the user controls the email address in the `email` claim.
 
 
-## Token Request
+# Issuer Discovery {#issuer-discovery}
 
-Once the browser has obtained an email address (mechanism out of scope) and a nonce from the RP:
+Both the browser and the RP need to discover information about the issuer for a given email address. This section describes the discovery process.
 
-- **2.1** - The browser parses the email domain ($EMAIL_DOMAIN) from the email address, looks up the `TXT` record for `_email-verification.$EMAIL_DOMAIN`. The contents of the record MUST start with `iss=` followed by the issuer identifier. There MUST be only one `TXT` record for `_email-verification.$EMAIL_DOMAIN`.
+## DNS Delegation {#dns-delegation}
+
+The email domain delegates email verification to an issuer via a DNS TXT record. Given an email address, parse the email domain ($EMAIL_DOMAIN) and look up the `TXT` record for `_email-verification.$EMAIL_DOMAIN`. The contents of the record MUST start with `iss=` followed by the issuer identifier. There MUST be only one `TXT` record for `_email-verification.$EMAIL_DOMAIN`.
 
 Example record:
 
@@ -214,18 +279,21 @@ _email-verification.issuer.example   TXT   iss=issuer.example
 
 > Access to DNS records and email is often independent of website deployments. This provides assurance that an issuer is truly authorized as an insider with only access to websites on `issuer.example` could not setup an issuer that would grant them verified emails for any email at `issuer.example`.
 
-- **2.2** - If an issuer is found, the browser loads `https://$ISSUER$/.well-known/email-verification` and MUST follow redirects to the same path but with a different subdomain of the Issuer.
+## Issuer Metadata {#issuer-metadata}
+
+Once the issuer identifier is known, fetch the metadata document from `https://$ISSUER/.well-known/email-verification`. The request MUST follow redirects to the same path but with a different subdomain of the Issuer.
 
 For example, `https://issuer.example/.well-known/email-verification` may redirect to `https://accounts.issuer.example/.well-known/email-verification`.
 
-
-- **2.3** - The browser confirms that the `.well-known/email-verification` file contains JSON that includes the following properties:
+The metadata document is JSON containing the following properties:
 
 - *issuance_endpoint* - the API endpoint the browser calls to obtain an EVT
 - *jwks_uri* - the URL where the issuer provides its public keys to verify the EVT
 - *signing_alg_values_supported* - OPTIONAL. JSON array containing a list of the signing algorithms ("alg" values) supported by the issuer for both HTTP Message Signatures and issued EVTs. Algorithm identifiers MUST be from the IANA "JSON Web Signature and Encryption Algorithms" registry. If omitted, "EdDSA" is the default. "EdDSA" SHOULD be included in the supported algorithms list. The value "none" MUST NOT be used.
+- *webauthn_supported* - OPTIONAL. Boolean indicating whether the issuer supports WebAuthn authentication as an alternative to cookies. If `true`, the issuer may return a WebAuthn challenge when cookies are not present or invalid. Defaults to `false`.
+- *private_email_supported* - OPTIONAL. Boolean indicating whether the issuer supports generating private email addresses. Defaults to `false`.
 
-Each of these properties MUST include the issuer domain as the root of their hostname.
+> **Open Question**: Should URL properties be required to include the issuer domain as the root of their hostname?
 
 Following is an example `.well-known/email-verification` file:
 
@@ -233,44 +301,62 @@ Following is an example `.well-known/email-verification` file:
 {
   "issuance_endpoint": "https://accounts.issuer.example/email-verification/issuance",
   "jwks_uri": "https://accounts.issuer.example/email-verification/jwks",
-  "signing_alg_values_supported": ["EdDSA", "RS256"]
+  "signing_alg_values_supported": ["EdDSA", "RS256"],
+  "webauthn_supported": true,
+  "private_email_supported": true
 }
 ```
 
-- **2.4** - The browser generates a fresh private / public key pair. The browser SHOULD select an algorithm from the issuer's `signing_alg_values_supported` array, or use "EdDSA" if the property is not present.
 
-- **2.5** - The browser creates an HTTP Message Signature ([RFC 9421](https://datatracker.ietf.org/doc/html/rfc9421)) request by:
+# HTTP Message Signatures {#http-signatures}
 
-  - Creating a JSON request body with the email address:
-    ```json
-    {
-      "email": "user@example.com"
-    }
-    ```
+This section defines how HTTP Message Signatures ([@!RFC9421]) are used in token requests. The browser signs requests to prove possession of a key pair, and the issuer verifies these signatures.
 
-  - Computing the `Content-Digest` header per [RFC 9530](https://datatracker.ietf.org/doc/html/rfc9530) using SHA-256:
-    ```
-    Content-Digest: sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:
-    ```
+## Request Signing {#request-signing}
 
-  - Creating the `Signature-Input` header specifying which components to sign:
-    ```
-    Signature-Input: sig=("@method" "@target-uri" "@authority" "content-digest" "cookie" "sec-fetch-dest"); created=1692345600; keyid="browser-key"; alg="ed25519"
-    ```
+The browser creates a signed request by:
 
-  - Computing the signature base per RFC 9421 Section 2.5 and signing it with the browser's private key
+1. Creating a JSON request body with the email address and optional parameters
+2. Computing the `Content-Digest` header per [@!RFC9530] using SHA-256
+3. Creating the `Signature-Key` header using the `hwk` scheme ([@!I-D.hardt-httpbis-signature-key]) with the browser's public key
+4. Creating the `Signature-Input` header specifying the covered components
+5. Computing the signature base per [@!RFC9421] Section 2.5 and signing with the browser's private key
+6. Creating the `Signature` header with the base64-encoded signature
 
-  - Creating the `Signature` header with the base64-encoded signature:
-    ```
-    Signature: sig=:MEQCIHd8Y8qYKm5e3dV8y....:
-    ```
+### Request Body
 
-  - Creating the `Signature-Key` header using the `hwk` scheme ([draft-hardt-httpbis-signature-key](https://datatracker.ietf.org/doc/draft-hardt-httpbis-signature-key/)) with the browser's public key:
-    ```
-    Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; x="JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs"
-    ```
+The request body is a JSON object with the following fields:
 
-- **2.6** - The browser POSTs to the `issuance_endpoint` of the issuer with 1P cookies:
+- `email` (REQUIRED): The email address to verify
+- `disposable` (OPTIONAL): Request a private email address. See [Private Email Addresses](#private-email).
+- `directed_email` (OPTIONAL): Identifier for a previously issued private email address. See [Private Email Addresses](#private-email).
+
+Example:
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+### Signature-Key Header
+
+The `Signature-Key` header uses the `hwk` scheme to convey the browser's public key:
+
+```
+Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; \
+    x="JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs"
+```
+
+### Signature-Input Header
+
+The covered components MUST include `@method`, `@authority`, `@path`, `content-digest`, and `signature-key`. The `cookie` component MUST be included when the Cookie header is present, and MUST be omitted when it is not (per [@!RFC9421] Section 2.5). The `created` parameter MUST be included.
+
+```
+Signature-Input: sig=("@method" "@authority" "@path" \
+    "content-digest" "cookie" "signature-key");created=1692345600
+```
+
+### Example Signed Request
 
 ```http
 POST /email-verification/issuance HTTP/1.1
@@ -279,118 +365,387 @@ Cookie: session=...
 Content-Type: application/json
 Content-Digest: sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:
 Sec-Fetch-Dest: email-verification
-Signature-Input: sig=("@method" "@target-uri" "@authority" "content-digest" "cookie" "sec-fetch-dest"); created=1692345600; keyid="browser-key"; alg="ed25519"
+Signature-Input: sig=("@method" "@authority" "@path" \
+    "content-digest" "cookie" "signature-key");created=1692345600
 Signature: sig=:MEQCIHd8Y8qYKm5e3dV8y....:
-Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; x="JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs"
+Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; \
+    x="JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs"
 
 {"email":"user@example.com"}
 ```
 
-## Token Issuance
+## Request Verification {#request-verification}
 
-On receipt of a token request from the browser:
+The issuer MUST verify the request headers:
 
-- **3.1** - The issuer MUST verify the request headers:
+- `Content-Type` is `application/json`
+- `Sec-Fetch-Dest` is `email-verification`
+- `Content-Digest` is present
+- `Signature-Input` is present
+- `Signature` is present
+- `Signature-Key` is present with `sig=hwk` scheme
 
-  - `Content-Type` is `application/json`
-  - `Sec-Fetch-Dest` is `email-verification`
-  - `Content-Digest` is present
-  - `Signature-Input` is present
-  - `Signature` is present
-  - `Signature-Key` is present with `sig=hwk` scheme
+The issuer MUST verify the HTTP Message Signature by:
 
-- **3.2** - The issuer MUST verify the HTTP Message Signature per [RFC 9421](https://datatracker.ietf.org/doc/html/rfc9421) by:
+1. Parsing the `Signature-Key` header and extracting the public key from the `hwk` parameters (`kty`, `crv`, `x` for OKP keys)
+2. Parsing the `Signature-Input` header to determine the covered components
+3. Verifying that the signature covers at minimum: `@method`, `@authority`, `@path`, `content-digest`, and `signature-key`. The signature MUST also cover `cookie` when the Cookie header is present.
+4. Reconstructing the signature base per [@!RFC9421] Section 2.5
+5. Verifying the signature in the `Signature` header using the extracted public key
+6. Verifying the `created` timestamp in `Signature-Input` is within 60 seconds of the current time
 
-  - Parsing the `Signature-Key` header and extracting the public key from the `hwk` parameters (`kty`, `crv`, `x` for OKP keys)
-  - Parsing the `Signature-Input` header to determine the covered components
-  - Verifying that the signature covers at minimum: `@method`, `@target-uri`, `@authority`, `content-digest`, `cookie`, and `sec-fetch-dest`
-  - Reconstructing the signature base per RFC 9421 Section 2.5
-  - Verifying the signature in the `Signature` header using the extracted public key
-  - Verifying the `created` timestamp in `Signature-Input` is within 60 seconds of the current time
+The issuer MUST verify the request body:
 
-- **3.3** - The issuer MUST verify the request body:
-
-  - Parsing the JSON body and extracting the `email` field
-  - Verifying the `email` field contains a syntactically valid email address
-  - Verifying the `Content-Digest` matches the actual request body
-
-- **3.4** - The issuer checks if the cookies sent represent a logged in user, and if the logged in user has control of the email provided in the request body. If so the issuer generates an EVT with the following properties:
-
-  - **Header**: MUST contain
-    - `alg`: signing algorithm (SHOULD match the algorithm from the HTTP Message Signature)
-    - `kid`: key identifier of key used to sign
-    - `typ` set to "evt+jwt"
-  - **Payload**: MUST contain the following claims:
-    - `iss`: the issuer identifier
-    - `iat`: issued at time
-    - `cnf`: confirmation claim containing the public key from the Signature-Key header's `hwk` parameters
-    - `email`: claim containing the email address from the request body
-    - `email_verified`: claim that email is verified per OpenID Connect 1.0
-  - **Signature**: MUST be signed with the issuer's private key corresponding to a public key in the `jwks_uri` identified by `kid`
+1. Parsing the JSON body and extracting the `email` field
+2. Verifying the `email` field contains a syntactically valid email address
+3. Verifying the `Content-Digest` matches the actual request body
 
 
-Example header:
-  ```json
-  {
-    "alg": "EdDSA",
-    "kid": "2024-08-19",
-    "typ": "evt+jwt"
-  }
-  ```
+# Email Verification Token (EVT) {#evt}
 
-Example payload:
-  ```json
-  {
-    "iss": "issuer.example",
-    "iat": 1724083200,
-    "cnf": {
-      "jwk": {
-        "kty": "OKP",
-        "crv": "Ed25519",
-        "x": "JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs"
-      }
-    },
-    "email": "user@example.com",
-    "email_verified": true
-  }
-  ```
-The resulting JWT has the `~` appended to it, making it compatible with the SD-JWT structure (though this protocol does not use selective disclosure features). Standard SD-JWT libraries can be used to parse and validate EVTs.
+The Email Verification Token (EVT) is a JWT issued by the issuer that contains a verified email address and the browser's public key. This section defines the EVT structure and how it is created and verified.
 
-- **3.5** - The issuer returns the EVT to the browser as the value of `issuance_token` in an `application/json` response.
+## EVT Structure {#evt-structure}
+
+The EVT is a JWT with the following structure:
+
+### Header
+
+- `alg` (REQUIRED): Signing algorithm
+- `kid` (REQUIRED): Key identifier of the key used to sign
+- `typ` (REQUIRED): Set to "evt+jwt"
 
 Example:
-```bash
-HTTP/1.1 200 OK
-Content-Type: application/json
-
-{"issuance_token":"eyJhbGciOiJFZERTQSIsImtpZCI6IjIwMjQtMDgtMTkiLCJ0eXAiOiJ3ZWItaWRlbnRpdHkrc2Qtand0In0..."}
+```json
+{
+  "alg": "EdDSA",
+  "kid": "2024-08-19",
+  "typ": "evt+jwt"
+}
 ```
 
-## Error Responses
+### Payload
+
+Required claims:
+
+- `iss`: The issuer identifier
+- `iat`: Issued at time (seconds since epoch)
+- `cnf`: Confirmation claim containing the browser's public key in `jwk` format (for SD-JWT Key Binding compatibility)
+- `email`: The verified email address
+- `email_verified`: Boolean, MUST be `true`
+
+Optional claims:
+
+- `is_private_email`: Boolean, set to `true` when the email is a private address
+
+Example:
+```json
+{
+  "iss": "issuer.example",
+  "iat": 1724083200,
+  "cnf": {
+    "jwk": {
+      "kty": "OKP",
+      "crv": "Ed25519",
+      "x": "JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs"
+    }
+  },
+  "email": "user@example.com",
+  "email_verified": true
+}
+```
+
+### Format
+
+The EVT has a `~` appended to it for SD-JWT compatibility (see [SD-JWT Compatibility](#sd-jwt-compatibility)).
+
+## EVT Creation {#evt-creation}
+
+After verifying the request (see [Request Verification](#request-verification)) and authenticating the user, the issuer creates the EVT:
+
+1. Construct the header with `alg`, `kid`, and `typ`
+2. Construct the payload with `iss`, `iat`, `cnf` (containing the public key from the `Signature-Key` header), `email`, and `email_verified`
+3. If a private email is requested, include `is_private_email: true` and set `email` to the private address
+4. Sign the JWT with the issuer's private key corresponding to the `kid`
+5. Append `~` to the signed JWT
+
+> Note: The `is_private_email` claim name matches Apple's Sign in with Apple for compatibility with existing RP implementations.
+
+## EVT Verification {#evt-verification}
+
+Both the browser and RP verify the EVT. The verification steps are:
+
+1. Parse the EVT into header, payload, and signature components
+2. Extract and validate the `alg` and `kid` from the header
+3. Extract and validate the `iss`, `iat`, `cnf`, `email`, and `email_verified` claims from the payload
+4. Perform [Issuer Discovery](#issuer-discovery) for the email domain to verify the `iss` claim matches the issuer identifier
+5. Fetch the issuer's public keys from the `jwks_uri` in the issuer metadata
+6. Verify the EVT signature using the public key identified by `kid`
+7. Verify `iat` is within an acceptable time window
+8. Verify `email_verified` is `true`
+
+The browser additionally verifies:
+
+- The `email` claim matches the email address being verified
+- The `cnf.jwk` claim matches the public key the browser generated
+
+
+# Key Binding (EVT+KB) {#kb}
+
+Key Binding ties an EVT to a specific RP and session through a Key Binding JWT (KB-JWT). The combined EVT+KB is what the RP receives and verifies.
+
+## KB-JWT Structure {#kb-structure}
+
+The KB-JWT is a JWT with the following structure:
+
+### Header
+
+- `alg` (REQUIRED): Signing algorithm (same as the browser's key pair)
+- `typ` (REQUIRED): Set to "kb+jwt" for SD-JWT library compatibility
+
+Example:
+```json
+{
+  "alg": "EdDSA",
+  "typ": "kb+jwt"
+}
+```
+
+### Payload
+
+- `aud` (REQUIRED): The RP's origin
+- `nonce` (REQUIRED): The nonce from the RP's session
+- `iat` (REQUIRED): Issued at time
+- `sd_hash` (REQUIRED): SHA-256 hash of the EVT for SD-JWT library compatibility
+
+Example:
+```json
+{
+  "aud": "https://rp.example",
+  "nonce": "259c5eae-486d-4b0f-b666-2a5b5ce1c925",
+  "iat": 1724083260,
+  "sd_hash": "X9yH0Ajrdm1Oij4tWso9UzzKJvPoDxwmuEcO3XAdRC0"
+}
+```
+
+## EVT+KB Format {#evt-kb-format}
+
+The EVT+KB is formed by concatenating the EVT and KB-JWT separated by a tilde:
+
+```
+<EVT>~<KB-JWT>
+```
+
+The EVT already has a trailing `~` from its SD-JWT format, so the full structure is:
+
+```
+<JWT>~<KB-JWT>
+```
+
+## SD-JWT Compatibility {#sd-jwt-compatibility}
+
+The EVT+KB format is compatible with SD-JWT with Key Binding as specified in [@!I-D.ietf-oauth-selective-disclosure-jwt], though this protocol does not use selective disclosure features. The following SD-JWT features are used:
+
+- **Trailing `~` on EVT**: The EVT uses the SD-JWT format (JWT with `~` suffix)
+- **`cnf` claim**: The EVT includes the `cnf` claim with `jwk` for holder key binding
+- **`typ: "kb+jwt"`**: The KB-JWT uses the SD-JWT Key Binding JWT type
+- **`sd_hash` claim**: The KB-JWT includes the SD-JWT hash of the EVT
+- **Concatenation format**: The EVT+KB uses the SD-JWT `<Issuer-signed-JWT>~<KB-JWT>` format
+
+Standard SD-JWT libraries can be used to parse and validate EVT+KB tokens.
+
+## KB-JWT Creation {#kb-creation-detail}
+
+After verifying the EVT (see [EVT Verification](#evt-verification)), the browser creates the KB-JWT:
+
+1. Construct the header with `alg` and `typ`
+2. Construct the payload with:
+   - `aud`: The RP's origin
+   - `nonce`: The nonce from the RP's session
+   - `iat`: Current time
+   - `sd_hash`: SHA-256 hash of the EVT (including the trailing `~`)
+3. Sign the KB-JWT with the browser's private key
+4. Concatenate with the EVT to form the EVT+KB
+
+## KB-JWT Verification {#kb-verification}
+
+The RP verifies the KB-JWT by:
+
+1. Parse the EVT+KB by separating at the tilde
+2. Parse the KB-JWT into header, payload, and signature
+3. Extract `alg` from the header and `aud`, `nonce`, `iat`, `sd_hash` from the payload
+4. Verify `aud` matches the RP's origin
+5. Verify `nonce` matches the nonce from the RP's session
+6. Verify `iat` is within a reasonable time window
+7. Compute the SHA-256 hash of the EVT and verify it matches `sd_hash`
+8. Verify the KB-JWT signature using the public key from the EVT's `cnf.jwk` claim
+
+
+# WebAuthn Authentication {#webauthn-authentication}
+
+When the issuer supports WebAuthn (`webauthn_supported: true` in metadata) and a token request lacks valid authentication cookies, the issuer MAY return a WebAuthn challenge to authenticate the user. This enables email verification even when the user is not logged into the issuer via cookies, using any WebAuthn-compatible credential (passkeys, security keys, platform authenticators).
+
+## WebAuthn Challenge Response
+
+Instead of returning an error or an EVT, the issuer returns a WebAuthn challenge:
+
+**HTTP 401 Unauthorized**
+```json
+{
+  "webauthn_challenge": {
+    "challenge": "dGVzdC1jaGFsbGVuZ2UtZGF0YQ",
+    "timeout": 60000,
+    "rpId": "issuer.example",
+    "allowCredentials": [
+      {
+        "type": "public-key",
+        "id": "Y3JlZGVudGlhbC1pZA"
+      }
+    ],
+    "userVerification": "preferred"
+  }
+}
+```
+
+The `webauthn_challenge` object follows the structure of PublicKeyCredentialRequestOptions as defined in [@WebAuthn].
+
+## WebAuthn Response
+
+After the browser obtains a WebAuthn assertion (this mechanism is being defined by the W3C ([@EVP-Browser])), it sends a new request to the issuance endpoint with the `webauthn_response`:
+
+```http
+POST /email-verification/issuance HTTP/1.1
+Host: accounts.issuer.example
+Content-Type: application/json
+Content-Digest: sha-256=:...:
+Sec-Fetch-Dest: email-verification
+Signature-Input: sig=("@method" "@authority" "@path" "content-digest" "signature-key");created=1692345600
+Signature: sig=:...:
+Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; x="JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs"
+
+{
+  "email": "user@example.com",
+  "webauthn_response": {
+    "id": "Y3JlZGVudGlhbC1pZA",
+    "rawId": "Y3JlZGVudGlhbC1pZA",
+    "response": {
+      "authenticatorData": "...",
+      "clientDataJSON": "...",
+      "signature": "..."
+    },
+    "type": "public-key"
+  }
+}
+```
+
+The `webauthn_response` object follows the structure of PublicKeyCredential as defined in [@WebAuthn].
+
+> Note: The WebAuthn request omits `cookie` from the signature components because WebAuthn authentication is used when the user lacks valid authentication cookies.
+
+## WebAuthn Verification
+
+The issuer verifies the WebAuthn response against its stored credentials for the email address. If verification succeeds, the issuer returns the EVT as described in [Token Issuance](#token-issuance).
+
+
+# Private Email Addresses {#private-email}
+
+Private email addresses allow users to provide site-specific email addresses to RPs, preventing RP-to-RP correlation of users by email address. There are two modes:
+
+- **Disposable**: A new private email address is generated for each request
+- **Directed**: A previously issued private email address is reused for account continuity
+
+## Request Parameters
+
+The token request body supports the following parameters for private email addresses:
+
+- `disposable` (OPTIONAL): Boolean. When set to `true`, requests a new private email address instead of the user's actual email.
+
+- `directed_email` (OPTIONAL): String. An opaque identifier for a previously issued private email address. When provided along with `disposable: true`, the issuer returns the same private email address if the identifier is valid and linked to the `email` in the request.
+
+## Example Requests
+
+Request for a new private email address (disposable):
+
+```json
+{
+  "email": "user@example.com",
+  "disposable": true
+}
+```
+
+Request to reuse a previously issued private email address (directed):
+
+```json
+{
+  "email": "user@example.com",
+  "disposable": true,
+  "directed_email": "d8f3a2b1-9c4e-4f6a-8b7d-1e2f3a4b5c6d"
+}
+```
+
+## Requirements
+
+- The private email MUST be a valid email address that the issuer can route to the user's actual mailbox
+- The private email SHOULD be unique per user and per RP origin (derived from the browser's context)
+- If `directed_email` is provided and is linked to the `email` address in the request, the issuer MUST return the same private email address
+- If `directed_email` is not provided or is invalid, the issuer generates a new private email address
+- The private email address is included in the EVT `email` claim
+- The EVT MUST include `is_private_email: true` when a private email address is issued
+
+## Issuer Flexibility
+
+The domain of the private email address does not need to match the domain of the user's actual email address. Additionally, the `iss` claim in the EVT corresponds to the issuer for the private email domain, which may differ from the issuer the browser initially contacted.
+
+For example, a user with `user@example.com` may receive a private email address `u7x9k2m4@privaterelay.different.example`. The EVT's `iss` claim would be the issuer for `privaterelay.different.example`. The browser verifies the EVT by performing issuer discovery on the private email domain and validating the signature against that issuer's JWKS. This allows email providers to delegate private email functionality to a separate service.
+
+## Example EVT Payload
+
+When a private email is issued, the EVT contains the private address in the `email` claim and includes `is_private_email: true`:
+
+```json
+{
+  "iss": "privaterelay.different.example",
+  "iat": 1724083200,
+  "cnf": {
+    "jwk": {
+      "kty": "OKP",
+      "crv": "Ed25519",
+      "x": "JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs"
+    }
+  },
+  "email": "u7x9k2m4@privaterelay.different.example",
+  "email_verified": true,
+  "is_private_email": true
+}
+```
+
+The browser MAY store the `directed_email` identifier so it can provide it in future requests if the user wants to reuse the same private email address at an RP.
+
+See [Privacy Considerations](#privacy-considerations) for privacy analysis of private email addresses.
+
+# Error Responses
 
 If the issuer cannot process the token request successfully, it MUST return an appropriate HTTP status code with a JSON error response containing an `error` field and optionally an `error_description` field.
 
+## Invalid Content-Type Header
 
-### Invalid Content-Type Header
+When the request does not include the required `Content-Type: application/json` header, the server MUST return the 415 HTTP response code.
 
-When the request does not include the required `Content-Type: application/json` header, the server MUST return the 415 HTTP response code
-
-
-### Invalid Sec-Fetch-Dest Header
+## Invalid Sec-Fetch-Dest Header
 
 When the request does not include the required `Sec-Fetch-Dest: email-verification` header:
 
 **HTTP 400 Bad Request**
 ```json
 {
-  "error": "invalid-request",
+  "error": "invalid_request",
   "error_description": "Missing or invalid Sec-Fetch-Dest header"
 }
 ```
 
 The `error_description` SHOULD specify that the Sec-Fetch-Dest header is missing or invalid.
 
-### Invalid or Missing HTTP Message Signature
+## Invalid or Missing HTTP Message Signature
 
 When the HTTP Message Signature is missing, malformed, or verification fails:
 
@@ -409,7 +764,7 @@ This includes cases where:
 - The signature verification fails using the public key from `Signature-Key`
 - The `created` timestamp is outside the acceptable time window
 
-### Invalid Content-Digest
+## Invalid Content-Digest
 
 When the `Content-Digest` header is missing or does not match the request body:
 
@@ -421,7 +776,7 @@ When the `Content-Digest` header is missing or does not match the request body:
 }
 ```
 
-### Authentication Required
+## Authentication Required
 
 When the request lacks valid authentication cookies, contains expired/invalid cookies, or the authenticated user does not have control of the requested email address:
 
@@ -433,7 +788,7 @@ When the request lacks valid authentication cookies, contains expired/invalid co
 }
 ```
 
-### Invalid Parameters
+## Invalid Parameters
 
 When the request body is malformed, missing the `email` field, or contains invalid values:
 
@@ -445,7 +800,19 @@ When the request body is malformed, missing the `email` field, or contains inval
 }
 ```
 
-### Server Errors
+## Private Email Not Supported
+
+When the request includes `disposable: true` but the issuer does not support private email addresses (`private_email_supported` is `false` or absent in metadata):
+
+**HTTP 400 Bad Request**
+```json
+{
+  "error": "private_email_not_supported",
+  "error_description": "This issuer does not support private email addresses"
+}
+```
+
+## Server Errors
 
 For internal server errors or temporary unavailability:
 
@@ -457,109 +824,53 @@ For internal server errors or temporary unavailability:
 }
 ```
 
-
-> In a future version of this spec, the issuer could prompt the user to login via a URL or with a Passkey request.
-
-
-## Token Presentation
-
-On receiving the `issuance_token` from the issuer:
-
-- **4.1** - The browser MUST verify the EVT by:
-
-  - parsing the EVT into header, payload, and signature components
-  - confirming the presence of, and extracting the `alg` and `kid` fields from the EVT header, and the `iss`, `iat`, `cnf`, `email`, and `email_verified` claims from the payload
-  - parsing the email domain from the `email` claim and looking up the `TXT` record for `_email-verification.$EMAIL_DOMAIN` to verify the `iss` claim matches the issuer identifier in the DNS record
-  - fetching the issuer's public keys from the `jwks_uri` specified in the `.well-known/email-verification` file
-  - verifying the EVT signature using the public key identified by `kid` from the JWKS with the `alg` algorithm
-  - verifying the `iat` claim is within 60 seconds of the current time
-  - verifying the `email` claim matches the email address being verified
-  - verifying the `email_verified` claim is true
-  - verifying the `cnf.jwk` claim matches the public key the browser generated in step 2.4
-
-
-- **4.2** - The browser then creates an EVT+KB by:
-
-  - taking the verified EVT from step 4.1 as the base token
-  - creating a Key Binding JWT (KB-JWT) with the following structure:
-    - **Header**:
-      - `alg`: same signing algorithm used by the browser's private key
-      - `typ`: "kb+jwt"
-    - **Payload**:
-      - `aud`: the RP's origin
-      - `nonce`: the nonce from step 1
-      - `iat`: current time when creating the KB-JWT
-      - `sd_hash`: SHA-256 hash of the EVT
-  - signing the KB-JWT with the browser's private key (the same key pair generated in step 2.4)
-  - concatenating the EVT and the KB-JWT separated by a tilde (~) to form the EVT+KB
-
-  Example KB-JWT header:
-  ```json
-  {
-    "alg": "EdDSA",
-    "typ": "kb+jwt"
-  }
-  ```
-
-  Example KB-JWT payload:
-  ```json
-  {
-    "aud": "https://rp.example",
-    "nonce": "259c5eae-486d-4b0f-b666-2a5b5ce1c925",
-    "salt": "kR7fY9mP3xQ8wN2vL5jH6tZ1cB4nM9sD8fG3hJ7kL2p",
-    "iat": 1724083260,
-    "sd_hash": "X9yH0Ajrdm1Oij4tWso9UzzKJvPoDxwmuEcO3XAdRC0"
-  }
-  ```
-
-- **4.3** - The browser provides the EVT+KB to the RP (mechanism out of scope for this specification - see W3C browser API specification)
-
-## Token Verification
-
-The RP receives the EVT+KB from the browser (mechanism out of scope) and the RP server MUST verify it by:
-
-- **5.1** - Parsing the EVT+KB by separating the EVT and KB-JWT components (separated by tilde ~)
-
-- **5.2** - Verifying the KB-JWT by:
-  - parsing the KB-JWT into header, payload, and signature components
-  - confirming the presence of, and extracting the `alg` field from the KB-JWT header, and the `aud`, `nonce`, `iat`, and `sd_hash` claims from the payload
-  - verifying the `aud` claim matches the RP's origin
-  - verifying the `nonce` claim matches the nonce from the RP's session (from step 1)
-  - verifying the `iat` claim is within a reasonable time window
-  - computing the SHA-256 hash of the EVT and verifying it matches the `sd_hash` claim
-
-- **5.3** - Verifying the EVT by:
-  - parsing the EVT into header, payload, and signature components
-  - confirming the presence of, and extracting the `alg` and `kid` fields from the EVT header, and the `iss`, `iat`, `cnf`, `email`, and `email_verified` claims from the payload
-  - parsing the email domain from the `email` claim and looking up the `TXT` record for `_email-verification.$EMAIL_DOMAIN` to verify the `iss` claim matches the issuer identifier in the DNS record
-  - fetching the issuer's public keys from the `jwks_uri` specified in the `.well-known/email-verification` file
-  - verifying the EVT signature using the public key identified by `kid` from the JWKS with the `alg` algorithm
-  - verifying the `iss` claim exactly matches the issuer identifier from the DNS record
-  - verifying the `iat` claim is within a reasonable time window
-  - verifying the `email_verified` claim is true
-
-- **5.4** - Verifying the KB-JWT signature using the public key from the `cnf` claim in the EVT with the `alg` algorithm from the KB-JWT header
-
-- **5.5** - If all verification steps pass, the RP has successfully verified that the user controls the email address in the `email` claim
-
-> **Note**: Standard SD-JWT libraries can be used to parse and validate EVTs, as EVTs use the same structure as SD-JWTs (JWT with `~` suffix).
-
-
 # Privacy Considerations
 
-> Below are notes capturing some discussions of potential privacy implications.
+This section analyzes the privacy properties of the Email Verification Protocol, following the guidance in [@?RFC6973].
 
-1. The email domain operator no longer learns which applications the user is verifying their email address to as the applications are no longer sending an email verification code to the user. By using an EVT+KB, the browser intermediates the request and response so that the issuer does not learn the identity of the RP.
+## Reduced Friction Tradeoff
 
-2. The RP can infer if a user is logged into the issuer as the RP receives an EVT when the user is logged in, and does not when the user is not logged in.
+By reducing friction in email verification, EVP makes it easier for users to provide their email address to more sites. This convenience could accelerate the RP correlation problem—users may share a correlatable identifier with more RPs than they would if verification required more effort.
 
-3. The issuer may learn the user has email at a mail domain it is authoritative for that it did not know the user had.
+EVP addresses this tradeoff through private email addresses. When supported by the issuer, users can present a site-specific private email that cannot be correlated across RPs. This makes sharing a non-correlatable identifier just as easy as sharing the user's real email address, giving users a privacy-preserving option without additional friction.
+
+## Timing Correlation by Email Providers
+
+The three-party model (see [Protocol Flow](#protocol-flow)) prevents the issuer from learning which RP requested verification. When the RP uses the email only for identification and does not send emails, the email provider never learns about the RP at all. When the RP does send emails, the provider eventually learns about that RP, but only when email is actually sent—not at verification time. This dulls timing correlation.
+
+## RP Correlation via Email Addresses
+
+Private email addresses prevent RPs from correlating users across sites. Additional benefits:
+
+**Protection from data breaches**: If an RP suffers a data breach, only the private email is exposed—not the user's primary email address.
+
+**Protection from unwanted email**: Because the issuer controls private email routing, users can revoke or filter mail to specific addresses without affecting their primary inbox.
+
+## Issuer Knowledge
+
+The issuer learns certain information through the protocol:
+
+1. **Email addresses**: The issuer learns that the user controls the email address in the request. This may reveal email addresses at domains the issuer is authoritative for that it did not previously know the user had.
+
+2. **Verification requests**: The issuer sees that verification was requested but does not learn which RP requested it (maintained by the three-party model).
+
+3. **Private email mappings**: When generating private emails, the issuer stores mappings between private addresses and user email addresses for mail routing.
+
+4. **Email traffic**: When RPs send email to private addresses, the issuer (operating the relay) learns about those communications.
+
+## RP Knowledge
+
+The RP can infer whether the user is logged into the issuer: the RP receives an EVT when the user is logged in, and receives an error when the user is not. This is inherent to any authentication-based verification scheme.
+
+## Browser Storage
+
+The browser MAY store the `directed_email` identifier per RP origin to enable account continuity with private email addresses.
 
 # Security Considerations
 
 ## HTTP Message Signature Security
 
-The use of HTTP Message Signatures ([RFC 9421](https://datatracker.ietf.org/doc/html/rfc9421)) provides several security benefits:
+The use of HTTP Message Signatures ([@!RFC9421]) provides several security benefits:
 
 1. **Request Integrity**: The signature covers the HTTP method, target URI, authority, content-digest, cookies, and security headers, preventing tampering with any of these components.
 
@@ -581,18 +892,38 @@ The `hwk` (Header Web Key) scheme provides:
 
 ## Email Existence Probing
 
-A successful EVP verification confirms that an email address exists and is controlled by a logged-in user. This could potentially be used to:
+Any software—not just browsers—can send requests to an issuer's issuance endpoint. An attacker could attempt to use this to probe for valid email addresses:
 
-1. **Build email lists**: An attacker could probe many addresses to identify valid ones for spam targeting.
-2. **Account enumeration**: An attacker could determine which email addresses have accounts at specific issuers.
+1. **Build email lists**: Probe many addresses to identify valid ones for spam targeting.
+2. **Account enumeration**: Determine which email addresses have accounts at specific issuers.
 
-These risks are mitigated by:
+### Uniform Error Responses
 
-- **User interaction required**: The browser API requires user gesture and consent before initiating verification. Automated probing is not possible.
-- **Rate limiting**: Issuers can rate-limit requests per user session or IP address.
-- **Same information as email OTP**: An attacker can already determine email existence by sending verification emails and checking for bounces. EVP does not create new information disclosure.
+To prevent probing, issuers MUST NOT return different error responses based on whether an email address exists. The `authentication_required` error should be returned uniformly whether:
 
-Issuers should implement appropriate rate limiting and abuse detection.
+- The email address does not exist at this issuer
+- The email address exists but the user is not authenticated
+- The email address exists but the authenticated user does not control it
+
+This ensures attackers cannot distinguish between "email exists" and "email does not exist" based on error responses.
+
+### Timing Attack Mitigations
+
+Response timing can also reveal whether an email address exists. If the issuer performs a database lookup only when the email exists, or takes different code paths based on email existence, an attacker can measure response times to infer information.
+
+Issuers SHOULD mitigate timing attacks using techniques such as:
+
+- **Uniform code paths**: Execute the same operations (database lookups, cryptographic operations) regardless of whether the email exists, avoiding early returns that skip processing steps.
+- **Response delay normalization**: Add delays to normalize response times across all error conditions to a consistent baseline.
+
+### Additional Mitigations
+
+- **User interaction required**: The browser API requires user gesture and consent before initiating verification, preventing automated probing from browsers.
+- **Rate limiting**: Issuers SHOULD rate-limit requests per IP address to slow down probing attempts from any client.
+- **Sec-Fetch-Dest verification**: The required `Sec-Fetch-Dest: email-verification` header provides a signal that the request originates from a browser, though this can be spoofed by non-browser clients.
+- **Same information as email OTP**: An attacker can already determine email existence by sending verification emails and checking for bounces. EVP does not create new information disclosure beyond what is already possible.
+
+Issuers SHOULD implement appropriate rate limiting and abuse detection.
 
 # Design Rationale
 
@@ -654,35 +985,18 @@ The issuer publishes signing keys via a JWKS endpoint rather than reusing DKIM k
 
 3. **Operational familiarity**: Developers implementing EVP are likely familiar with JWKS from OAuth/OIDC work.
 
-# Alternatives Under Consideration
-
-## Passkey Authentication
-
-In addition to, or instead of the browser sending cookies to the Issuer, the Issuer could return a WebAuthN request to the browser if it has credentials for the user identified by the email address. The browser would then interact with the user and provide the WebAuthN response to the Issuer, authenticating the user, and the Issuer would then return the EVT.
-
-# Alternatives Considered
-
-## Use .wellknown for Mail Domain delegation to Issuer
-
-Rather than the DNS TXT record, the Mail Domain would host a JSON file in the .wellknown domain. This creates challenges for the long tail of individually owned domains:
-
-- would require a domain that is used just for email to now have to support a web server
-- the mail domain is usually an apex domain, which does not support CNAME, complicating hosting a web site
-
-## Use Request JWT Instead of HTTP Message Signatures
+## Why HTTP Message Signatures Rather Than Request JWT?
 
 The original design used a JWT signed by the browser to carry the email address and browser's public key. The HTTP Message Signatures approach was chosen because:
 
-1. **Standards-Based**: RFC 9421 is a published standard for signing HTTP messages, providing better interoperability
+1. **Standards-Based**: [@!RFC9421] is a published standard for signing HTTP messages, providing better interoperability
 2. **Cookie Binding**: HTTP Message Signatures can directly sign the `cookie` header, providing stronger binding between authentication cookies and the request
 3. **Content Integrity**: The `content-digest` component provides built-in content integrity without needing to duplicate the email in a JWT
 4. **Flexibility**: The signature can cover any HTTP components, making it easier to add additional protections in the future
 5. **Simpler Key Distribution**: The Signature-Key header provides a standardized way to distribute keys inline with the request
 
-# References
+{backmatter}
 
-- [RFC 9421: HTTP Message Signatures](https://datatracker.ietf.org/doc/html/rfc9421)
-- [RFC 9530: Digest Fields](https://datatracker.ietf.org/doc/html/rfc9530)
-- [draft-hardt-httpbis-signature-key: HTTP Signature-Key Header](https://datatracker.ietf.org/doc/draft-hardt-httpbis-signature-key/)
-- [Selective Disclosure for JWT (SD-JWT)](https://datatracker.ietf.org/doc/draft-ietf-oauth-selective-disclosure-jwt/)
-- [OpenID Connect Core 1.0](https://openid.net/specs/openid-connect-core-1_0.html)
+# Acknowledgments
+
+The authors would like to thank reviewers for their feedback on this specification.
