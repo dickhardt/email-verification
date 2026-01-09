@@ -194,10 +194,9 @@ POST /email-verification/issuance HTTP/1.1
 Host: accounts.issuer.example
 Cookie: session=...
 Content-Type: application/json
-Content-Digest: sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:
 Sec-Fetch-Dest: email-verification
 Signature-Input: sig=("@method" "@authority" "@path" \
-    "content-digest" "cookie" "signature-key");created=1692345600
+    "cookie" "signature-key");created=1692345600
 Signature: sig=:MEQCIHd8Y8qYKm5e3dV8y....:
 Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; \
     x="JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs"
@@ -324,11 +323,10 @@ This section defines how HTTP Message Signatures ([@!RFC9421]) are used in token
 The browser creates a signed request by:
 
 1. Creating a JSON request body with the email address and optional parameters
-2. Computing the `Content-Digest` header per [@!RFC9530] using SHA-256
-3. Creating the `Signature-Key` header using the `hwk` scheme ([@!I-D.hardt-httpbis-signature-key]) with the browser's public key
-4. Creating the `Signature-Input` header specifying the covered components
-5. Computing the signature base per [@!RFC9421] Section 2.5 and signing with the browser's private key
-6. Creating the `Signature` header with the base64-encoded signature
+2. Creating the `Signature-Key` header using the `hwk` scheme ([@!I-D.hardt-httpbis-signature-key]) with the browser's public key
+3. Creating the `Signature-Input` header specifying the covered components
+4. Computing the signature base per [@!RFC9421] Section 2.5 and signing with the browser's private key
+5. Creating the `Signature` header with the base64-encoded signature
 
 ### Request Body
 
@@ -356,11 +354,11 @@ Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; \
 
 ### Signature-Input Header
 
-The covered components MUST include `@method`, `@authority`, `@path`, `content-digest`, and `signature-key`. The `cookie` component MUST be included when the Cookie header is present, and MUST be omitted when it is not (per [@!RFC9421] Section 2.5). The `created` parameter MUST be included.
+The covered components MUST include `@method`, `@authority`, `@path`, and `signature-key`. The `cookie` component MUST be included when the Cookie header is present, and MUST be omitted when it is not (per [@!RFC9421] Section 2.5). The `created` parameter MUST be included.
 
 ```
 Signature-Input: sig=("@method" "@authority" "@path" \
-    "content-digest" "cookie" "signature-key");created=1692345600
+    "cookie" "signature-key");created=1692345600
 ```
 
 ### Example Signed Request
@@ -370,10 +368,9 @@ POST /email-verification/issuance HTTP/1.1
 Host: accounts.issuer.example
 Cookie: session=...
 Content-Type: application/json
-Content-Digest: sha-256=:X48E9qOokqqrvdts8nOJRJN3OWDUoyWxBf7kbu9DBPE=:
 Sec-Fetch-Dest: email-verification
 Signature-Input: sig=("@method" "@authority" "@path" \
-    "content-digest" "cookie" "signature-key");created=1692345600
+    "cookie" "signature-key");created=1692345600
 Signature: sig=:MEQCIHd8Y8qYKm5e3dV8y....:
 Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; \
     x="JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs"
@@ -387,7 +384,6 @@ The issuer MUST verify the request headers:
 
 - `Content-Type` is `application/json`
 - `Sec-Fetch-Dest` is `email-verification`
-- `Content-Digest` is present
 - `Signature-Input` is present
 - `Signature` is present
 - `Signature-Key` is present with `sig=hwk` scheme
@@ -396,7 +392,7 @@ The issuer MUST verify the HTTP Message Signature by:
 
 1. Parsing the `Signature-Key` header and extracting the public key from the `hwk` parameters (`kty`, `crv`, `x` for OKP keys)
 2. Parsing the `Signature-Input` header to determine the covered components
-3. Verifying that the signature covers at minimum: `@method`, `@authority`, `@path`, `content-digest`, and `signature-key`. The signature MUST also cover `cookie` when the Cookie header is present.
+3. Verifying that the signature covers at minimum: `@method`, `@authority`, `@path`, and `signature-key`. The signature MUST also cover `cookie` when the Cookie header is present.
 4. Reconstructing the signature base per [@!RFC9421] Section 2.5
 5. Verifying the signature in the `Signature` header using the extracted public key
 6. Verifying the `created` timestamp in `Signature-Input` is within 60 seconds of the current time
@@ -405,7 +401,6 @@ The issuer MUST verify the request body:
 
 1. Parsing the JSON body and extracting the `email` field
 2. Verifying the `email` field contains a syntactically valid email address
-3. Verifying the `Content-Digest` matches the actual request body
 
 
 # Email Verification Token (EVT) {#evt}
@@ -631,9 +626,8 @@ POST /email-verification/issuance HTTP/1.1
 Host: accounts.issuer.example
 Cookie: webauthn_state=...
 Content-Type: application/json
-Content-Digest: sha-256=:...:
 Sec-Fetch-Dest: email-verification
-Signature-Input: sig=("@method" "@authority" "@path" "content-digest" "cookie" "signature-key");created=1692345600
+Signature-Input: sig=("@method" "@authority" "@path" "cookie" "signature-key");created=1692345600
 Signature: sig=:...:
 Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; x="JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs"
 
@@ -779,18 +773,6 @@ This includes cases where:
 - The signature verification fails using the public key from `Signature-Key`
 - The `created` timestamp is outside the acceptable time window
 
-## Invalid Content-Digest
-
-When the `Content-Digest` header is missing or does not match the request body:
-
-**HTTP 400 Bad Request**
-```json
-{
-  "error": "invalid_request",
-  "error_description": "Content-Digest header missing or does not match request body"
-}
-```
-
 ## Authentication Required
 
 When the request lacks valid authentication cookies, contains expired/invalid cookies, or the authenticated user does not have control of the requested email address:
@@ -899,7 +881,7 @@ The browser MAY store the private email address per RP origin to enable account 
 
 The use of HTTP Message Signatures ([@!RFC9421]) provides several security benefits:
 
-1. **Request Integrity**: The signature covers the HTTP method, target URI, authority, content-digest, cookies, and security headers, preventing tampering with any of these components.
+1. **Request Integrity**: The signature covers the HTTP method, authority, path, and cookies, preventing tampering with any of these components.
 
 2. **Cookie Binding**: By including the `cookie` component in the signature, the browser's authentication cookies are cryptographically bound to the specific request, preventing cookie injection or manipulation attacks.
 
@@ -1018,9 +1000,8 @@ The original design used a JWT signed by the browser to carry the email address 
 
 1. **Standards-Based**: [@!RFC9421] is a published standard for signing HTTP messages, providing better interoperability
 2. **Cookie Binding**: HTTP Message Signatures can directly sign the `cookie` header, providing stronger binding between authentication cookies and the request
-3. **Content Integrity**: The `content-digest` component provides built-in content integrity without needing to duplicate the email in a JWT
-4. **Flexibility**: The signature can cover any HTTP components, making it easier to add additional protections in the future
-5. **Simpler Key Distribution**: The Signature-Key header provides a standardized way to distribute keys inline with the request
+3. **Flexibility**: The signature can cover any HTTP components, making it easier to add additional protections in the future
+4. **Simpler Key Distribution**: The Signature-Key header provides a standardized way to distribute keys inline with the request
 
 {backmatter}
 
