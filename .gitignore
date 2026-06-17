@@ -10,6 +10,7 @@
 /.refcache
 /.targets.mk
 /.vscode/
+/.claude/
 /lib
 /node_modules/
 /versioned/

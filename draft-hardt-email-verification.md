@@ -71,11 +71,21 @@ organization = "Google"
   <seriesInfo name="W3C" value="Recommendation"/>
 </reference>
 
-<reference anchor="EVP-Browser" target="https://github.com/WICG/email-verification-protocol">
+<reference anchor="EVP-Browser" target="https://wicg.github.io/email-verification/">
   <front>
-    <title>Email Verification Protocol Browser API</title>
+    <title>Email Verification API</title>
     <author>
-      <organization>W3C</organization>
+      <organization>WICG</organization>
+    </author>
+    <date year="2025"/>
+  </front>
+</reference>
+
+<reference anchor="LightweightFedCM" target="https://github.com/fedidcg/LightweightFedCM">
+  <front>
+    <title>Lightweight FedCM</title>
+    <author>
+      <organization>FedID CG</organization>
     </author>
     <date year="2025"/>
   </front>
@@ -146,26 +156,39 @@ The following diagram illustrates the protocol flow between the RP Server, Brows
 ```
 Step                      RP Server     Browser              Issuer
                                |            |                    |
-2.1 Session Binding            |--- nonce ->|                    |
+2.1 Email Discovery            |            |<- discover accts ->|
+                               |            |   (push or pull)   |
                                |            |                    |
-2.2 Email Acquisition          |      [obtain email from user]   |
+2.2 Session Binding            |--- nonce ->|                    |
                                |            |                    |
-2.3 Token Request              |            |-- POST /issuance ->|
+2.3 Email Acquisition          |      [obtain email from user]   |
+                               |            |                    |
+2.4 Token Request              |            |-- POST /issuance ->|
                                |            |    (email, ...)    |
                                |            |                    |
-2.4 EVT Creation               |            |           [create EVT]
+2.5 EVT Creation               |            |           [create EVT]
                                |            |                    |
-2.5 Token Issuance             |            |<------ EVT --------|
+2.6 Token Issuance             |            |<------ EVT --------|
                                |            |                    |
-2.6 KB Creation                |        [create KB-JWT]          |
+2.7 KB Creation                |        [create KB-JWT]          |
                                |            |                    |
-2.7 Token Presentation         |<-- EVT+KB -|                    |
+2.8 Token Presentation         |<-- EVT+KB -|                    |
                                |            |                    |
-2.8 Token Verification    [verify EVT+KB]   |                    |
+2.9 Token Verification    [verify EVT+KB]   |                    |
                                |            |                    |
 ```
 
 
+
+## Email Discovery {#email-discovery}
+
+Before presenting the user with email address choices, the browser discovers which email accounts have active sessions with an issuer. There are two models for this discovery:
+
+**Push model**: The issuer proactively pushes account information to the browser using the FedCM Accounts Push mechanism ([@?LightweightFedCM]). The browser accumulates account data without making an explicit request.
+
+**Pull model**: The browser calls the issuer's accounts endpoint per the FedCM mechanism, as defined in the W3C Email Verification API ([@?EVP-Browser]). The browser fetches the issuer's FedCM well-known configuration and requests the account list from the `accounts_endpoint`.
+
+The result of email discovery is the set of email addresses available for the current user, which the browser presents to the user in [Email Acquisition](#email-acquisition).
 
 ## Session Binding {#session-binding}
 
@@ -203,6 +226,8 @@ Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; \
 
 {"email":"user@example.com"}
 ```
+
+> Note: The W3C Email Verification API ([@?EVP-Browser]) currently specifies a different request format: the browser constructs a signed JWT (`request_token`) with the public key in the header (`alg`, `jwk`) and `aud`, `iat`, and `email` in the payload, sent with `Content-Type: application/x-www-form-urlencoded`. Existing deployments use this format; it is considered deprecated by this specification in favor of HTTP Message Signatures.
 
 ## EVT Issuance {#evt-issuance}
 
@@ -265,6 +290,8 @@ If all verification steps pass, the RP has successfully verified that the user c
 
 Both the browser and the RP need to discover information about the issuer for a given email address. This section describes the discovery process.
 
+> Note: The W3C Email Verification API ([@?EVP-Browser]) uses FedCM's well-known configuration (`/.well-known/fedcm.json`) for issuer discovery. This specification uses `/.well-known/email-verification`. These two specifications will align on a single well-known file.
+
 ## DNS Delegation {#dns-delegation}
 
 The email domain delegates email verification to an issuer via a DNS TXT record. Given an email address, parse the email domain ($EMAIL_DOMAIN) and look up the `TXT` record for `_email-verification.$EMAIL_DOMAIN`. The contents of the record MUST start with `iss=` followed by the issuer identifier. There MUST be only one `TXT` record for `_email-verification.$EMAIL_DOMAIN`.
@@ -287,9 +314,7 @@ _email-verification.issuer.example   TXT   iss=issuer.example
 
 ## Issuer Metadata {#issuer-metadata}
 
-Once the issuer identifier is known, fetch the metadata document from `https://$ISSUER/.well-known/email-verification`. The request MUST follow redirects to the same path but with a different subdomain of the Issuer.
-
-For example, `https://issuer.example/.well-known/email-verification` may redirect to `https://accounts.issuer.example/.well-known/email-verification`.
+Once the issuer identifier is known, fetch the metadata document from `https://$ISSUER/.well-known/email-verification`.
 
 The metadata document is JSON containing the following properties:
 
@@ -298,8 +323,6 @@ The metadata document is JSON containing the following properties:
 - *signing_alg_values_supported* - OPTIONAL. JSON array containing a list of the signing algorithms ("alg" values) supported by the issuer for both HTTP Message Signatures and issued EVTs. Algorithm identifiers MUST be from the IANA "JSON Web Signature and Encryption Algorithms" registry. If omitted, "EdDSA" is the default. "EdDSA" SHOULD be included in the supported algorithms list. The value "none" MUST NOT be used.
 - *webauthn_supported* - OPTIONAL. Boolean indicating whether the issuer supports WebAuthn authentication as an alternative to cookies. If `true`, the issuer may return a WebAuthn challenge when cookies are not present or invalid. Defaults to `false`.
 - *private_email_supported* - OPTIONAL. Boolean indicating whether the issuer supports generating private email addresses. Defaults to `false`.
-
-> **Open Question**: Should URL properties be required to include the issuer domain as the root of their hostname?
 
 Following is an example `.well-known/email-verification` file:
 
@@ -1002,6 +1025,16 @@ The original design used a JWT signed by the browser to carry the email address 
 2. **Cookie Binding**: HTTP Message Signatures can directly sign the `cookie` header, providing stronger binding between authentication cookies and the request
 3. **Flexibility**: The signature can cover any HTTP components, making it easier to add additional protections in the future
 4. **Simpler Key Distribution**: The Signature-Key header provides a standardized way to distribute keys inline with the request
+
+# Implementation Status
+
+*Note: This section is to be removed before publishing as an RFC.*
+
+This section records the status of known implementations of the protocol defined by this specification at the time of posting of this Internet-Draft, and is based on a proposal described in [@RFC7942]. The description of implementations in this section is intended to assist the IETF in its decision processes in progressing drafts to RFCs.
+
+The following implementations are known:
+
+- **Hellō** — [hello.coop](https://hello.coop). Organization: Hellō. Role: Issuer. Coverage: EVT issuance endpoint, issuer discovery via DNS TXT, JWKS endpoint. Level of maturity: exploratory.
 
 {backmatter}
 
