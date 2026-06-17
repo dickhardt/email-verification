@@ -93,7 +93,9 @@ organization = "Google"
 
 .# Abstract
 
-This document defines the Email Verification Protocol (EVP), which enables web applications to verify that a user controls an email address without sending a verification email. The protocol uses a three-party model where the browser intermediates between the relying party and an issuer, providing both improved user experience and privacy protection.
+This document defines the Email Verification Protocol (EVP), the HTTP-level protocol by which a browser obtains a signed email verification token from an issuer and presents it to a relying party (RP). The protocol enables web applications to verify that a user controls an email address without sending a verification email. It uses a three-party model in which the browser intermediates between the RP and the issuer, hiding the RP's identity from the issuer and supporting private, per-RP email addresses to prevent cross-site correlation.
+
+This document covers issuer discovery, the token issuance request, the Email Verification Token (EVT) and Key Binding JWT (KB-JWT) formats, and token verification. The browser API — how the user selects an email address and how the token is delivered to the RP — is defined in the companion W3C Email Verification API ([@?EVP-Browser]).
 
 .# Discussion Venues
 
