@@ -1038,6 +1038,13 @@ The following implementations are known:
 
 - **Hellō** — [hello.coop](https://hello.coop). Organization: Hellō. Role: Issuer. Coverage: EVT issuance endpoint, issuer discovery via DNS TXT, JWKS endpoint. Level of maturity: exploratory.
 
+# Document History
+
+*Note: This section is to be removed before publishing as an RFC.*
+
+- draft-hardt-email-verification-00
+  - Initial draft.
+
 {backmatter}
 
 # Acknowledgments
