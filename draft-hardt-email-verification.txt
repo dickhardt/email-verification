@@ -5,8 +5,8 @@
 TBD                                                             D. Hardt
 Internet-Draft                                                     Hellō
 Intended status: Standards Track                                 S. Goto
-Expires: 13 July 2026                                             Google
-                                                          9 January 2026
+Expires: 6 January 2027                                           Google
+                                                             5 July 2026
 
 
                       Email Verification Protocol
@@ -14,12 +14,22 @@ Expires: 13 July 2026                                             Google
 
 Abstract
 
-   This document defines the Email Verification Protocol (EVP), which
-   enables web applications to verify that a user controls an email
-   address without sending a verification email.  The protocol uses a
-   three-party model where the browser intermediates between the relying
-   party and an issuer, providing both improved user experience and
-   privacy protection.
+   This document defines the Email Verification Protocol (EVP), the
+   HTTP-level protocol by which a browser obtains a signed email
+   verification token from an issuer and presents it to a relying party
+   (RP).  The protocol enables web applications to verify that a user
+   controls an email address without sending a verification email.  It
+   uses a three-party model in which the browser intermediates between
+   the RP and the issuer, hiding the RP's identity from the issuer and
+   supporting private, per-RP email addresses to prevent cross-site
+   correlation.
+
+   This document covers issuer discovery, the token issuance request,
+   the Email Verification Token (EVT) and Key Binding JWT (KB-JWT)
+   formats, and token verification.  The browser API — how the user
+   selects an email address and how the token is delivered to the RP —
+   is defined in the companion W3C Email Verification API
+   ([EVP-Browser]).
 
 Discussion Venues
 
@@ -47,7 +57,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 13 July 2026.
+   This Internet-Draft will expire on 6 January 2027.
 
 Copyright Notice
 
@@ -71,13 +81,14 @@ Table of Contents
      1.3.  Friction Solution
      1.4.  Privacy Solution
    2.  Protocol Flow
-     2.1.  Session Binding
-     2.2.  Email Acquisition
-     2.3.  Token Request
-     2.4.  EVT Issuance
-     2.5.  KB Creation
-     2.6.  Token Presentation
-     2.7.  Token Verification
+     2.1.  Email Discovery
+     2.2.  Session Binding
+     2.3.  Email Acquisition
+     2.4.  Token Request
+     2.5.  EVT Issuance
+     2.6.  KB Creation
+     2.7.  Token Presentation
+     2.8.  Token Verification
    3.  Issuer Discovery
      3.1.  DNS Delegation
      3.2.  Issuer Metadata
@@ -143,9 +154,11 @@ Table of Contents
      12.4.  Why DNS Delegation?
      12.5.  Why JWKS Over DKIM Keys?
      12.6.  Why HTTP Message Signatures Rather Than Request JWT?
-   13. References
-     13.1.  Normative References
-     13.2.  Informative References
+   13. Implementation Status
+   14. Document History
+   15. References
+     15.1.  Normative References
+     15.2.  Informative References
    Appendix A.  Acknowledgments
    Authors' Addresses
 
@@ -249,25 +262,49 @@ Table of Contents
 
    Step                      RP Server     Browser              Issuer
                                   |            |                    |
-   2.1 Session Binding            |--- nonce ->|                    |
+   2.1 Email Discovery            |            |<- discover accts ->|
+                                  |            |   (push or pull)   |
                                   |            |                    |
-   2.2 Email Acquisition          |      [obtain email from user]   |
+   2.2 Session Binding            |--- nonce ->|                    |
                                   |            |                    |
-   2.3 Token Request              |            |-- POST /issuance ->|
+   2.3 Email Acquisition          |      [obtain email from user]   |
+                                  |            |                    |
+   2.4 Token Request              |            |-- POST /issuance ->|
                                   |            |    (email, ...)    |
                                   |            |                    |
-   2.4 EVT Creation               |            |           [create EVT]
+   2.5 EVT Creation               |            |           [create EVT]
                                   |            |                    |
-   2.5 Token Issuance             |            |<------ EVT --------|
+   2.6 Token Issuance             |            |<------ EVT --------|
                                   |            |                    |
-   2.6 KB Creation                |        [create KB-JWT]          |
+   2.7 KB Creation                |        [create KB-JWT]          |
                                   |            |                    |
-   2.7 Token Presentation         |<-- EVT+KB -|                    |
+   2.8 Token Presentation         |<-- EVT+KB -|                    |
                                   |            |                    |
-   2.8 Token Verification    [verify EVT+KB]   |                    |
+   2.9 Token Verification    [verify EVT+KB]   |                    |
                                   |            |                    |
 
-2.1.  Session Binding
+2.1.  Email Discovery
+
+   Before presenting the user with email address choices, the browser
+   discovers which email accounts have active sessions with an issuer.
+   There are two models for this discovery:
+
+   *Push model*: The issuer proactively pushes account information to
+   the browser using the FedCM Accounts Push mechanism
+   ([LightweightFedCM]).  The browser accumulates account data without
+   making an explicit request.
+
+   *Pull model*: The browser calls the issuer's accounts endpoint per
+   the FedCM mechanism, as defined in the W3C Email Verification API
+   ([EVP-Browser]).  The browser fetches the issuer's FedCM well-known
+   configuration and requests the account list from the
+   accounts_endpoint.
+
+   The result of email discovery is the set of email addresses available
+   for the current user, which the browser presents to the user in Email
+   Acquisition (#email-acquisition).
+
+2.2.  Session Binding
 
    The RP Server generates a cryptographically random nonce with at
    least 128 bits of entropy and binds it to a session it has with the
@@ -276,12 +313,12 @@ Table of Contents
    provides the nonce to the browser is being defined by the W3C
    ([EVP-Browser]).
 
-2.2.  Email Acquisition
+2.3.  Email Acquisition
 
    The browser obtains an email address from the user.  This mechanism
    is being defined by the W3C ([EVP-Browser]).
 
-2.3.  Token Request
+2.4.  Token Request
 
    Once the browser has the email address and nonce:
 
@@ -318,7 +355,15 @@ Table of Contents
 
    {"email":"user@example.com"}
 
-2.4.  EVT Issuance
+   |  Note: The W3C Email Verification API ([EVP-Browser]) currently
+   |  specifies a different request format: the browser constructs a
+   |  signed JWT (request_token) with the public key in the header (alg,
+   |  jwk) and aud, iat, and email in the payload, sent with Content-
+   |  Type: application/x-www-form-urlencoded.  Existing deployments use
+   |  this format; it is considered deprecated by this specification in
+   |  favor of HTTP Message Signatures.
+
+2.5.  EVT Issuance
 
    On receipt of a token request:
 
@@ -344,7 +389,7 @@ Table of Contents
 
    The browser MUST process any Set-Cookie headers in the response.
 
-2.5.  KB Creation
+2.6.  KB Creation
 
    On receiving the issuance_token:
 
@@ -368,12 +413,12 @@ Table of Contents
    eyJhdWQiOiJodHRwczovL3JwLmV4YW1wbGUiLCJub25jZSI6IjI1OWM1ZWFlLTQ4...}.
    signature
 
-2.6.  Token Presentation
+2.7.  Token Presentation
 
    The browser provides the EVT+KB to the RP.  This mechanism is being
    defined by the W3C ([EVP-Browser]).
 
-2.7.  Token Verification
+2.8.  Token Verification
 
    The RP receives the EVT+KB and verifies it by:
 
@@ -390,6 +435,12 @@ Table of Contents
    Both the browser and the RP need to discover information about the
    issuer for a given email address.  This section describes the
    discovery process.
+
+   |  Note: The W3C Email Verification API ([EVP-Browser]) uses FedCM's
+   |  well-known configuration (/.well-known/fedcm.json) for issuer
+   |  discovery.  This specification uses /.well-known/email-
+   |  verification.  These two specifications will align on a single
+   |  well-known file.
 
 3.1.  DNS Delegation
 
@@ -421,13 +472,7 @@ Table of Contents
 3.2.  Issuer Metadata
 
    Once the issuer identifier is known, fetch the metadata document from
-   https://$ISSUER/.well-known/email-verification.  The request MUST
-   follow redirects to the same path but with a different subdomain of
-   the Issuer.
-
-   For example, https://issuer.example/.well-known/email-verification
-   may redirect to https://accounts.issuer.example/.well-known/email-
-   verification.
+   https://$ISSUER/.well-known/email-verification.
 
    The metadata document is JSON containing the following properties:
 
@@ -449,9 +494,6 @@ Table of Contents
    *  _private_email_supported_ - OPTIONAL.  Boolean indicating whether
       the issuer supports generating private email addresses.  Defaults
       to false.
-
-   |  *Open Question*: Should URL properties be required to include the
-   |  issuer domain as the root of their hostname?
 
    Following is an example .well-known/email-verification file:
 
@@ -1372,16 +1414,62 @@ Table of Contents
    4.  *Simpler Key Distribution*: The Signature-Key header provides a
        standardized way to distribute keys inline with the request
 
-13.  References
+13.  Implementation Status
 
-13.1.  Normative References
+   _Note: This section is to be removed before publishing as an RFC._
+
+   This section records the status of known implementations of the
+   protocol defined by this specification at the time of posting of this
+   Internet-Draft, and is based on a proposal described in [RFC7942].
+   The description of implementations in this section is intended to
+   assist the IETF in its decision processes in progressing drafts to
+   RFCs.
+
+   The following implementations are known:
+
+   *  *Hellō* — hello.coop (https://hello.coop).  Organization: Hellō.
+      Role: Issuer.  Coverage: EVT issuance endpoint, issuer discovery
+      via DNS TXT, JWKS endpoint.  Level of maturity: exploratory.
+
+   *  *GMail* — gmail.com (https://gmail.com).  Organization: Google.
+      Role: Issuer.  Coverage: EVT issuance endpoint, issuer discovery
+      via DNS TXT, JWKS endpoint.  Level of maturity: origin trial.
+
+   *  *Chrome* — Organization: Google.  Role: Browser.  An origin trial
+      is available at https://developer.chrome.com/
+      origintrials/#/view_trial/10696049115004929
+      (https://developer.chrome.com/
+      origintrials/#/view_trial/10696049115004929).
+
+   *  *Edge* — Organization: Microsoft.  Role: Browser.  An origin trial
+      is available at https://developer.microsoft.com/en-us/microsoft-
+      edge/origin-trials/trials/683027d2-a798-460f-9b35-03a95002d9af
+      (https://developer.microsoft.com/en-us/microsoft-edge/origin-
+      trials/trials/683027d2-a798-460f-9b35-03a95002d9af).
+
+14.  Document History
+
+   _Note: This section is to be removed before publishing as an RFC._
+
+   *  draft-hardt-email-verification-01
+
+      -  Updated Implementation Status: completed GMail issuer entry,
+         added Chrome and Edge origin trials.
+
+   *  draft-hardt-email-verification-00
+
+      -  Initial draft.
+
+15.  References
+
+15.1.  Normative References
 
    [I-D.hardt-httpbis-signature-key]
-              Hardt, D. and T. Meunier, "HTTP Signature-Key Header",
-              Work in Progress, Internet-Draft, draft-hardt-httpbis-
-              signature-key-01, 8 January 2026,
+              Hardt, D. and T. Meunier, "HTTP Signature Keys", Work in
+              Progress, Internet-Draft, draft-hardt-httpbis-signature-
+              key-06, 2 July 2026,
               <https://datatracker.ietf.org/doc/html/draft-hardt-
-              httpbis-signature-key-01>.
+              httpbis-signature-key-06>.
 
    [I-D.ietf-oauth-selective-disclosure-jwt]
               Fett, D., Yasuda, K., and B. Campbell, "Selective
@@ -1394,17 +1482,26 @@ Table of Contents
               Message Signatures", RFC 9421, DOI 10.17487/RFC9421,
               February 2024, <https://www.rfc-editor.org/info/rfc9421>.
 
-13.2.  Informative References
+15.2.  Informative References
 
    [EVP-Browser]
-              W3C, "Email Verification Protocol Browser API", 2025,
-              <https://github.com/WICG/email-verification-protocol>.
+              WICG, "Email Verification API", 2025,
+              <https://wicg.github.io/email-verification/>.
+
+   [LightweightFedCM]
+              FedID CG, "Lightweight FedCM", 2025,
+              <https://github.com/fedidcg/LightweightFedCM>.
 
    [RFC6973]  Cooper, A., Tschofenig, H., Aboba, B., Peterson, J.,
               Morris, J., Hansen, M., and R. Smith, "Privacy
               Considerations for Internet Protocols", RFC 6973,
               DOI 10.17487/RFC6973, July 2013,
               <https://www.rfc-editor.org/info/rfc6973>.
+
+   [RFC7942]  Sheffer, Y. and A. Farrel, "Improving Awareness of Running
+              Code: The Implementation Status Section", BCP 205,
+              RFC 7942, DOI 10.17487/RFC7942, July 2016,
+              <https://www.rfc-editor.org/info/rfc7942>.
 
    [WebAuthn] Jones, M., Kumar, A., and E. Lundberg, "Web
               Authentication: An API for accessing Public Key
