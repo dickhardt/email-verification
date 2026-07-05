@@ -12,7 +12,7 @@ name = "Internet-Draft"
 value = "draft-hardt-email-verification-latest"
 stream = "IETF"
 
-date = 2026-01-06T00:00:00Z
+date = 2026-07-04T00:00:00Z
 
 [[author]]
 initials = "D."
@@ -1038,9 +1038,18 @@ The following implementations are known:
 
 - **Hellō** — [hello.coop](https://hello.coop). Organization: Hellō. Role: Issuer. Coverage: EVT issuance endpoint, issuer discovery via DNS TXT, JWKS endpoint. Level of maturity: exploratory.
 
+- **GMail** — [gmail.com](https://gmail.com). Organization: Google. Role: Issuer. Coverage: EVT issuance endpoint, issuer discovery via DNS TXT, JWKS endpoint. Level of maturity: origin trial.
+
+- **Chrome** — Organization: Google. Role: Browser. An origin trial is available at <https://developer.chrome.com/origintrials/#/view_trial/10696049115004929>.
+
+- **Edge** — Organization: Microsoft. Role: Browser. An origin trial is available at <https://developer.microsoft.com/en-us/microsoft-edge/origin-trials/trials/683027d2-a798-460f-9b35-03a95002d9af>.
+
 # Document History
 
 *Note: This section is to be removed before publishing as an RFC.*
+
+- draft-hardt-email-verification-01
+  - Updated Implementation Status: completed GMail issuer entry, added Chrome and Edge origin trials.
 
 - draft-hardt-email-verification-00
   - Initial draft.
