@@ -1,0 +1,116 @@
+{
+  "magic": "E!vIA5L86J2I",
+  "timestamp": "2026-07-05T01:12:08.054510+00:00",
+  "repo": "dickhardt/email-verification",
+  "labels": [
+    {
+      "name": "bug",
+      "description": "Something isn't working",
+      "color": "d73a4a"
+    },
+    {
+      "name": "documentation",
+      "description": "Improvements or additions to documentation",
+      "color": "0075ca"
+    },
+    {
+      "name": "duplicate",
+      "description": "This issue or pull request already exists",
+      "color": "cfd3d7"
+    },
+    {
+      "name": "enhancement",
+      "description": "New feature or request",
+      "color": "a2eeef"
+    },
+    {
+      "name": "help wanted",
+      "description": "Extra attention is needed",
+      "color": "008672"
+    },
+    {
+      "name": "good first issue",
+      "description": "Good for newcomers",
+      "color": "7057ff"
+    },
+    {
+      "name": "invalid",
+      "description": "This doesn't seem right",
+      "color": "e4e669"
+    },
+    {
+      "name": "question",
+      "description": "Further information is requested",
+      "color": "d876e3"
+    },
+    {
+      "name": "wontfix",
+      "description": "This will not be worked on",
+      "color": "ffffff"
+    }
+  ],
+  "issues": [
+    {
+      "number": 2,
+      "id": "I_kwDOQ071b88AAAABGt8gbQ",
+      "title": "Spec is unclear on what a \"syntactically valid email address\" is",
+      "url": "https://github.com/dickhardt/email-verification/issues/2",
+      "state": "OPEN",
+      "author": "cbiesinger",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "https://www.ietf.org/archive/id/draft-hardt-email-verification-00.html#section-4.2-6.2\n> Verifying the email field contains a syntactically valid email address\n\nIt is not clear how this spec defines \"syntactically valid email address\".",
+      "createdAt": "2026-06-25T16:51:29Z",
+      "updatedAt": "2026-06-25T16:51:29Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 3,
+      "id": "I_kwDOQ071b88AAAABGt99Jw",
+      "title": "Requested email is not part of the signature",
+      "url": "https://github.com/dickhardt/email-verification/issues/3",
+      "state": "OPEN",
+      "author": "cbiesinger",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "https://www.ietf.org/archive/id/draft-hardt-email-verification-00.html#name-signature-input-header\n\n> The covered components MUST include @method, @authority, @path, and signature-key. The cookie component MUST be included when the Cookie header is present, and MUST be omitted when it is not (per [[RFC9421](https://www.ietf.org/archive/id/draft-hardt-email-verification-00.html#RFC9421)] Section 2.5). The created parameter MUST be included.\n\nThis does not include `Content-Digest` or any other way of including the email in the signature. This seems unintentional?\n\ncc @yi-gu @samuelgoto\n",
+      "createdAt": "2026-06-25T16:54:54Z",
+      "updatedAt": "2026-06-25T16:54:54Z",
+      "closedAt": null,
+      "comments": []
+    }
+  ],
+  "pulls": [
+    {
+      "number": 1,
+      "id": "PR_kwDOQ071b87mHSXE",
+      "title": "chore: bump GitHub Actions to Node-24-compatible majors",
+      "url": "https://github.com/dickhardt/email-verification/pull/1",
+      "state": "MERGED",
+      "author": "dickhardt",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "## Why\nGitHub forces JS actions to Node 24 on 2026-06-16 and removes Node 20 on 2026-09-16. This repo's workflows pinned GitHub-maintained actions on Node-20 (or older) majors.\n\n## Changes\n- `actions/checkout` \u2192 **v6**\n- `actions/cache` \u2192 **v5**\n- `actions/upload-artifact` \u2192 **v7**\n- Added `.github/**` to `ghpages.yml` paths-ignore (push & pull_request) so CI-config-only changes don't rebuild/republish the editor's copy \u2014 matches the `openid/connect-*` repos and makes this branch deploy-safe.\n\n`martinthomson/i-d-template@v1` (Docker action) left as-is. `upload-artifact` bump reviewed: each workflow has a single upload per run with a unique/default name, no matrix or merge reliance \u2014 safe. Remaining `actionlint` notes (deprecated `set-output`) are pre-existing and out of scope.\n\n## Validation\n`actionlint` clean on bumped lines. `publish.yml` (tag `draft-*`), `archive.yml` (schedule/dispatch), `update.yml` (dispatch) don't deploy on a branch push; `ghpages.yml` now path-ignores `.github/**`.\n\n\ud83e\udd16 Generated with [Claude Code](https://claude.com/claude-code)\n",
+      "createdAt": "2026-06-13T18:17:53Z",
+      "updatedAt": "2026-06-16T16:56:18Z",
+      "baseRepository": "dickhardt/email-verification",
+      "baseRefName": "main",
+      "baseRefOid": "2a9bab0f4ce17c8040e95aba3ccaaad090af1fd9",
+      "headRepository": "dickhardt/email-verification",
+      "headRefName": "chore/actions-node24",
+      "headRefOid": "5b2aa252f13b5e5570803d32297767a303c1cebc",
+      "closedAt": "2026-06-16T16:56:18Z",
+      "mergedAt": "2026-06-16T16:56:18Z",
+      "mergedBy": "dickhardt",
+      "mergeCommit": {
+        "oid": "6d17a579532d1ce9d9d9026ee3c4d9d7cd15f227"
+      },
+      "comments": [],
+      "reviews": []
+    }
+  ]
+}
