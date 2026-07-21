@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-07-12T00:15:45.970908+00:00",
+  "timestamp": "2026-07-21T00:17:01.872370+00:00",
   "repo": "dickhardt/email-verification",
   "labels": [
     {
@@ -130,6 +130,70 @@
           "updatedAt": "2026-07-10T21:07:14Z"
         }
       ]
+    },
+    {
+      "number": 5,
+      "id": "I_kwDOQ071b88AAAABJdshig",
+      "title": "Nonce and Key Binding Issues",
+      "url": "https://github.com/dickhardt/email-verification/issues/5",
+      "state": "OPEN",
+      "author": "dennisjackson",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "A comment I raised in the side-meeting: \n\nThe current draft is a bit underspecified in terms of the privacy and security properties it's trying to achieve. For example, the decision to use a browser-based key to sign the RP's nonce means that sucessful logins to a RP may not be 1:1 with requests to the issuer. \n\nConcretely, an attacker who can perform the Issuance process once and receive a valid credential for a public key they control can then respond to arbitary challenges until the credential expires. If the client were using SSO style flow this would not be possible without the Issuer noticing (it seems strange that djackson has made 100 logins to different sites in the last minute). This would be prevented if the RP's nonce were also signed by the Issuer. If there are privacy concerns with exposing this to the Issuer (e.g. identifying the RP), a blind signature might be the right solution. ",
+      "createdAt": "2026-07-20T14:47:13Z",
+      "updatedAt": "2026-07-20T14:48:19Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 6,
+      "id": "I_kwDOQ071b88AAAABJdyT8A",
+      "title": "Security Considerations around DNS Delegation",
+      "url": "https://github.com/dickhardt/email-verification/issues/6",
+      "state": "OPEN",
+      "author": "dennisjackson",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Viktor pointed out that the DNS Delegation needs to be checked by the client, but clients struggle to validate DNSSEC or rely on DoH. Spoofed DNS records may lead to credential compromise with a user's mail provider (depending on how clients authenticate). Authentication decisions should only depend on information fetched via HTTPS and never from DNS (as a rule).",
+      "createdAt": "2026-07-20T14:58:19Z",
+      "updatedAt": "2026-07-20T14:58:19Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 7,
+      "id": "I_kwDOQ071b88AAAABJeawEg",
+      "title": "Should `iss` should be a full origin?",
+      "url": "https://github.com/dickhardt/email-verification/issues/7",
+      "state": "OPEN",
+      "author": "samuelgoto",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "In this example:\n\nhttps://www.ietf.org/archive/id/draft-hardt-email-verification-00.html#name-payload\n\n```json\n{\n  \"iss\": \"issuer.example\",\n  ...\n}\n```\n\nThe browser spec currently enforces that `iss` is a full origin (meaning, contains also a scheme, `https` specifically), so it expects something like the following:\n\n```json\n{\n  \"iss\": \"https://issuer.example\",\n  ...\n}\n```\n\nI'm not sure which spec needs to change, but this is a difference between what has been implemented and what the spec says ...\n\n... Should `iss` be an origin?\n",
+      "createdAt": "2026-07-20T16:17:32Z",
+      "updatedAt": "2026-07-20T16:17:32Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 8,
+      "id": "I_kwDOQ071b88AAAABJfhVoA",
+      "title": "Don't disclose private email address usage to websites",
+      "url": "https://github.com/dickhardt/email-verification/issues/8",
+      "state": "OPEN",
+      "author": "ShivanKaul",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "As discussed in today's IETF side-meeting, `is_private_email: true` is currently required in the EVT as defined in [section 8.3](https://datatracker.ietf.org/doc/html/draft-hardt-email-verification-01#name-requirements).\n\nThis is a privacy leak. Websites (relying parties) shouldn't need to know that a user is signing up with a private email address. This would give websites an easy way to block users who use email aliases.",
+      "createdAt": "2026-07-20T18:43:18Z",
+      "updatedAt": "2026-07-20T18:43:18Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
