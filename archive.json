@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-07-21T00:17:01.872370+00:00",
+  "timestamp": "2026-07-23T00:17:07.838117+00:00",
   "repo": "dickhardt/email-verification",
   "labels": [
     {
@@ -192,6 +192,22 @@
       "body": "As discussed in today's IETF side-meeting, `is_private_email: true` is currently required in the EVT as defined in [section 8.3](https://datatracker.ietf.org/doc/html/draft-hardt-email-verification-01#name-requirements).\n\nThis is a privacy leak. Websites (relying parties) shouldn't need to know that a user is signing up with a private email address. This would give websites an easy way to block users who use email aliases.",
       "createdAt": "2026-07-20T18:43:18Z",
       "updatedAt": "2026-07-20T18:43:18Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 9,
+      "id": "I_kwDOQ071b88AAAABJxdo0A",
+      "title": "gmail email verifications don't have a kid",
+      "url": "https://github.com/dickhardt/email-verification/issues/9",
+      "state": "OPEN",
+      "author": "LeviSchuck",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Section 5.2 specifies: \n\n> Construct the header with alg, kid, and typ\n\nWhat actually gets sent is `{\"alg\":\"EdDSA\",\"typ\":\"evt+jwt\"}`, no kid claim inside\n\nNone of the keys have a kid claim: https://verifiablecredentials-pa.googleapis.com/.well-known/vc-public-jwks \n\nSection 5.3 specifies:\n\n> Verify the EVT signature using the public key identified by kid\n\nWhen there's no kid I have to verify against every key in the jwks until one works.",
+      "createdAt": "2026-07-22T16:02:01Z",
+      "updatedAt": "2026-07-22T16:02:59Z",
       "closedAt": null,
       "comments": []
     }
