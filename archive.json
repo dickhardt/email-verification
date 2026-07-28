@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-07-23T00:17:07.838117+00:00",
+  "timestamp": "2026-07-28T00:15:58.851439+00:00",
   "repo": "dickhardt/email-verification",
   "labels": [
     {
@@ -191,9 +191,17 @@
       "labels": [],
       "body": "As discussed in today's IETF side-meeting, `is_private_email: true` is currently required in the EVT as defined in [section 8.3](https://datatracker.ietf.org/doc/html/draft-hardt-email-verification-01#name-requirements).\n\nThis is a privacy leak. Websites (relying parties) shouldn't need to know that a user is signing up with a private email address. This would give websites an easy way to block users who use email aliases.",
       "createdAt": "2026-07-20T18:43:18Z",
-      "updatedAt": "2026-07-20T18:43:18Z",
+      "updatedAt": "2026-07-27T16:13:02Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "npdoty",
+          "authorAssociation": "NONE",
+          "body": "It seems likely that directed identifiers / private email addresses may still be detectable by the relying party, e.g. by looking for long, high-entropy handles, or recognizing the separate domains that some email providers will use for that functionality. I expect (and the document should note in privacy considerations) that libraries/vendors will likely exist to try to distinguish private from non-private emails.\n\nBut I agree that it doesn't seem useful to provide a boolean in the response itself, when that seems to primarily enable coercion of the user.",
+          "createdAt": "2026-07-27T16:13:02Z",
+          "updatedAt": "2026-07-27T16:13:02Z"
+        }
+      ]
     },
     {
       "number": 9,
@@ -208,6 +216,22 @@
       "body": "Section 5.2 specifies: \n\n> Construct the header with alg, kid, and typ\n\nWhat actually gets sent is `{\"alg\":\"EdDSA\",\"typ\":\"evt+jwt\"}`, no kid claim inside\n\nNone of the keys have a kid claim: https://verifiablecredentials-pa.googleapis.com/.well-known/vc-public-jwks \n\nSection 5.3 specifies:\n\n> Verify the EVT signature using the public key identified by kid\n\nWhen there's no kid I have to verify against every key in the jwks until one works.",
       "createdAt": "2026-07-22T16:02:01Z",
       "updatedAt": "2026-07-22T16:02:59Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 10,
+      "id": "I_kwDOQ071b88AAAABKW4bsw",
+      "title": "private/directed identifiers seems to be optional afterthought, should be recommended or required",
+      "url": "https://github.com/dickhardt/email-verification/issues/10",
+      "state": "OPEN",
+      "author": "npdoty",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "It seems like the only safe way that this system can be deployed is if issuers, at least primarily, provide directed identifiers rather than permanent cross-context addresses. Tracking users across contexts and selling their contact info for behavioral tracking and spam are lucrative for sites and only limited by the friction and cost involved in getting users to verify email addresses by delivering a message.\n\nIt appears that currently private or directed email addresses are optional, not included in the primary examples, and disabled by default. It seems that instead private email addresses SHOULD be used, with a fallback option for users or services that can't currently provide it and explicitly note that they don't offer that baseline protection.",
+      "createdAt": "2026-07-27T16:21:33Z",
+      "updatedAt": "2026-07-27T16:21:33Z",
       "closedAt": null,
       "comments": []
     }
