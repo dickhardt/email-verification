@@ -5,8 +5,8 @@
 TBD                                                             D. Hardt
 Internet-Draft                                                     Hellō
 Intended status: Standards Track                                 S. Goto
-Expires: 6 January 2027                                           Google
-                                                             5 July 2026
+Expires: 31 January 2027                                          Google
+                                                            30 July 2026
 
 
                       Email Verification Protocol
@@ -39,6 +39,13 @@ Discussion Venues
    https://github.com/dickhardt/email-verification
    (https://github.com/dickhardt/email-verification).
 
+   Discussion of this document takes place on the evp-discuss mailing
+   list.  Subscribe at https://mailman3.ietf.org/mailman3/lists/evp-
+   discuss.ietf.org/ (https://mailman3.ietf.org/mailman3/lists/evp-
+   discuss.ietf.org/) and view the archive at
+   https://mailarchive.ietf.org/arch/browse/evp-discuss/
+   (https://mailarchive.ietf.org/arch/browse/evp-discuss/).
+
    The browser API aspects are being developed separately by the W3C
    ([EVP-Browser]).
 
@@ -57,7 +64,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 6 January 2027.
+   This Internet-Draft will expire on 31 January 2027.
 
 Copyright Notice
 
@@ -1467,9 +1474,9 @@ Table of Contents
    [I-D.hardt-httpbis-signature-key]
               Hardt, D. and T. Meunier, "HTTP Signature Keys", Work in
               Progress, Internet-Draft, draft-hardt-httpbis-signature-
-              key-06, 2 July 2026,
+              key-07, 4 July 2026,
               <https://datatracker.ietf.org/doc/html/draft-hardt-
-              httpbis-signature-key-06>.
+              httpbis-signature-key-07>.
 
    [I-D.ietf-oauth-selective-disclosure-jwt]
               Fett, D., Yasuda, K., and B. Campbell, "Selective
