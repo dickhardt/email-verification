@@ -15,6 +15,10 @@ This document defines the Email Verification Protocol (EVP), which enables web a
 
 * [Browser API (W3C WICG)](https://github.com/WICG/email-verification-protocol) - Browser API aspects
 
+## Discussion
+
+Discussion of the Email Verification Protocol takes place on the evp-discuss mailing list ([subscribe](https://mailman3.ietf.org/mailman3/lists/evp-discuss.ietf.org/), [archive](https://mailarchive.ietf.org/arch/browse/evp-discuss/)).
+
 ## Contributing
 
 See the [guidelines for contributions](https://github.com/dickhardt/email-verification/blob/main/CONTRIBUTING.md).

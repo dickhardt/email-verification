@@ -103,6 +103,8 @@ This document covers issuer discovery, the token issuance request, the Email Ver
 
 Source for this draft and an issue tracker can be found at https://github.com/dickhardt/email-verification.
 
+Discussion of this document takes place on the evp-discuss mailing list. Subscribe at https://mailman3.ietf.org/mailman3/lists/evp-discuss.ietf.org/ and view the archive at https://mailarchive.ietf.org/arch/browse/evp-discuss/.
+
 The browser API aspects are being developed separately by the W3C ([@EVP-Browser]).
 
 {mainmatter}
