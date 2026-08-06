@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-08-02T00:17:38.820907+00:00",
+  "timestamp": "2026-08-06T00:15:28.209872+00:00",
   "repo": "dickhardt/email-verification",
   "labels": [
     {
@@ -297,6 +297,22 @@
       "body": "https://dickhardt.github.io/email-verification/draft-hardt-email-verification.html#name-token-request mentions the nonce but does not show it being used.\n\nPer https://www.rfc-editor.org/info/rfc9421/#name-minimal-signature-using-rsa I believe the nonce should be included in the signature input (and therefore in the signature base).",
       "createdAt": "2026-07-31T20:47:07Z",
       "updatedAt": "2026-07-31T20:47:07Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 13,
+      "id": "I_kwDOQ071b88AAAABLogB1g",
+      "title": "Should `email` always be the address exactly as provided?",
+      "url": "https://github.com/dickhardt/email-verification/issues/13",
+      "state": "OPEN",
+      "author": "rowan-m",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "This occurred to me when seeing that Gmail was returning `email` in the token in the form `First.Last@gmail.com` when the user had entered `first.last@gmail.com`. (https://github.com/rowan-m/rowan-fyi/issues/58) . This only got picked up because the demo was mistakenly doing a case-sensitive comparison.\n\nHowever, it occurred to me that users might provide an email address that is functionally equivalent if not exactly equal, e.g. `fir.s.t.last@provider.example` or `prefix+first.last@provider.example`.\n\nI think that if the user supplies an email address that the provider validates, the provider should return the email address explicitly as supplied and not a canonical / normalised version of it. This also feels preferable from both a privacy point of view in that no additional information about the identity is shared back with the verifying site and simpler for the verifying site as well since they don't have to consider any provider-specific rules around transforming addresses.",
+      "createdAt": "2026-08-05T22:06:51Z",
+      "updatedAt": "2026-08-05T22:06:51Z",
       "closedAt": null,
       "comments": []
     }
