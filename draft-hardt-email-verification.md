@@ -281,7 +281,7 @@ On receiving the `issuance_token`:
 Example EVT+KB (line breaks for display):
 ```
 eyJhbGciOiJFZDI1NTE5Iiwia2lkIjoiMjAyNC0wOC0xOSIsInR5cCI6ImV2dCtqd3QifQ.
-eyJpc3MiOiJpc3N1ZXIuZXhhbXBsZSIsImlhdCI6MTcyNDA4MzIwMCwiY25mIjp7...}.
+eyJpc3MiOiJodHRwczovL2lzc3Vlci5leGFtcGxlIiwiaWF0IjoxNzI0MDgzMjAw...}.
 signature~
 eyJhbGciOiJFZDI1NTE5IiwidHlwIjoia2Irand0In0.
 eyJhdWQiOiJodHRwczovL3JwLmV4YW1wbGUiLCJub25jZSI6IjI1OWM1ZWFlLTQ4...}.
@@ -311,7 +311,7 @@ Both the browser and the RP need to discover information about the issuer for a 
 
 ## DNS Delegation {#dns-delegation}
 
-The email domain delegates email verification to an issuer via a DNS TXT record. Given an email address, parse the email domain ($EMAIL_DOMAIN) and look up the `TXT` record for `_email-verification.$EMAIL_DOMAIN`. The contents of the record MUST start with `iss=` followed by the issuer identifier. There MUST be only one `TXT` record for `_email-verification.$EMAIL_DOMAIN`.
+The email domain delegates email verification to an issuer via a DNS TXT record. Given an email address, parse the email domain ($EMAIL_DOMAIN) and look up the `TXT` record for `_email-verification.$EMAIL_DOMAIN`. The contents of the record MUST start with `iss=` followed by the issuer host name. There MUST be only one `TXT` record for `_email-verification.$EMAIL_DOMAIN`.
 
 Example record:
 
@@ -319,7 +319,7 @@ Example record:
 _email-verification.email-domain.example   TXT   iss=issuer.example
 ```
 
-This record states that `email-domain.example` has delegated email verification to the issuer `issuer.example`.
+This record states that `email-domain.example` has delegated email verification to the issuer at the host `issuer.example`.
 
 If the email domain and the issuer are the same domain, then the record would be:
 
@@ -329,12 +329,21 @@ _email-verification.issuer.example   TXT   iss=issuer.example
 
 > Access to DNS records and email is often independent of website deployments. This provides assurance that an issuer is truly authorized as an insider with only access to websites on `issuer.example` could not setup an issuer that would grant them verified emails for any email at `issuer.example`.
 
+## Issuer Identifier {#issuer-identifier}
+
+The record carries a host name. The **issuer identifier** is the HTTPS origin of that host: the string `https://` followed by the host, with no port, no path, and no trailing slash. For the record above, the issuer identifier is `https://issuer.example`.
+
+The identifier is an origin rather than a bare host so that it names the same thing as the `iss` claim of [@!OpenID.Core] and the issuer of [@!RFC8414], and so that it is directly comparable to the values those specifications define. A bare host would have to be widened to an origin at every comparison, which is where mismatches arise.
+
+Every use of the issuer identity in this specification — the `iss` claim of the EVT, the `issuer` member of the metadata document, and the base of the well-known URL — is this origin. Comparisons between them are byte-for-byte on the derived string; no scheme defaulting, port normalization, or trailing-slash tolerance is applied.
+
 ## Issuer Metadata {#issuer-metadata}
 
-Once the issuer identifier is known, fetch the metadata document from `https://$ISSUER/.well-known/email-verification`.
+Once the issuer identifier is known, fetch the metadata document from `$ISSUER/.well-known/email-verification`, where `$ISSUER` is the issuer identifier defined above. For `https://issuer.example` this is `https://issuer.example/.well-known/email-verification`.
 
 The metadata document is JSON containing the following properties:
 
+- *issuer* - the issuer identifier. The value MUST be identical to the issuer identifier the document was fetched under, and a party that fetches the document MUST reject it if it is not. This is the check of [@!RFC8414], Section 3.3, and it prevents a document served at one identity from claiming another.
 - *issuance_endpoint* - the API endpoint the browser calls to obtain an EVT
 - *jwks_uri* - the URL where the issuer provides its public keys to verify the EVT
 - *signing_alg_values_supported* - OPTIONAL. JSON array containing a list of the signing algorithms (`alg` values) supported by the issuer for both HTTP Message Signatures and issued EVTs. Algorithm identifiers MUST be from the IANA "JSON Web Signature and Encryption Algorithms" registry, and MUST be fully specified per [@!RFC9864]: the polymorphic `EdDSA` identifier MUST NOT be used, and `Ed25519` or `Ed448` used instead. `none` and the symmetric MAC identifiers MUST NOT be used. For the HTTP Message Signature case these are the algorithms an issuer would state in `Accept-Signature-Alg` ([@!I-D.hardt-httpbis-signature-key]), and that document's requirements on the conveyed key apply. If omitted, `Ed25519` is the default. `Ed25519` SHOULD be included in the supported algorithms list.
@@ -345,6 +354,7 @@ Following is an example `.well-known/email-verification` file:
 
 ```json
 {
+  "issuer": "https://issuer.example",
   "issuance_endpoint": "https://accounts.issuer.example/email-verification/issuance",
   "jwks_uri": "https://accounts.issuer.example/email-verification/jwks",
   "signing_alg_values_supported": ["Ed25519", "ES256"],
@@ -500,7 +510,7 @@ Example:
 
 Required claims:
 
-- `iss`: The issuer identifier
+- `iss`: The issuer identifier, an HTTPS origin (see [Issuer Identifier](#issuer-identifier))
 - `iat`: Issued at time (seconds since epoch)
 - `cnf`: Confirmation claim containing the browser's public key in `jwk` format (for SD-JWT Key Binding compatibility). The `jwk` is the key conveyed in the `Signature-Key` header of the token request, reproduced with the same members, including its fully-specified `alg`.
 - `email`: The verified email address
@@ -513,7 +523,7 @@ Optional claims:
 Example:
 ```json
 {
-  "iss": "issuer.example",
+  "iss": "https://issuer.example",
   "iat": 1724083200,
   "cnf": {
     "jwk": {
@@ -551,7 +561,7 @@ Both the browser and RP verify the EVT. The verification steps are:
 1. Parse the EVT into header, payload, and signature components
 2. Extract and validate the `alg` and `kid` from the header. Reject an `alg` that is absent, polymorphic, `none`, or a symmetric MAC identifier.
 3. Extract and validate the `iss`, `iat`, `cnf`, `email`, and `email_verified` claims from the payload
-4. Perform [Issuer Discovery](#issuer-discovery) for the email domain to verify the `iss` claim matches the issuer identifier
+4. Perform [Issuer Discovery](#issuer-discovery) for the email domain to derive the issuer identifier, and verify the `iss` claim is byte-for-byte identical to it
 5. Fetch the issuer's public keys from the `jwks_uri` in the issuer metadata
 6. Verify the EVT signature using the public key identified by `kid`
 7. Verify `iat` is within an acceptable time window
@@ -776,9 +786,9 @@ Request to reuse a previously issued private email address:
 
 ## Issuer Flexibility
 
-The domain of the private email address does not need to match the domain of the user's actual email address. Additionally, the `iss` claim in the EVT corresponds to the issuer for the private email domain, which may differ from the issuer the browser initially contacted.
+The domain of the private email address does not need to match the domain of the user's actual email address. Additionally, the `iss` claim in the EVT is the issuer identifier for the private email domain, which may differ from the issuer the browser initially contacted.
 
-For example, a user with `user@example.com` may receive a private email address `u7x9k2m4@privaterelay.different.example`. The EVT's `iss` claim would be the issuer for `privaterelay.different.example`. The browser verifies the EVT by performing issuer discovery on the private email domain and validating the signature against that issuer's JWKS. This allows email providers to delegate private email functionality to a separate service. It also enables privacy for users with vanity domains (e.g., `me@dickhardt.example`) where the domain itself is a unique identifier that would otherwise reveal the user's identity.
+For example, a user with `user@example.com` may receive a private email address `u7x9k2m4@privaterelay.different.example`. The EVT's `iss` claim would be the issuer identifier derived for `privaterelay.different.example`. The browser verifies the EVT by performing issuer discovery on the private email domain and validating the signature against that issuer's JWKS. This allows email providers to delegate private email functionality to a separate service. It also enables privacy for users with vanity domains (e.g., `me@dickhardt.example`) where the domain itself is a unique identifier that would otherwise reveal the user's identity.
 
 ## Example EVT Payload
 
@@ -786,7 +796,7 @@ When a private email is issued, the EVT contains the private address in the `ema
 
 ```json
 {
-  "iss": "privaterelay.different.example",
+  "iss": "https://privaterelay.different.example",
   "iat": 1724083200,
   "cnf": {
     "jwk": {
@@ -1129,6 +1139,8 @@ The following implementations are known:
   - Added the `Signature-Error` response header to signature error responses, alongside this specification's existing JSON error body, and said how the two relate: the body reports `invalid_signature` in every case and the header carries which failure it was.
   - Added a Fully-Specified Algorithms subsection to Security Considerations giving the reason and naming which of the three signatures each rule reaches.
   - Defined "valid email address" as the "valid e-mail address" production of [@!WHATWG.HTML] rather than leaving the term undefined, and said why that production rather than [@!RFC5322]. Addresses issue #2.
+  - Made the issuer identifier an HTTPS origin rather than a bare host name, aligning the `iss` claim with [@!OpenID.Core] and [@!RFC8414] and with what the browser implementation already enforces. The DNS TXT record still carries a host name; the identifier is derived from it by prefixing `https://`, and every comparison is byte-for-byte on the derived string. Added an Issuer Identifier section stating the derivation once. Addresses issue #7.
+  - Added the `issuer` member to the metadata document and required a fetching party to reject a document whose `issuer` does not match the identity it was fetched under, per [@!RFC8414], Section 3.3. This is the check Signature-Key -08 added for its own discovery, applied here.
   - Made coverage of the `cookie` component optional, and forbade an issuer from rejecting a request solely because it is not covered. In some browser architectures the Cookie header is attached after the request is constructed and signed, so the value does not exist at signing time and the requirement was unimplementable. Restated the Cookie Binding security property as one an issuer may not assume, and said what is lost when it is absent. Addresses issue #11.
   - Required the `Content-Digest` header ([@!RFC9530]) on the token request and added `content-digest` to the covered components. The email address being verified is carried in the request body, which no covered component reached, so the signature attested to a request without attesting to which address it asked for. Required the issuer to recompute the digest against the received bytes rather than rely on the signature over the header alone. Addresses issue #3.
 
