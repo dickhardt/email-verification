@@ -197,13 +197,19 @@ Step                      RP Server     Browser              Issuer
 
 ## Email Discovery {#email-discovery}
 
-Before presenting the user with email address choices, the browser discovers which email accounts have active sessions with an issuer. There are two models for this discovery:
+Email discovery populates the set of addresses the browser offers the user in [Email Acquisition](#email-acquisition). It is a source of candidates for a chooser, and nothing more. It is not [Issuer Discovery](#issuer-discovery), it does not establish who is authoritative for an email domain, and a deployment may omit it entirely — a browser that offers addresses from its own store, or that takes one the user types, enters the protocol at [Email Acquisition](#email-acquisition) with no discovery step at all.
+
+An issuer may surface accounts it holds a session for by either of two models:
 
 **Push model**: The issuer proactively pushes account information to the browser using the FedCM Accounts Push mechanism ([@?LightweightFedCM]). The browser accumulates account data without making an explicit request.
 
 **Pull model**: The browser calls the issuer's accounts endpoint per the FedCM mechanism, as defined in the W3C Email Verification API ([@?EVP-Browser]). The browser fetches the issuer's FedCM well-known configuration and requests the account list from the `accounts_endpoint`.
 
-The result of email discovery is the set of email addresses available for the current user, which the browser presents to the user in [Email Acquisition](#email-acquisition).
+Both models run against issuers the browser already has a relationship with, which is why no email address is needed to reach them and no circularity with [Issuer Discovery](#issuer-discovery) arises. What they establish is that the issuer holds a session for an account, not that the issuer may verify it.
+
+Whatever the source of the address, once the user selects one the browser performs [Issuer Discovery](#issuer-discovery) on that address's domain, and the DNS delegation is what determines the issuer for it. An address surfaced by an issuer through Push or Pull is subject to that lookup on the same terms as one the user typed: an issuer's claim to hold an account for `user@example.com` gives it no authority to verify that address unless `_email-verification.example.com` delegates to it. An earlier revision of this section could be read as having the browser resolve an issuer before any address was known, which is not the case.
+
+> Note: The W3C Email Verification API ([@?EVP-Browser]) describes the ordering the other way around, with the browser suggesting addresses from its own autofill store and FedCM used to validate a selection rather than to source the suggestions. Both orderings reach the same place — issuer discovery runs on the selected address — and the two specifications will align on one description.
 
 ## Session Binding {#session-binding}
 
@@ -1153,6 +1159,7 @@ The following implementations are known:
   - Added the `Signature-Error` response header to signature error responses, alongside this specification's existing JSON error body, and said how the two relate: the body reports `invalid_signature` in every case and the header carries which failure it was.
   - Added a Fully-Specified Algorithms subsection to Security Considerations giving the reason and naming which of the three signatures each rule reaches.
   - Defined "valid email address" as the "valid e-mail address" production of [@!WHATWG.HTML] rather than leaving the term undefined, and said why that production rather than [@!RFC5322]. Addresses issue #2.
+  - Rewrote Email Discovery. It read as though the browser resolved an issuer before any email address was known, which contradicts Issuer Discovery being a DNS lookup on the selected address. Said what the section actually does — populate a chooser — that it is optional, that Push and Pull run against issuers the browser already has a relationship with so no address is needed to reach them, and that an issuer surfacing an account gains no authority to verify it without the DNS delegation. Noted the ordering difference with the W3C API. Addresses issue #4.
   - Added a DNS Delegation subsection to Security Considerations. The delegation rests on an unauthenticated TXT record and the document said nothing about it. Separated the two lookups: spoofing the browser's resolver discloses the email address but yields no token the RP will accept, since cookies and WebAuthn credentials are origin-scoped and the RP resolves the record itself; spoofing the RP's resolver is the attack that matters and is not mitigated elsewhere. Recommended DNSSEC validation by RPs and zone signing by email domain operators, and stated the residual risk. Addresses issue #6.
   - Made the issuer identifier an HTTPS origin rather than a bare host name, aligning the `iss` claim with [@!OpenID.Core] and [@!RFC8414] and with what the browser implementation already enforces. The DNS TXT record still carries a host name; the identifier is derived from it by prefixing `https://`, and every comparison is byte-for-byte on the derived string. Added an Issuer Identifier section stating the derivation once. Addresses issue #7.
   - Added the `issuer` member to the metadata document and required a fetching party to reject a document whose `issuer` does not match the identity it was fetched under, per [@!RFC8414], Section 3.3. This is the check Signature-Key -08 added for its own discovery, applied here.
