@@ -12,7 +12,7 @@ name = "Internet-Draft"
 value = "draft-hardt-email-verification-latest"
 stream = "IETF"
 
-date = 2026-07-04T00:00:00Z
+date = 2026-08-07T00:00:00Z
 
 [[author]]
 initials = "D."
@@ -208,7 +208,7 @@ Once the browser has the email address and nonce:
 
 1. The browser performs [Issuer Discovery](#issuer-discovery) for the email address to obtain the issuer's metadata, including the `issuance_endpoint`.
 
-2. The browser generates a fresh private/public key pair. The browser SHOULD select an algorithm from the issuer's `signing_alg_values_supported` array, or use "EdDSA" if not present.
+2. The browser generates a fresh private/public key pair. The browser SHOULD select an algorithm from the issuer's `signing_alg_values_supported` array, or use `Ed25519` if not present.
 
 3. The browser creates a signed request per [HTTP Message Signatures](#http-signatures) and POSTs to the `issuance_endpoint`, including the issuer's cookies. The request body is a JSON object with the following parameters:
 
@@ -225,8 +225,8 @@ Sec-Fetch-Dest: email-verification
 Signature-Input: sig=("@method" "@authority" "@path" \
     "cookie" "signature-key");created=1692345600
 Signature: sig=:MEQCIHd8Y8qYKm5e3dV8y....:
-Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; \
-    x="JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs"
+Signature-Key: sig=hwk;kty="OKP";crv="Ed25519"; \
+    x="JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs";alg="Ed25519"
 
 {"email":"user@example.com"}
 ```
@@ -248,7 +248,7 @@ HTTP/1.1 200 OK
 Content-Type: application/json
 Set-Cookie: session=...; Secure; HttpOnly; SameSite=None
 
-{"issuance_token":"eyJhbGciOiJFZERTQSIsImtpZCI6IjIwMjQtMDgtMTkiLCJ0eXAiOiJldnQrand0In0...~"}
+{"issuance_token":"eyJhbGciOiJFZDI1NTE5Iiwia2lkIjoiMjAyNC0wOC0xOSIsInR5cCI6ImV2dCtqd3QifQ...~"}
 ```
 
 The browser MUST process any `Set-Cookie` headers in the response.
@@ -267,10 +267,10 @@ On receiving the `issuance_token`:
 
 Example EVT+KB (line breaks for display):
 ```
-eyJhbGciOiJFZERTQSIsImtpZCI6IjIwMjQtMDgtMTkiLCJ0eXAiOiJldnQrand0In0.
+eyJhbGciOiJFZDI1NTE5Iiwia2lkIjoiMjAyNC0wOC0xOSIsInR5cCI6ImV2dCtqd3QifQ.
 eyJpc3MiOiJpc3N1ZXIuZXhhbXBsZSIsImlhdCI6MTcyNDA4MzIwMCwiY25mIjp7...}.
 signature~
-eyJhbGciOiJFZERTQSIsInR5cCI6ImtiK2p3dCJ9.
+eyJhbGciOiJFZDI1NTE5IiwidHlwIjoia2Irand0In0.
 eyJhdWQiOiJodHRwczovL3JwLmV4YW1wbGUiLCJub25jZSI6IjI1OWM1ZWFlLTQ4...}.
 signature
 ```
@@ -324,7 +324,7 @@ The metadata document is JSON containing the following properties:
 
 - *issuance_endpoint* - the API endpoint the browser calls to obtain an EVT
 - *jwks_uri* - the URL where the issuer provides its public keys to verify the EVT
-- *signing_alg_values_supported* - OPTIONAL. JSON array containing a list of the signing algorithms ("alg" values) supported by the issuer for both HTTP Message Signatures and issued EVTs. Algorithm identifiers MUST be from the IANA "JSON Web Signature and Encryption Algorithms" registry. If omitted, "EdDSA" is the default. "EdDSA" SHOULD be included in the supported algorithms list. The value "none" MUST NOT be used.
+- *signing_alg_values_supported* - OPTIONAL. JSON array containing a list of the signing algorithms (`alg` values) supported by the issuer for both HTTP Message Signatures and issued EVTs. Algorithm identifiers MUST be from the IANA "JSON Web Signature and Encryption Algorithms" registry, and MUST be fully specified: each identifier MUST determine the signature operation completely, including curve and hash where applicable, per Algorithm Determination in [@!I-D.hardt-httpbis-signature-key]. The polymorphic `EdDSA` identifier MUST NOT be used; use `Ed25519` or `Ed448`. The value `none`, any algorithm whose JOSE Implementation Requirement is `Prohibited`, and the symmetric MAC identifiers (`HS256`, `HS384`, `HS512`) MUST NOT be used. If omitted, `Ed25519` is the default. `Ed25519` SHOULD be included in the supported algorithms list.
 - *webauthn_supported* - OPTIONAL. Boolean indicating whether the issuer supports WebAuthn authentication as an alternative to cookies. If `true`, the issuer may return a WebAuthn challenge when cookies are not present or invalid. Defaults to `false`.
 - *private_email_supported* - OPTIONAL. Boolean indicating whether the issuer supports generating private email addresses. Defaults to `false`.
 
@@ -334,7 +334,7 @@ Following is an example `.well-known/email-verification` file:
 {
   "issuance_endpoint": "https://accounts.issuer.example/email-verification/issuance",
   "jwks_uri": "https://accounts.issuer.example/email-verification/jwks",
-  "signing_alg_values_supported": ["EdDSA", "RS256"],
+  "signing_alg_values_supported": ["Ed25519", "ES256"],
   "webauthn_supported": true,
   "private_email_supported": true
 }
@@ -343,7 +343,7 @@ Following is an example `.well-known/email-verification` file:
 
 # HTTP Message Signatures {#http-signatures}
 
-This section defines how HTTP Message Signatures ([@!RFC9421]) are used in token requests. The browser signs requests to prove possession of a key pair, and the issuer verifies these signatures.
+This section defines how HTTP Message Signatures ([@!RFC9421]) are used in token requests. The browser signs requests to prove possession of a key pair, and the issuer verifies these signatures. The browser's public key is conveyed with the `hwk` scheme of [@!I-D.hardt-httpbis-signature-key]; that document's requirements apply in full, and this section states how they are met here.
 
 ## HTTP Request Signing {#request-signing}
 
@@ -375,13 +375,19 @@ Example:
 The `Signature-Key` header uses the `hwk` scheme to convey the browser's public key:
 
 ```
-Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; \
-    x="JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs"
+Signature-Key: sig=hwk;kty="OKP";crv="Ed25519"; \
+    x="JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs";alg="Ed25519"
 ```
+
+The `alg` parameter is REQUIRED and MUST be a fully-specified algorithm identifier from the IANA "JSON Web Signature and Encryption Algorithms" registry, per Algorithm Determination in [@!I-D.hardt-httpbis-signature-key]. `Ed25519` is used above; `ES256` and `PS256` are examples of other fully-specified identifiers. The polymorphic `EdDSA` identifier MUST NOT be used, nor `none`, nor a symmetric MAC identifier.
+
+The `kid` parameter MUST NOT be present. The key is carried inline, so there is nothing for an identifier to select.
+
+The `alg` parameter of `Signature-Input` ([@!RFC9421], Section 2.3) MUST NOT be included. The algorithm is signaled by the key, per [@!RFC9421] Section 3.3.7 and [@!I-D.hardt-httpbis-signature-key].
 
 ### Signature-Input Header
 
-The covered components MUST include `@method`, `@authority`, `@path`, and `signature-key`. The `cookie` component MUST be included when the Cookie header is present, and MUST be omitted when it is not (per [@!RFC9421] Section 2.5). The `created` parameter MUST be included.
+The covered components MUST include `@method`, `@authority`, `@path`, and `signature-key`. Coverage of `signature-key` is required by [@!I-D.hardt-httpbis-signature-key]; without it an attacker can substitute the key or the scheme without invalidating the signature. The `cookie` component MUST be included when the Cookie header is present, and MUST be omitted when it is not (per [@!RFC9421] Section 2.5). The `created` parameter MUST be included.
 
 ```
 Signature-Input: sig=("@method" "@authority" "@path" \
@@ -399,8 +405,8 @@ Sec-Fetch-Dest: email-verification
 Signature-Input: sig=("@method" "@authority" "@path" \
     "cookie" "signature-key");created=1692345600
 Signature: sig=:MEQCIHd8Y8qYKm5e3dV8y....:
-Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; \
-    x="JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs"
+Signature-Key: sig=hwk;kty="OKP";crv="Ed25519"; \
+    x="JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs";alg="Ed25519"
 
 {"email":"user@example.com"}
 ```
@@ -417,12 +423,18 @@ The issuer MUST verify the request headers:
 
 The issuer MUST verify the HTTP Message Signature by:
 
-1. Parsing the `Signature-Key` header and extracting the public key from the `hwk` parameters (`kty`, `crv`, `x` for OKP keys)
-2. Parsing the `Signature-Input` header to determine the covered components
-3. Verifying that the signature covers at minimum: `@method`, `@authority`, `@path`, and `signature-key`. The signature MUST also cover `cookie` when the Cookie header is present.
-4. Reconstructing the signature base per [@!RFC9421] Section 2.5
-5. Verifying the signature in the `Signature` header using the extracted public key
-6. Verifying the `created` timestamp in `Signature-Input` is within 60 seconds of the current time
+1. Parsing the `Signature-Key` header as a Structured Field Dictionary and selecting the member whose key matches the signature label being verified. If the member names a scheme the issuer does not implement, the issuer MUST reject the request with `unsupported_scheme` and MUST NOT fail in a scheme-specific or undefined manner.
+2. Extracting the public key from the `hwk` parameters (`kty`, `crv`, `x`, and `alg` for OKP keys). The issuer MUST reject a key whose `alg` parameter is absent, or whose `alg` is a polymorphic identifier such as `EdDSA`, and MUST NOT select an algorithm by inspecting `kty` and `crv`. The issuer MUST reject a key carrying a `kid` parameter.
+3. Verifying that `kty` and, where present, `crv` are consistent with `alg`, and rejecting the key if they are not. A key with an `alg` of `Ed25519` and a `kty` of `RSA` is inconsistent, as is one with an `alg` of `ES256` and a `crv` of `P-384`.
+4. Rejecting an `alg` naming an algorithm the issuer does not support, reporting `unsupported_algorithm`. The issuer MUST reject `none`, any algorithm whose JOSE Implementation Requirement is `Prohibited`, and any symmetric algorithm, including the `oct` key type and the `HS256`, `HS384`, and `HS512` identifiers.
+5. Parsing the `Signature-Input` header to determine the covered components
+6. Verifying that the signature covers at minimum: `@method`, `@authority`, `@path`, and `signature-key`. The signature MUST also cover `cookie` when the Cookie header is present. The issuer MUST reject a request in which `signature-key` is not a covered component.
+7. Ignoring the `alg` signature parameter if present in `Signature-Input`, and not using it to select or validate the algorithm. The algorithm is the one the key carries.
+8. Reconstructing the signature base per [@!RFC9421] Section 2.5
+9. Verifying the signature in the `Signature` header using the extracted public key and the algorithm named by its `alg`
+10. Verifying the `created` timestamp in `Signature-Input` is within 60 seconds of the current time
+
+The error codes named above are those of [@!I-D.hardt-httpbis-signature-key]; see [Signature Errors](#signature-errors) for how the issuer reports them.
 
 The issuer MUST verify the request body:
 
@@ -440,14 +452,14 @@ The EVT is a JWT with the following structure:
 
 ### Header
 
-- `alg` (REQUIRED): Signing algorithm
+- `alg` (REQUIRED): Signing algorithm. MUST be a fully-specified identifier from the IANA "JSON Web Signature and Encryption Algorithms" registry. The polymorphic `EdDSA` identifier MUST NOT be used; use `Ed25519` or `Ed448`.
 - `kid` (REQUIRED): Key identifier of the key used to sign
 - `typ` (REQUIRED): Set to "evt+jwt"
 
 Example:
 ```json
 {
-  "alg": "EdDSA",
+  "alg": "Ed25519",
   "kid": "2024-08-19",
   "typ": "evt+jwt"
 }
@@ -459,7 +471,7 @@ Required claims:
 
 - `iss`: The issuer identifier
 - `iat`: Issued at time (seconds since epoch)
-- `cnf`: Confirmation claim containing the browser's public key in `jwk` format (for SD-JWT Key Binding compatibility)
+- `cnf`: Confirmation claim containing the browser's public key in `jwk` format (for SD-JWT Key Binding compatibility). The `jwk` is the key conveyed in the `Signature-Key` header of the token request, reproduced with the same members, including its fully-specified `alg`.
 - `email`: The verified email address
 - `email_verified`: Boolean, MUST be `true`
 
@@ -476,7 +488,8 @@ Example:
     "jwk": {
       "kty": "OKP",
       "crv": "Ed25519",
-      "x": "JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs"
+      "x": "JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs",
+      "alg": "Ed25519"
     }
   },
   "email": "user@example.com",
@@ -493,7 +506,7 @@ The EVT has a `~` appended to it for SD-JWT compatibility (see [SD-JWT Compatibi
 After verifying the request (see [Request Verification](#request-verification)) and authenticating the user, the issuer creates the EVT:
 
 1. Construct the header with `alg`, `kid`, and `typ`
-2. Construct the payload with `iss`, `iat`, `cnf` (containing the public key from the `Signature-Key` header), `email`, and `email_verified`
+2. Construct the payload with `iss`, `iat`, `cnf` (containing the public key from the `Signature-Key` header, including its `alg` member), `email`, and `email_verified`
 3. If a private email is requested, include `is_private_email: true` and set `email` to the private address
 4. Sign the JWT with the issuer's private key corresponding to the `kid`
 5. Append `~` to the signed JWT
@@ -505,7 +518,7 @@ After verifying the request (see [Request Verification](#request-verification)) 
 Both the browser and RP verify the EVT. The verification steps are:
 
 1. Parse the EVT into header, payload, and signature components
-2. Extract and validate the `alg` and `kid` from the header
+2. Extract and validate the `alg` and `kid` from the header. Reject an `alg` that is absent, polymorphic, `none`, or a symmetric MAC identifier.
 3. Extract and validate the `iss`, `iat`, `cnf`, `email`, and `email_verified` claims from the payload
 4. Perform [Issuer Discovery](#issuer-discovery) for the email domain to verify the `iss` claim matches the issuer identifier
 5. Fetch the issuer's public keys from the `jwks_uri` in the issuer metadata
@@ -529,13 +542,13 @@ The KB-JWT is a JWT with the following structure:
 
 ### Header
 
-- `alg` (REQUIRED): Signing algorithm (same as the browser's key pair)
+- `alg` (REQUIRED): Signing algorithm. MUST be the fully-specified identifier carried in the `alg` member of the EVT's `cnf.jwk`, which is the same key the browser used to sign the token request.
 - `typ` (REQUIRED): Set to "kb+jwt" for SD-JWT library compatibility
 
 Example:
 ```json
 {
-  "alg": "EdDSA",
+  "alg": "Ed25519",
   "typ": "kb+jwt"
 }
 ```
@@ -603,11 +616,12 @@ The RP verifies the KB-JWT by:
 1. Parse the EVT+KB by separating at the tilde
 2. Parse the KB-JWT into header, payload, and signature
 3. Extract `alg` from the header and `aud`, `nonce`, `iat`, `sd_hash` from the payload
-4. Verify `aud` matches the RP's origin
-5. Verify `nonce` matches the nonce from the RP's session
-6. Verify `iat` is within a reasonable time window
-7. Compute the SHA-256 hash of the EVT and verify it matches `sd_hash`
-8. Verify the KB-JWT signature using the public key from the EVT's `cnf.jwk` claim
+4. Verify `alg` matches the `alg` member of the EVT's `cnf.jwk`, and reject the KB-JWT if it does not
+5. Verify `aud` matches the RP's origin
+6. Verify `nonce` matches the nonce from the RP's session
+7. Verify `iat` is within a reasonable time window
+8. Compute the SHA-256 hash of the EVT and verify it matches `sd_hash`
+9. Verify the KB-JWT signature using the public key from the EVT's `cnf.jwk` claim, under the algorithm named by that key's `alg` member
 
 
 # WebAuthn Authentication {#webauthn-authentication}
@@ -656,7 +670,7 @@ Content-Type: application/json
 Sec-Fetch-Dest: email-verification
 Signature-Input: sig=("@method" "@authority" "@path" "cookie" "signature-key");created=1692345600
 Signature: sig=:...:
-Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; x="JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs"
+Signature-Key: sig=hwk;kty="OKP";crv="Ed25519";x="JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs";alg="Ed25519"
 
 {
   "email": "user@example.com",
@@ -746,7 +760,8 @@ When a private email is issued, the EVT contains the private address in the `ema
     "jwk": {
       "kty": "OKP",
       "crv": "Ed25519",
-      "x": "JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs"
+      "x": "JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs",
+      "alg": "Ed25519"
     }
   },
   "email": "u7x9k2m4@privaterelay.different.example",
@@ -781,12 +796,16 @@ When the request does not include the required `Sec-Fetch-Dest: email-verificati
 
 The `error_description` SHOULD specify that the Sec-Fetch-Dest header is missing or invalid.
 
-## Invalid or Missing HTTP Message Signature
+## Invalid or Missing HTTP Message Signature {#signature-errors}
 
-When the HTTP Message Signature is missing, malformed, or verification fails:
+When the HTTP Message Signature is missing, malformed, or verification fails, the issuer MUST return the `error` field `invalid_signature` in the JSON body, and SHOULD include the `Signature-Error` response header of [@!I-D.hardt-httpbis-signature-key] naming the specific error code. The header is the machine-readable carrier; the JSON body remains for clients that do not process it.
 
 **HTTP 400 Bad Request**
-```json
+```http
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Signature-Error: error=invalid_signature
+
 {
   "error": "invalid_signature",
   "error_description": "HTTP Message Signature verification failed"
@@ -794,11 +813,44 @@ When the HTTP Message Signature is missing, malformed, or verification fails:
 ```
 
 This includes cases where:
+
 - The `Signature`, `Signature-Input`, or `Signature-Key` headers are missing
 - The `Signature-Key` header does not use the `hwk` scheme or is malformed
-- The signature does not cover the required components
+- The `hwk` key omits `alg`, carries a polymorphic `alg`, carries a `kid`, or has a `kty` or `crv` inconsistent with its `alg`
+- The signature does not cover the required components, including `signature-key`
 - The signature verification fails using the public key from `Signature-Key`
 - The `created` timestamp is outside the acceptable time window
+
+The `Signature-Error` codes an issuer returns map to these cases as follows:
+
+| Case | `Signature-Error` code |
+|------|------------------------|
+| The selected `Signature-Key` member names a scheme other than `hwk` | `unsupported_scheme` |
+| The key's `alg` names an algorithm the issuer does not support, or is absent, polymorphic, `none`, or symmetric | `unsupported_algorithm` |
+| The key is malformed, carries a `kid`, or has a `kty` or `crv` inconsistent with its `alg` | `invalid_key` |
+| A required component is not covered, including `signature-key` and `cookie` when the Cookie header is present | `invalid_input` |
+| The `Signature`, `Signature-Input`, or `Signature-Key` header is missing, the `created` timestamp is outside the window, or the signature does not verify | `invalid_signature` |
+
+When returning `invalid_input`, the issuer SHOULD include the `required_input` member naming the components it requires:
+
+```http
+Signature-Error: error=invalid_input,
+    required_input=("@method" "@authority" "@path" "signature-key")
+```
+
+When returning `unsupported_scheme`, the issuer SHOULD include `Accept-Signature-Scheme: hwk`. When returning `unsupported_algorithm`, the issuer SHOULD include `Accept-Signature-Alg` naming the algorithms it accepts, which are the values of `signing_alg_values_supported` in its metadata:
+
+```http
+HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Signature-Error: error=unsupported_algorithm
+Accept-Signature-Alg: Ed25519, ES256
+
+{
+  "error": "invalid_signature",
+  "error_description": "Unsupported signature algorithm"
+}
+```
 
 ## Authentication Required
 
@@ -914,7 +966,7 @@ The use of HTTP Message Signatures ([@!RFC9421]) provides several security benef
 
 3. **Replay Protection**: The `created` timestamp in the `Signature-Input` header is verified to be within 60 seconds, preventing replay attacks.
 
-4. **Public Key Binding**: The browser's public key transmitted via the `Signature-Key` header with the `hwk` scheme is bound to the request signature, ensuring the issuer knows which public key to include in the EVT's `cnf` claim.
+4. **Public Key Binding**: The browser's public key transmitted via the `Signature-Key` header with the `hwk` scheme is bound to the request signature, ensuring the issuer knows which public key to include in the EVT's `cnf` claim. Because `signature-key` is a covered component, an attacker cannot substitute the key or the scheme without invalidating the signature; see Signature-Key Integrity in [@!I-D.hardt-httpbis-signature-key].
 
 ## Signature-Key hwk Scheme
 
@@ -925,6 +977,14 @@ The `hwk` (Header Web Key) scheme provides:
 2. **Pseudonymity**: The browser does not need to identify itself - the key serves as a pseudonymous identifier for the request.
 
 3. **Ephemeral Keys**: The browser generates fresh key pairs for each verification flow, limiting the correlation potential across different verification attempts.
+
+## Algorithm Determination
+
+The signature algorithm is determined by the key, not by the wire. The `alg` member of the `hwk` key is the single source of truth, and it is fully specified: it names the signature operation completely, including curve and hash where applicable. The `alg` signature parameter of `Signature-Input` is not used ([@!RFC9421], Section 3.3.7), and an issuer MUST ignore it if present.
+
+A key whose algorithm is not fully determined by its identifier invites downgrade and confused-verifier conditions, in which two verifiers disagree on the operation a signature represents. This is why the polymorphic `EdDSA` identifier, deprecated by [@!RFC9864], MUST NOT be used, and why the issuer rejects a key whose `kty` or `crv` disagrees with its `alg` rather than resolving the disagreement in favor of either.
+
+Symmetric algorithms MUST NOT be used. The `hwk` scheme distributes a public key, and the proof of possession the protocol relies on requires that the private key be held only by the browser. A shared secret handed to the issuer would let the issuer forge the signature it is checking.
 
 ## Email Existence Probing
 
@@ -1049,6 +1109,22 @@ The following implementations are known:
 # Document History
 
 *Note: This section is to be removed before publishing as an RFC.*
+
+- draft-hardt-email-verification-02
+
+  Tracked the breaking changes in draft-hardt-httpbis-signature-key-08. A token request serialized per -01 is rejected by an issuer implementing this version, and one serialized per this version is rejected by an issuer implementing -01. There is nothing to negotiate over, so both ends of a deployment move together.
+
+  - Made the `hwk` `alg` parameter REQUIRED on the `Signature-Key` header, and required it to be fully specified. Signature-Key -08 makes this the single source of truth for the algorithm; -07 forbade the parameter outright.
+  - Replaced the polymorphic `EdDSA` identifier with `Ed25519` throughout: the browser's key, the default when `signing_alg_values_supported` is absent, the EVT header, the KB-JWT header, and every example. `EdDSA` is deprecated by [@!RFC9864] and forbidden by Signature-Key -08.
+  - Required `signing_alg_values_supported` to carry fully-specified identifiers, and stated what it MUST NOT contain: `EdDSA`, `none`, any algorithm whose JOSE Implementation Requirement is `Prohibited`, and the symmetric MAC identifiers.
+  - Required the issuer to take the algorithm from the key's `alg` rather than derive it from `kty` and `crv`, and to reject a key whose `kty` or `crv` disagrees with its `alg`.
+  - Required the issuer to reject a key carrying a `kid` parameter, which Signature-Key -08 raised from SHOULD NOT to MUST NOT. The key is inline, so a `kid` selects nothing.
+  - Required the issuer to reject a request in which `signature-key` is not a covered component, matching the raise from SHOULD to MUST in Signature-Key -08. Coverage was already required of signers here; the verifier-side obligation was missing.
+  - Stated that signers MUST NOT include the `alg` signature parameter in `Signature-Input` and that issuers MUST ignore it, per [@!RFC9421], Section 3.3.7.
+  - Required the issuer to reject an unimplemented `Signature-Key` scheme with `unsupported_scheme` rather than in a scheme-specific manner, using the error code added in Signature-Key -08.
+  - Added the `Signature-Error` response header to signature error responses, with a table mapping each failure case to its error code, and had the issuer send `Accept-Signature-Scheme`, `Accept-Signature-Alg`, and `required_input` alongside `unsupported_scheme`, `unsupported_algorithm`, and `invalid_input`. The `supported_algorithms` member of `Signature-Error` was removed in Signature-Key -08 in favor of `Accept-Signature-Alg`.
+  - Carried the key's `alg` member into the EVT `cnf.jwk`, so the RP verifies the KB-JWT under a fully-specified algorithm rather than one derived from the key. Required the KB-JWT header `alg` to match it, and had the RP reject a KB-JWT where the two disagree.
+  - Added an Algorithm Determination subsection to Security Considerations giving the reason for these rules: a key whose algorithm is not fully determined by its identifier invites downgrade and confused-verifier conditions.
 
 - draft-hardt-email-verification-01
   - Updated Implementation Status: completed GMail issuer entry, added Chrome and Edge origin trials.
