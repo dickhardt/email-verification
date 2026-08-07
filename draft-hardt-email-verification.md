@@ -1002,6 +1002,20 @@ Every algorithm identifier in this protocol is fully specified: it names the sig
 
 For the browser's request-signing key, [@!I-D.hardt-httpbis-signature-key] imposes this and states how the issuer enforces it. The EVT and the KB-JWT are outside that document's scope, so this specification imposes it on them directly: on the issuer's EVT signing key (see [EVT Structure](#evt-structure)) and on the KB-JWT, whose `alg` is fixed by the `cnf.jwk` it is verified against (see [KB-JWT Structure](#kb-structure)).
 
+## DNS Delegation {#dns-delegation-security}
+
+The delegation from an email domain to an issuer is carried in an unauthenticated DNS TXT record ([DNS Delegation](#dns-delegation)). An attacker who controls what a party sees for `_email-verification.$EMAIL_DOMAIN` controls which issuer that party believes is authoritative for the domain. This section states what that yields, and to whom.
+
+Two parties resolve the record independently: the browser, to find the issuance endpoint, and the RP, to check the `iss` claim of the EVT it receives ([EVT Verification](#evt-verification)). The two lookups are not equally valuable to an attacker.
+
+**Spoofing the browser's resolver alone gains little.** The browser is directed to an attacker-controlled issuer and discloses the email address to it. It does not disclose the user's credentials: cookies are scoped to the real issuer's origin and are not sent to a different one, and a WebAuthn challenge from the attacker carries the attacker's `rpId`, so an authenticator will not produce an assertion usable at the real issuer. The attacker can mint an EVT, but its `iss` is the attacker's identifier, and the RP — resolving the record itself, over its own path — derives the real issuer identifier and rejects the token. The mismatch is what stops it, which is why [Issuer Identifier](#issuer-identifier) requires the comparison to be exact.
+
+**Spoofing the RP's resolver is the attack that matters.** An attacker who controls the RP's view of DNS for the email domain, and who runs an issuer, can present an EVT the RP accepts for any address at that domain. Nothing later in verification catches this: the token is well-formed, correctly signed, and signed by the key the RP was told to trust. This is the residual risk of the design, and it is not mitigated elsewhere in this document.
+
+The RP is better placed to address this than the browser. It is a server, resolving on its own infrastructure, and can validate DNSSEC or use a validating resolver over an authenticated channel. RPs SHOULD validate DNSSEC for `_email-verification.$EMAIL_DOMAIN` where the email domain is signed, and SHOULD resolve through a resolver they trust rather than whatever the host is configured with. Email domain operators publishing this record SHOULD sign their zone.
+
+It has been argued that an authentication decision should never depend on data fetched from DNS. The objection is sound as a general rule and this document does not dismiss it. Two things are true alongside it. The delegation is a property of an email domain, and the authoritative source for a property of an email domain is that domain's DNS — the same place SPF, DKIM, and DMARC already sit, and the same records an attacker with this capability could already forge to redirect or authenticate mail for the domain. And moving the delegation to HTTPS would require every email domain to operate a web server, which [Why DNS Delegation?](#why-dns-delegation) explains is the barrier this design set out to avoid. The exposure this creates is nonetheless real, unsigned DNS is weaker than HTTPS, and a deployment that cannot obtain DNSSEC on the email domains it accepts is accepting the risk described above.
+
 ## Email Existence Probing
 
 Any software—not just browsers—can send requests to an issuer's issuance endpoint. An attacker could attempt to use this to probe for valid email addresses:
@@ -1077,7 +1091,7 @@ The EVT uses the SD-JWT structure (specifically, the key binding capability from
 
 3. **Extensibility**: While EVP does not currently use selective disclosure, the SD-JWT structure allows future extensions without changing the token format.
 
-## Why DNS Delegation?
+## Why DNS Delegation? {#why-dns-delegation}
 
 The mail domain delegates email verification to an issuer via a DNS TXT record rather than a `.well-known` file. This choice aligns with how email infrastructure already works:
 
@@ -1139,6 +1153,7 @@ The following implementations are known:
   - Added the `Signature-Error` response header to signature error responses, alongside this specification's existing JSON error body, and said how the two relate: the body reports `invalid_signature` in every case and the header carries which failure it was.
   - Added a Fully-Specified Algorithms subsection to Security Considerations giving the reason and naming which of the three signatures each rule reaches.
   - Defined "valid email address" as the "valid e-mail address" production of [@!WHATWG.HTML] rather than leaving the term undefined, and said why that production rather than [@!RFC5322]. Addresses issue #2.
+  - Added a DNS Delegation subsection to Security Considerations. The delegation rests on an unauthenticated TXT record and the document said nothing about it. Separated the two lookups: spoofing the browser's resolver discloses the email address but yields no token the RP will accept, since cookies and WebAuthn credentials are origin-scoped and the RP resolves the record itself; spoofing the RP's resolver is the attack that matters and is not mitigated elsewhere. Recommended DNSSEC validation by RPs and zone signing by email domain operators, and stated the residual risk. Addresses issue #6.
   - Made the issuer identifier an HTTPS origin rather than a bare host name, aligning the `iss` claim with [@!OpenID.Core] and [@!RFC8414] and with what the browser implementation already enforces. The DNS TXT record still carries a host name; the identifier is derived from it by prefixing `https://`, and every comparison is byte-for-byte on the derived string. Added an Issuer Identifier section stating the derivation once. Addresses issue #7.
   - Added the `issuer` member to the metadata document and required a fetching party to reject a document whose `issuer` does not match the identity it was fetched under, per [@!RFC8414], Section 3.3. This is the check Signature-Key -08 added for its own discovery, applied here.
   - Made coverage of the `cookie` component optional, and forbade an issuer from rejecting a request solely because it is not covered. In some browser architectures the Cookie header is attached after the request is constructed and signed, so the value does not exist at signing time and the requirement was unimplementable. Restated the Cookie Binding security property as one an issuer may not assume, and said what is lost when it is absent. Addresses issue #11.
