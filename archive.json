@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-08-09T00:05:10.542407+00:00",
+  "timestamp": "2026-08-11T00:06:43.055747+00:00",
   "repo": "dickhardt/email-verification",
   "labels": [
     {
@@ -360,6 +360,38 @@
       "body": "In [Token Verification](https://www.ietf.org/archive/id/draft-hardt-email-verification-01.html#name-token-verification), specifically in [EVT Verification](https://www.ietf.org/archive/id/draft-hardt-email-verification-01.html#evt-verification), `email` is required to be present in the \"payload\":\n\n> Extract and validate the iss, iat, cnf, email, and email_verified claims from the payload\n\nThis disallows verifiers (of which there are many) to be forwards compatible with issuers that might want to issue the `email` attribute as a [SD-JWT](https://www.ietf.org/archive/id/draft-fett-oauth-selective-disclosure-jwt-02.html) selective disclosure (rather than a payload).\n\nThis is particularly problematic because it corners the protocol from ever having issuers that issue the `email` attribute as a selective disclosure, because that would require redeploying every verifier before issuers could make use of the feature.\n\nIt is unclear exactly what the use cases are for issuers to having the `email` attribute in selective disclosures (as opposed to the payload), but one of the open design alternatives that we explored was having a variation of the protocol that (a) doesn't contain `email` as an input to the [token request](https://www.ietf.org/archive/id/draft-hardt-email-verification-01.html#name-token-request) and instead (b) asks the issuer to produce \"all emails that the user is logged in to\", allowing the browser/user agent to only selectively disclose the specific email that the user selected. This variation could be used as an alternative to the current imposition that the browser makes for the issuer to expose itself as a FedCM Login Status API provider and expose an [accounts endpoint](https://w3c-fedid.github.io/FedCM/#idp-api-accounts-endpoint) to list \"all emails that the user is logged in to\".\n\nBecause there are a really large number of verifiers, whatever gets ossified first is going to be really hard to change later, so, unless there are drawbacks to having verifiers ALSO accept the `email` attribute in selective disclosures, I'd recommend changing the [EVT verification](https://www.ietf.org/archive/id/draft-hardt-email-verification-01.html#evt-verification) algorithm to allow them so that we can keep this door open if we ever need it.\n\nRelated discussion here: https://github.com/WICG/email-verification/issues/49\n",
       "createdAt": "2026-08-08T18:36:53Z",
       "updatedAt": "2026-08-08T18:39:35Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 22,
+      "id": "I_kwDOQ071b88AAAABMNeDoQ",
+      "title": "Consider renaming headers to `username-*` rather than `email-*` to represent atproto and activitypub",
+      "url": "https://github.com/dickhardt/email-verification/issues/22",
+      "state": "OPEN",
+      "author": "samuelgoto",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "I'm not entirely convinced this is necessarily a good idea, but I wanted to bring this up to make sure it doesn't fall through the cracks.\n\nIt has been noted, rightfully so, that the Email Verification Protocol has little to actually do with \"email\" per se, but can be actually (for better or for worse) only makes an assertion of \"does the current user own this specific username X on domain Y\" (rather than, for example, also make an assertion of email deliverability).\n\nIt is unclear if that's a feature or a bug, but this also just so happen to be the affordance that we need to prove ownership of ActivityPub handles (user@mastodon.com) and AtProto (@username.com).\n\nEmail Verification, I think, is a great scope to take and we should probably keep much of the API and interface email specific, but perhaps there is a way that we can have some basic infrastructure that is email-agnostic in case we want to anticipate how we would (or would not) extend this proposal to support activitypub and atproto handles.\n\nA few possible outcomes comes to my mind:\n\n1. keep the \"Email Verification\" scope but just change the headers / fields to use an email agnostic name, e.g. `.well-known/username-verification` rather than `.well-known/email-verification` (the `Sec-Fetch-Dest` and the `DNS TXT` record perhaps but maybe not the `email` attribute in the JWT?).\n2. do nothing and maintain the `email-*` naming, and use those terms for activitypub and atproto\n3. duplicate the protocol with `email-*` and `username-*` to support activitypub and atproto\n\nIt is not clear to me which option is best, but I just figured that if we do (2), we should do it deliberately rather than accidentally.",
+      "createdAt": "2026-08-10T21:11:05Z",
+      "updatedAt": "2026-08-10T21:11:05Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 23,
+      "id": "I_kwDOQ071b88AAAABMNeoDA",
+      "title": "Post Quantum algorithms?",
+      "url": "https://github.com/dickhardt/email-verification/issues/23",
+      "state": "OPEN",
+      "author": "samuelgoto",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "This came up in passing and I figured it would be useful to file to make sure it doesn't fall through the cracks.\n\nDo we have a PQ story? Can / have we picked algorithms that are PQ safe? If so, feel free to close this. If not, do we know how to go through a PQ transition? ",
+      "createdAt": "2026-08-10T21:12:29Z",
+      "updatedAt": "2026-08-10T21:12:29Z",
       "closedAt": null,
       "comments": []
     }
