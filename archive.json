@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-08-11T00:06:43.055747+00:00",
+  "timestamp": "2026-08-13T00:10:41.515245+00:00",
   "repo": "dickhardt/email-verification",
   "labels": [
     {
@@ -335,7 +335,7 @@
       "labels": [],
       "body": "This occurred to me when seeing that Gmail was returning `email` in the token in the form `First.Last@gmail.com` when the user had entered `first.last@gmail.com`. (https://github.com/rowan-m/rowan-fyi/issues/58) . This only got picked up because the demo was mistakenly doing a case-sensitive comparison.\n\nHowever, it occurred to me that users might provide an email address that is functionally equivalent if not exactly equal, e.g. `fir.s.t.last@provider.example` or `prefix+first.last@provider.example`.\n\nI think that if the user supplies an email address that the provider validates, the provider should return the email address explicitly as supplied and not a canonical / normalised version of it. This also feels preferable from both a privacy point of view in that no additional information about the identity is shared back with the verifying site and simpler for the verifying site as well since they don't have to consider any provider-specific rules around transforming addresses.",
       "createdAt": "2026-08-05T22:06:51Z",
-      "updatedAt": "2026-08-07T14:55:50Z",
+      "updatedAt": "2026-08-12T11:19:07Z",
       "closedAt": null,
       "comments": [
         {
@@ -344,6 +344,13 @@
           "body": "Agreed the spec has to say something \u2014 right now it says nothing, which is how the Gmail `First.Last@` case got as far as a demo before anyone noticed. Before writing it I want to separate the case that's clearly a bug from the one that's a real design choice, because I don't think they have the same answer.\n\n**Case 1: case folding.** `First.Last@gmail.com` for `first.last@gmail.com`. The domain is case-insensitive by RFC 5321, so an RP comparing domains case-sensitively is wrong regardless. The local part is formally case-*sensitive*, but essentially no provider treats it that way. I don't think there's much disagreement here: the spec should say how an RP compares two addresses, and probably say issuers shouldn't case-fold what the user supplied. That part I'd just fix.\n\n**Case 2: canonicalization that changes identity.** Dots and `+` tags \u2014 `fir.s.t.last@` and `prefix+first.last@` resolving to the same mailbox. This is where I'd like discussion, because \"return exactly as supplied\" has a consequence worth being explicit about:\n\nIf the `email` claim is whatever string the user typed, then **the user chooses their own identifier at each RP.** One mailbox yields unboundedly many distinct `email` values. An RP doing account lookup by email address gets a different account per variant, so the same person signs up repeatedly at the same site without either party noticing. That's a real interop cost and it lands on RPs, who can't fix it without implementing provider-specific normalization \u2014 which is exactly what you're arguing they shouldn't have to do.\n\nThe counter-argument, which I find genuinely strong: returning the canonical form means the issuer tells the RP something the user didn't, and the `First.Last` capitalization is information about the account rather than about the address. Your privacy framing is right as far as it goes.\n\nThere's also a third option nobody has raised: if the concern is that the returned address leaks more than the user offered, private email addresses already solve that completely, and better than preserving the typed form does.\n\nQuestions:\n\n1. **Should the `email` claim be a stable identifier for a mailbox, or a faithful echo of user input?** These conflict, and I'd rather the spec choose deliberately than leave it to each issuer.\n2. **If it's the stable identifier**, is a MUST for the local part being returned as the issuer holds it acceptable, given RPs then get one value per mailbox?\n3. **If it's the echo**, what do we tell RPs to do about the duplicate-account problem? \"Compare case-insensitively\" doesn't cover dots and tags.\n4. **Does the answer differ for private addresses?** Those are issuer-generated, so there's no user-supplied form to preserve and the question may not arise.\n\nMy current lean is to fix the case-comparison issue now \u2014 that's unambiguous and it's the bug you actually hit \u2014 and settle the canonicalization question separately. @rowan-m does that split work for you, or do you see case and dots as the same question?",
           "createdAt": "2026-08-07T14:55:50Z",
           "updatedAt": "2026-08-07T14:55:50Z"
+        },
+        {
+          "author": "rowan-m",
+          "authorAssociation": "NONE",
+          "body": "Yeah, case-insensitive comparison seems like an easy inclusion. @samuelgoto also raised this in #24.\n\nFor the wider question, I'm leaning towards it being left as responsibility for the IdP to return an appropriately normalised version of the email address that the RP should consider canonical.\n\nSo, if someone is running their own catch-all domain with deliberate variations for spam tracking, then they can return what they want. A larger provider may choose to return a normalised version, e.g. `fir.s.t.last@example.com` > `first.last@example.com` if they deem it better for their users.",
+          "createdAt": "2026-08-12T11:19:07Z",
+          "updatedAt": "2026-08-12T11:19:07Z"
         }
       ]
     },
@@ -359,9 +366,17 @@
       "labels": [],
       "body": "In [Token Verification](https://www.ietf.org/archive/id/draft-hardt-email-verification-01.html#name-token-verification), specifically in [EVT Verification](https://www.ietf.org/archive/id/draft-hardt-email-verification-01.html#evt-verification), `email` is required to be present in the \"payload\":\n\n> Extract and validate the iss, iat, cnf, email, and email_verified claims from the payload\n\nThis disallows verifiers (of which there are many) to be forwards compatible with issuers that might want to issue the `email` attribute as a [SD-JWT](https://www.ietf.org/archive/id/draft-fett-oauth-selective-disclosure-jwt-02.html) selective disclosure (rather than a payload).\n\nThis is particularly problematic because it corners the protocol from ever having issuers that issue the `email` attribute as a selective disclosure, because that would require redeploying every verifier before issuers could make use of the feature.\n\nIt is unclear exactly what the use cases are for issuers to having the `email` attribute in selective disclosures (as opposed to the payload), but one of the open design alternatives that we explored was having a variation of the protocol that (a) doesn't contain `email` as an input to the [token request](https://www.ietf.org/archive/id/draft-hardt-email-verification-01.html#name-token-request) and instead (b) asks the issuer to produce \"all emails that the user is logged in to\", allowing the browser/user agent to only selectively disclose the specific email that the user selected. This variation could be used as an alternative to the current imposition that the browser makes for the issuer to expose itself as a FedCM Login Status API provider and expose an [accounts endpoint](https://w3c-fedid.github.io/FedCM/#idp-api-accounts-endpoint) to list \"all emails that the user is logged in to\".\n\nBecause there are a really large number of verifiers, whatever gets ossified first is going to be really hard to change later, so, unless there are drawbacks to having verifiers ALSO accept the `email` attribute in selective disclosures, I'd recommend changing the [EVT verification](https://www.ietf.org/archive/id/draft-hardt-email-verification-01.html#evt-verification) algorithm to allow them so that we can keep this door open if we ever need it.\n\nRelated discussion here: https://github.com/WICG/email-verification/issues/49\n",
       "createdAt": "2026-08-08T18:36:53Z",
-      "updatedAt": "2026-08-08T18:39:35Z",
+      "updatedAt": "2026-08-12T16:06:26Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "dickhardt",
+          "authorAssociation": "OWNER",
+          "body": "Agree that getting verifiers to change to looking at an SD is much harder to do than including SD now. \n\nA major concern would be availability of SD libraries for verifiers -- would need some data to see support -- the current tokens are pretty easy to verify with widely available JWT libraries and a little string parsing on the `~` \n\nIf we do support SD -- then I'd prefer that to be the ONLY way to send the email rather than two different ways. ",
+          "createdAt": "2026-08-12T16:06:26Z",
+          "updatedAt": "2026-08-12T16:06:26Z"
+        }
+      ]
     },
     {
       "number": 22,
@@ -375,23 +390,55 @@
       "labels": [],
       "body": "I'm not entirely convinced this is necessarily a good idea, but I wanted to bring this up to make sure it doesn't fall through the cracks.\n\nIt has been noted, rightfully so, that the Email Verification Protocol has little to actually do with \"email\" per se, but can be actually (for better or for worse) only makes an assertion of \"does the current user own this specific username X on domain Y\" (rather than, for example, also make an assertion of email deliverability).\n\nIt is unclear if that's a feature or a bug, but this also just so happen to be the affordance that we need to prove ownership of ActivityPub handles (user@mastodon.com) and AtProto (@username.com).\n\nEmail Verification, I think, is a great scope to take and we should probably keep much of the API and interface email specific, but perhaps there is a way that we can have some basic infrastructure that is email-agnostic in case we want to anticipate how we would (or would not) extend this proposal to support activitypub and atproto handles.\n\nA few possible outcomes comes to my mind:\n\n1. keep the \"Email Verification\" scope but just change the headers / fields to use an email agnostic name, e.g. `.well-known/username-verification` rather than `.well-known/email-verification` (the `Sec-Fetch-Dest` and the `DNS TXT` record perhaps but maybe not the `email` attribute in the JWT?).\n2. do nothing and maintain the `email-*` naming, and use those terms for activitypub and atproto\n3. duplicate the protocol with `email-*` and `username-*` to support activitypub and atproto\n\nIt is not clear to me which option is best, but I just figured that if we do (2), we should do it deliberately rather than accidentally.",
       "createdAt": "2026-08-10T21:11:05Z",
-      "updatedAt": "2026-08-10T21:11:05Z",
+      "updatedAt": "2026-08-12T16:09:39Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "dickhardt",
+          "authorAssociation": "OWNER",
+          "body": "I think it is better developer ergonomics to be consistent and use the same name everywhere. \n\nWe call the mobile devices in our pockets a phone -- but 99% of the use is not making phone calls. \n\nThe core use case is replacing email verification -- so more people will understand what it does with that name.\n\nI do think that some signalling if there is deliverability could be useful. ",
+          "createdAt": "2026-08-12T16:09:39Z",
+          "updatedAt": "2026-08-12T16:09:39Z"
+        }
+      ]
     },
     {
       "number": 23,
       "id": "I_kwDOQ071b88AAAABMNeoDA",
       "title": "Post Quantum algorithms?",
       "url": "https://github.com/dickhardt/email-verification/issues/23",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "samuelgoto",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "This came up in passing and I figured it would be useful to file to make sure it doesn't fall through the cracks.\n\nDo we have a PQ story? Can / have we picked algorithms that are PQ safe? If so, feel free to close this. If not, do we know how to go through a PQ transition? ",
       "createdAt": "2026-08-10T21:12:29Z",
-      "updatedAt": "2026-08-10T21:12:29Z",
+      "updatedAt": "2026-08-12T16:11:49Z",
+      "closedAt": "2026-08-12T16:11:49Z",
+      "comments": [
+        {
+          "author": "dickhardt",
+          "authorAssociation": "OWNER",
+          "body": "PQ algs are  in https://www.iana.org/assignments/jose#web-signature-encryption-algorithms\n\nWe just list the ones supported in the metadata -- alg agility is designed in. Closing unless someone knows otherwise.",
+          "createdAt": "2026-08-12T16:11:49Z",
+          "updatedAt": "2026-08-12T16:11:49Z"
+        }
+      ]
+    },
+    {
+      "number": 24,
+      "id": "I_kwDOQ071b88AAAABMV6s0Q",
+      "title": "Be explicit about case insensitive email matching",
+      "url": "https://github.com/dickhardt/email-verification/issues/24",
+      "state": "OPEN",
+      "author": "samuelgoto",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "In section https://www.ietf.org/archive/id/draft-hardt-email-verification-01.html#section-5.3-4.1, where it says:\n\n> The email claim matches the email address being verified\n\nWe should go over explicitly the type of matching that we are making, which, specifically, ignores case sensitivity, so that verifiers don't reject emails that the browser otherwise accepts.",
+      "createdAt": "2026-08-11T18:17:14Z",
+      "updatedAt": "2026-08-11T18:17:14Z",
       "closedAt": null,
       "comments": []
     }
