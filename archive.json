@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-08-13T00:10:41.515245+00:00",
+  "timestamp": "2026-08-16T00:02:20.237421+00:00",
   "repo": "dickhardt/email-verification",
   "labels": [
     {
@@ -366,7 +366,7 @@
       "labels": [],
       "body": "In [Token Verification](https://www.ietf.org/archive/id/draft-hardt-email-verification-01.html#name-token-verification), specifically in [EVT Verification](https://www.ietf.org/archive/id/draft-hardt-email-verification-01.html#evt-verification), `email` is required to be present in the \"payload\":\n\n> Extract and validate the iss, iat, cnf, email, and email_verified claims from the payload\n\nThis disallows verifiers (of which there are many) to be forwards compatible with issuers that might want to issue the `email` attribute as a [SD-JWT](https://www.ietf.org/archive/id/draft-fett-oauth-selective-disclosure-jwt-02.html) selective disclosure (rather than a payload).\n\nThis is particularly problematic because it corners the protocol from ever having issuers that issue the `email` attribute as a selective disclosure, because that would require redeploying every verifier before issuers could make use of the feature.\n\nIt is unclear exactly what the use cases are for issuers to having the `email` attribute in selective disclosures (as opposed to the payload), but one of the open design alternatives that we explored was having a variation of the protocol that (a) doesn't contain `email` as an input to the [token request](https://www.ietf.org/archive/id/draft-hardt-email-verification-01.html#name-token-request) and instead (b) asks the issuer to produce \"all emails that the user is logged in to\", allowing the browser/user agent to only selectively disclose the specific email that the user selected. This variation could be used as an alternative to the current imposition that the browser makes for the issuer to expose itself as a FedCM Login Status API provider and expose an [accounts endpoint](https://w3c-fedid.github.io/FedCM/#idp-api-accounts-endpoint) to list \"all emails that the user is logged in to\".\n\nBecause there are a really large number of verifiers, whatever gets ossified first is going to be really hard to change later, so, unless there are drawbacks to having verifiers ALSO accept the `email` attribute in selective disclosures, I'd recommend changing the [EVT verification](https://www.ietf.org/archive/id/draft-hardt-email-verification-01.html#evt-verification) algorithm to allow them so that we can keep this door open if we ever need it.\n\nRelated discussion here: https://github.com/WICG/email-verification/issues/49\n",
       "createdAt": "2026-08-08T18:36:53Z",
-      "updatedAt": "2026-08-12T16:06:26Z",
+      "updatedAt": "2026-08-14T13:50:26Z",
       "closedAt": null,
       "comments": [
         {
@@ -375,6 +375,13 @@
           "body": "Agree that getting verifiers to change to looking at an SD is much harder to do than including SD now. \n\nA major concern would be availability of SD libraries for verifiers -- would need some data to see support -- the current tokens are pretty easy to verify with widely available JWT libraries and a little string parsing on the `~` \n\nIf we do support SD -- then I'd prefer that to be the ONLY way to send the email rather than two different ways. ",
           "createdAt": "2026-08-12T16:06:26Z",
           "updatedAt": "2026-08-12T16:06:26Z"
+        },
+        {
+          "author": "samuelgoto",
+          "authorAssociation": "NONE",
+          "body": "Supporting only in SD would be a backwards incompatible change but I think would be worth doing so that we can decouple the token from the email (eg if one wants to use this for handles rather than email).",
+          "createdAt": "2026-08-14T13:50:26Z",
+          "updatedAt": "2026-08-14T13:50:26Z"
         }
       ]
     },
@@ -383,15 +390,15 @@
       "id": "I_kwDOQ071b88AAAABMNeDoQ",
       "title": "Consider renaming headers to `username-*` rather than `email-*` to represent atproto and activitypub",
       "url": "https://github.com/dickhardt/email-verification/issues/22",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "samuelgoto",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "I'm not entirely convinced this is necessarily a good idea, but I wanted to bring this up to make sure it doesn't fall through the cracks.\n\nIt has been noted, rightfully so, that the Email Verification Protocol has little to actually do with \"email\" per se, but can be actually (for better or for worse) only makes an assertion of \"does the current user own this specific username X on domain Y\" (rather than, for example, also make an assertion of email deliverability).\n\nIt is unclear if that's a feature or a bug, but this also just so happen to be the affordance that we need to prove ownership of ActivityPub handles (user@mastodon.com) and AtProto (@username.com).\n\nEmail Verification, I think, is a great scope to take and we should probably keep much of the API and interface email specific, but perhaps there is a way that we can have some basic infrastructure that is email-agnostic in case we want to anticipate how we would (or would not) extend this proposal to support activitypub and atproto handles.\n\nA few possible outcomes comes to my mind:\n\n1. keep the \"Email Verification\" scope but just change the headers / fields to use an email agnostic name, e.g. `.well-known/username-verification` rather than `.well-known/email-verification` (the `Sec-Fetch-Dest` and the `DNS TXT` record perhaps but maybe not the `email` attribute in the JWT?).\n2. do nothing and maintain the `email-*` naming, and use those terms for activitypub and atproto\n3. duplicate the protocol with `email-*` and `username-*` to support activitypub and atproto\n\nIt is not clear to me which option is best, but I just figured that if we do (2), we should do it deliberately rather than accidentally.",
       "createdAt": "2026-08-10T21:11:05Z",
-      "updatedAt": "2026-08-12T16:09:39Z",
-      "closedAt": null,
+      "updatedAt": "2026-08-15T14:58:09Z",
+      "closedAt": "2026-08-15T14:58:08Z",
       "comments": [
         {
           "author": "dickhardt",
@@ -399,6 +406,13 @@
           "body": "I think it is better developer ergonomics to be consistent and use the same name everywhere. \n\nWe call the mobile devices in our pockets a phone -- but 99% of the use is not making phone calls. \n\nThe core use case is replacing email verification -- so more people will understand what it does with that name.\n\nI do think that some signalling if there is deliverability could be useful. ",
           "createdAt": "2026-08-12T16:09:39Z",
           "updatedAt": "2026-08-12T16:09:39Z"
+        },
+        {
+          "author": "samuelgoto",
+          "authorAssociation": "NONE",
+          "body": "I think this is a reasonable resolution. Closing.\n\n> I do think that some signalling if there is deliverability could be useful.\n\nI think this is a very different issue, so closing this one and kicking another one to capture this.",
+          "createdAt": "2026-08-15T14:58:08Z",
+          "updatedAt": "2026-08-15T14:58:08Z"
         }
       ]
     },
@@ -439,6 +453,22 @@
       "body": "In section https://www.ietf.org/archive/id/draft-hardt-email-verification-01.html#section-5.3-4.1, where it says:\n\n> The email claim matches the email address being verified\n\nWe should go over explicitly the type of matching that we are making, which, specifically, ignores case sensitivity, so that verifiers don't reject emails that the browser otherwise accepts.",
       "createdAt": "2026-08-11T18:17:14Z",
       "updatedAt": "2026-08-11T18:17:14Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 25,
+      "id": "I_kwDOQ071b88AAAABM45OqA",
+      "title": "Allow issuers to assert the deliverability of the email",
+      "url": "https://github.com/dickhardt/email-verification/issues/25",
+      "state": "OPEN",
+      "author": "samuelgoto",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Currently, `email_verified` allows issuers to assert that the user owns the email, but not whether the email is in a deliverable state, for example, whether the user's inbox is full or not (there are probably a lot more conditions for deliverability).\n\nDeliverability is particularly important for relying parties, which use email not just for login but also for re-engagement (e.g. newsletters, notifications, etc).\n\nWe should consider introducing a mechanism that allows email providers to make some sort of assertion about deliverability.",
+      "createdAt": "2026-08-15T15:01:41Z",
+      "updatedAt": "2026-08-15T15:01:41Z",
       "closedAt": null,
       "comments": []
     }
