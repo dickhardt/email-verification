@@ -197,13 +197,19 @@ Step                      RP Server     Browser              Issuer
 
 ## Email Discovery {#email-discovery}
 
-Before presenting the user with email address choices, the browser discovers which email accounts have active sessions with an issuer. There are two models for this discovery:
+Email discovery populates the set of addresses the browser offers the user in [Email Acquisition](#email-acquisition). It is a source of candidates for a chooser, and nothing more. It is not [Issuer Discovery](#issuer-discovery), it does not establish who is authoritative for an email domain, and a deployment may omit it entirely — a browser that offers addresses from its own store, or that takes one the user types, enters the protocol at [Email Acquisition](#email-acquisition) with no discovery step at all.
+
+An issuer may surface accounts it holds a session for by either of two models:
 
 **Push model**: The issuer proactively pushes account information to the browser using the FedCM Accounts Push mechanism ([@?LightweightFedCM]). The browser accumulates account data without making an explicit request.
 
 **Pull model**: The browser calls the issuer's accounts endpoint per the FedCM mechanism, as defined in the W3C Email Verification API ([@?EVP-Browser]). The browser fetches the issuer's FedCM well-known configuration and requests the account list from the `accounts_endpoint`.
 
-The result of email discovery is the set of email addresses available for the current user, which the browser presents to the user in [Email Acquisition](#email-acquisition).
+Both models run against issuers the browser already has a relationship with, which is why no email address is needed to reach them and no circularity with [Issuer Discovery](#issuer-discovery) arises. What they establish is that the issuer holds a session for an account, not that the issuer may verify it.
+
+Whatever the source of the address, once the user selects one the browser performs [Issuer Discovery](#issuer-discovery) on that address's domain, and the DNS delegation is what determines the issuer for it. An address surfaced by an issuer through Push or Pull is subject to that lookup on the same terms as one the user typed: an issuer's claim to hold an account for `user@example.com` gives it no authority to verify that address unless `_email-verification.example.com` delegates to it. An earlier revision of this section could be read as having the browser resolve an issuer before any address was known, which is not the case.
+
+> Note: The W3C Email Verification API ([@?EVP-Browser]) describes the ordering the other way around, with the browser suggesting addresses from its own autofill store and FedCM used to validate a selection rather than to source the suggestions. Both orderings reach the same place — issuer discovery runs on the selected address — and the two specifications will align on one description.
 
 ## Session Binding {#session-binding}
 
@@ -281,7 +287,7 @@ On receiving the `issuance_token`:
 Example EVT+KB (line breaks for display):
 ```
 eyJhbGciOiJFZDI1NTE5Iiwia2lkIjoiMjAyNC0wOC0xOSIsInR5cCI6ImV2dCtqd3QifQ.
-eyJpc3MiOiJpc3N1ZXIuZXhhbXBsZSIsImlhdCI6MTcyNDA4MzIwMCwiY25mIjp7...}.
+eyJpc3MiOiJodHRwczovL2lzc3Vlci5leGFtcGxlIiwiaWF0IjoxNzI0MDgzMjAw...}.
 signature~
 eyJhbGciOiJFZDI1NTE5IiwidHlwIjoia2Irand0In0.
 eyJhdWQiOiJodHRwczovL3JwLmV4YW1wbGUiLCJub25jZSI6IjI1OWM1ZWFlLTQ4...}.
@@ -311,7 +317,7 @@ Both the browser and the RP need to discover information about the issuer for a 
 
 ## DNS Delegation {#dns-delegation}
 
-The email domain delegates email verification to an issuer via a DNS TXT record. Given an email address, parse the email domain ($EMAIL_DOMAIN) and look up the `TXT` record for `_email-verification.$EMAIL_DOMAIN`. The contents of the record MUST start with `iss=` followed by the issuer identifier. There MUST be only one `TXT` record for `_email-verification.$EMAIL_DOMAIN`.
+The email domain delegates email verification to an issuer via a DNS TXT record. Given an email address, parse the email domain ($EMAIL_DOMAIN) and look up the `TXT` record for `_email-verification.$EMAIL_DOMAIN`. The contents of the record MUST start with `iss=` followed by the issuer host name. There MUST be only one `TXT` record for `_email-verification.$EMAIL_DOMAIN`.
 
 Example record:
 
@@ -319,7 +325,7 @@ Example record:
 _email-verification.email-domain.example   TXT   iss=issuer.example
 ```
 
-This record states that `email-domain.example` has delegated email verification to the issuer `issuer.example`.
+This record states that `email-domain.example` has delegated email verification to the issuer at the host `issuer.example`.
 
 If the email domain and the issuer are the same domain, then the record would be:
 
@@ -329,12 +335,21 @@ _email-verification.issuer.example   TXT   iss=issuer.example
 
 > Access to DNS records and email is often independent of website deployments. This provides assurance that an issuer is truly authorized as an insider with only access to websites on `issuer.example` could not setup an issuer that would grant them verified emails for any email at `issuer.example`.
 
+## Issuer Identifier {#issuer-identifier}
+
+The record carries a host name. The **issuer identifier** is the HTTPS origin of that host: the string `https://` followed by the host, with no port, no path, and no trailing slash. For the record above, the issuer identifier is `https://issuer.example`.
+
+The identifier is an origin rather than a bare host so that it names the same thing as the `iss` claim of [@!OpenID.Core] and the issuer of [@!RFC8414], and so that it is directly comparable to the values those specifications define. A bare host would have to be widened to an origin at every comparison, which is where mismatches arise.
+
+Every use of the issuer identity in this specification — the `iss` claim of the EVT, the `issuer` member of the metadata document, and the base of the well-known URL — is this origin. Comparisons between them are byte-for-byte on the derived string; no scheme defaulting, port normalization, or trailing-slash tolerance is applied.
+
 ## Issuer Metadata {#issuer-metadata}
 
-Once the issuer identifier is known, fetch the metadata document from `https://$ISSUER/.well-known/email-verification`.
+Once the issuer identifier is known, fetch the metadata document from `$ISSUER/.well-known/email-verification`, where `$ISSUER` is the issuer identifier defined above. For `https://issuer.example` this is `https://issuer.example/.well-known/email-verification`.
 
 The metadata document is JSON containing the following properties:
 
+- *issuer* - the issuer identifier. The value MUST be identical to the issuer identifier the document was fetched under, and a party that fetches the document MUST reject it if it is not. This is the check of [@!RFC8414], Section 3.3, and it prevents a document served at one identity from claiming another.
 - *issuance_endpoint* - the API endpoint the browser calls to obtain an EVT
 - *jwks_uri* - the URL where the issuer provides its public keys to verify the EVT
 - *signing_alg_values_supported* - OPTIONAL. JSON array containing a list of the signing algorithms (`alg` values) supported by the issuer for both HTTP Message Signatures and issued EVTs. Algorithm identifiers MUST be from the IANA "JSON Web Signature and Encryption Algorithms" registry, and MUST be fully specified per [@!RFC9864]: the polymorphic `EdDSA` identifier MUST NOT be used, and `Ed25519` or `Ed448` used instead. `none` and the symmetric MAC identifiers MUST NOT be used. For the HTTP Message Signature case these are the algorithms an issuer would state in `Accept-Signature-Alg` ([@!I-D.hardt-httpbis-signature-key]), and that document's requirements on the conveyed key apply. If omitted, `Ed25519` is the default. `Ed25519` SHOULD be included in the supported algorithms list.
@@ -345,6 +360,7 @@ Following is an example `.well-known/email-verification` file:
 
 ```json
 {
+  "issuer": "https://issuer.example",
   "issuance_endpoint": "https://accounts.issuer.example/email-verification/issuance",
   "jwks_uri": "https://accounts.issuer.example/email-verification/jwks",
   "signing_alg_values_supported": ["Ed25519", "ES256"],
@@ -500,7 +516,7 @@ Example:
 
 Required claims:
 
-- `iss`: The issuer identifier
+- `iss`: The issuer identifier, an HTTPS origin (see [Issuer Identifier](#issuer-identifier))
 - `iat`: Issued at time (seconds since epoch)
 - `cnf`: Confirmation claim containing the browser's public key in `jwk` format (for SD-JWT Key Binding compatibility). The `jwk` is the key conveyed in the `Signature-Key` header of the token request, reproduced with the same members, including its fully-specified `alg`.
 - `email`: The verified email address
@@ -513,7 +529,7 @@ Optional claims:
 Example:
 ```json
 {
-  "iss": "issuer.example",
+  "iss": "https://issuer.example",
   "iat": 1724083200,
   "cnf": {
     "jwk": {
@@ -551,7 +567,7 @@ Both the browser and RP verify the EVT. The verification steps are:
 1. Parse the EVT into header, payload, and signature components
 2. Extract and validate the `alg` and `kid` from the header. Reject an `alg` that is absent, polymorphic, `none`, or a symmetric MAC identifier.
 3. Extract and validate the `iss`, `iat`, `cnf`, `email`, and `email_verified` claims from the payload
-4. Perform [Issuer Discovery](#issuer-discovery) for the email domain to verify the `iss` claim matches the issuer identifier
+4. Perform [Issuer Discovery](#issuer-discovery) for the email domain to derive the issuer identifier, and verify the `iss` claim is byte-for-byte identical to it
 5. Fetch the issuer's public keys from the `jwks_uri` in the issuer metadata
 6. Verify the EVT signature using the public key identified by `kid`
 7. Verify `iat` is within an acceptable time window
@@ -776,9 +792,9 @@ Request to reuse a previously issued private email address:
 
 ## Issuer Flexibility
 
-The domain of the private email address does not need to match the domain of the user's actual email address. Additionally, the `iss` claim in the EVT corresponds to the issuer for the private email domain, which may differ from the issuer the browser initially contacted.
+The domain of the private email address does not need to match the domain of the user's actual email address. Additionally, the `iss` claim in the EVT is the issuer identifier for the private email domain, which may differ from the issuer the browser initially contacted.
 
-For example, a user with `user@example.com` may receive a private email address `u7x9k2m4@privaterelay.different.example`. The EVT's `iss` claim would be the issuer for `privaterelay.different.example`. The browser verifies the EVT by performing issuer discovery on the private email domain and validating the signature against that issuer's JWKS. This allows email providers to delegate private email functionality to a separate service. It also enables privacy for users with vanity domains (e.g., `me@dickhardt.example`) where the domain itself is a unique identifier that would otherwise reveal the user's identity.
+For example, a user with `user@example.com` may receive a private email address `u7x9k2m4@privaterelay.different.example`. The EVT's `iss` claim would be the issuer identifier derived for `privaterelay.different.example`. The browser verifies the EVT by performing issuer discovery on the private email domain and validating the signature against that issuer's JWKS. This allows email providers to delegate private email functionality to a separate service. It also enables privacy for users with vanity domains (e.g., `me@dickhardt.example`) where the domain itself is a unique identifier that would otherwise reveal the user's identity.
 
 ## Example EVT Payload
 
@@ -786,7 +802,7 @@ When a private email is issued, the EVT contains the private address in the `ema
 
 ```json
 {
-  "iss": "privaterelay.different.example",
+  "iss": "https://privaterelay.different.example",
   "iat": 1724083200,
   "cnf": {
     "jwk": {
@@ -992,6 +1008,20 @@ Every algorithm identifier in this protocol is fully specified: it names the sig
 
 For the browser's request-signing key, [@!I-D.hardt-httpbis-signature-key] imposes this and states how the issuer enforces it. The EVT and the KB-JWT are outside that document's scope, so this specification imposes it on them directly: on the issuer's EVT signing key (see [EVT Structure](#evt-structure)) and on the KB-JWT, whose `alg` is fixed by the `cnf.jwk` it is verified against (see [KB-JWT Structure](#kb-structure)).
 
+## DNS Delegation {#dns-delegation-security}
+
+The delegation from an email domain to an issuer is carried in an unauthenticated DNS TXT record ([DNS Delegation](#dns-delegation)). An attacker who controls what a party sees for `_email-verification.$EMAIL_DOMAIN` controls which issuer that party believes is authoritative for the domain. This section states what that yields, and to whom.
+
+Two parties resolve the record independently: the browser, to find the issuance endpoint, and the RP, to check the `iss` claim of the EVT it receives ([EVT Verification](#evt-verification)). The two lookups are not equally valuable to an attacker.
+
+**Spoofing the browser's resolver alone gains little.** The browser is directed to an attacker-controlled issuer and discloses the email address to it. It does not disclose the user's credentials: cookies are scoped to the real issuer's origin and are not sent to a different one, and a WebAuthn challenge from the attacker carries the attacker's `rpId`, so an authenticator will not produce an assertion usable at the real issuer. The attacker can mint an EVT, but its `iss` is the attacker's identifier, and the RP — resolving the record itself, over its own path — derives the real issuer identifier and rejects the token. The mismatch is what stops it, which is why [Issuer Identifier](#issuer-identifier) requires the comparison to be exact.
+
+**Spoofing the RP's resolver is the attack that matters.** An attacker who controls the RP's view of DNS for the email domain, and who runs an issuer, can present an EVT the RP accepts for any address at that domain. Nothing later in verification catches this: the token is well-formed, correctly signed, and signed by the key the RP was told to trust. This is the residual risk of the design, and it is not mitigated elsewhere in this document.
+
+The RP is better placed to address this than the browser. It is a server, resolving on its own infrastructure, and can validate DNSSEC or use a validating resolver over an authenticated channel. RPs SHOULD validate DNSSEC for `_email-verification.$EMAIL_DOMAIN` where the email domain is signed, and SHOULD resolve through a resolver they trust rather than whatever the host is configured with. Email domain operators publishing this record SHOULD sign their zone.
+
+It has been argued that an authentication decision should never depend on data fetched from DNS. The objection is sound as a general rule and this document does not dismiss it. Two things are true alongside it. The delegation is a property of an email domain, and the authoritative source for a property of an email domain is that domain's DNS — the same place SPF, DKIM, and DMARC already sit, and the same records an attacker with this capability could already forge to redirect or authenticate mail for the domain. And moving the delegation to HTTPS would require every email domain to operate a web server, which [Why DNS Delegation?](#why-dns-delegation) explains is the barrier this design set out to avoid. The exposure this creates is nonetheless real, unsigned DNS is weaker than HTTPS, and a deployment that cannot obtain DNSSEC on the email domains it accepts is accepting the risk described above.
+
 ## Email Existence Probing
 
 Any software—not just browsers—can send requests to an issuer's issuance endpoint. An attacker could attempt to use this to probe for valid email addresses:
@@ -1067,7 +1097,7 @@ The EVT uses the SD-JWT structure (specifically, the key binding capability from
 
 3. **Extensibility**: While EVP does not currently use selective disclosure, the SD-JWT structure allows future extensions without changing the token format.
 
-## Why DNS Delegation?
+## Why DNS Delegation? {#why-dns-delegation}
 
 The mail domain delegates email verification to an issuer via a DNS TXT record rather than a `.well-known` file. This choice aligns with how email infrastructure already works:
 
@@ -1129,6 +1159,10 @@ The following implementations are known:
   - Added the `Signature-Error` response header to signature error responses, alongside this specification's existing JSON error body, and said how the two relate: the body reports `invalid_signature` in every case and the header carries which failure it was.
   - Added a Fully-Specified Algorithms subsection to Security Considerations giving the reason and naming which of the three signatures each rule reaches.
   - Defined "valid email address" as the "valid e-mail address" production of [@!WHATWG.HTML] rather than leaving the term undefined, and said why that production rather than [@!RFC5322]. Addresses issue #2.
+  - Rewrote Email Discovery. It read as though the browser resolved an issuer before any email address was known, which contradicts Issuer Discovery being a DNS lookup on the selected address. Said what the section actually does — populate a chooser — that it is optional, that Push and Pull run against issuers the browser already has a relationship with so no address is needed to reach them, and that an issuer surfacing an account gains no authority to verify it without the DNS delegation. Noted the ordering difference with the W3C API. Addresses issue #4.
+  - Added a DNS Delegation subsection to Security Considerations. The delegation rests on an unauthenticated TXT record and the document said nothing about it. Separated the two lookups: spoofing the browser's resolver discloses the email address but yields no token the RP will accept, since cookies and WebAuthn credentials are origin-scoped and the RP resolves the record itself; spoofing the RP's resolver is the attack that matters and is not mitigated elsewhere. Recommended DNSSEC validation by RPs and zone signing by email domain operators, and stated the residual risk. Addresses issue #6.
+  - Made the issuer identifier an HTTPS origin rather than a bare host name, aligning the `iss` claim with [@!OpenID.Core] and [@!RFC8414] and with what the browser implementation already enforces. The DNS TXT record still carries a host name; the identifier is derived from it by prefixing `https://`, and every comparison is byte-for-byte on the derived string. Added an Issuer Identifier section stating the derivation once. Addresses issue #7.
+  - Added the `issuer` member to the metadata document and required a fetching party to reject a document whose `issuer` does not match the identity it was fetched under, per [@!RFC8414], Section 3.3. This is the check Signature-Key -08 added for its own discovery, applied here.
   - Made coverage of the `cookie` component optional, and forbade an issuer from rejecting a request solely because it is not covered. In some browser architectures the Cookie header is attached after the request is constructed and signed, so the value does not exist at signing time and the requirement was unimplementable. Restated the Cookie Binding security property as one an issuer may not assume, and said what is lost when it is absent. Addresses issue #11.
   - Required the `Content-Digest` header ([@!RFC9530]) on the token request and added `content-digest` to the covered components. The email address being verified is carried in the request body, which no covered component reached, so the signature attested to a request without attesting to which address it asked for. Required the issuer to recompute the digest against the received bytes rather than rely on the signature over the header alone. Addresses issue #3.
 
