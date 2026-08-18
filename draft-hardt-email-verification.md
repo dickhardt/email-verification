@@ -81,6 +81,17 @@ organization = "Google"
   </front>
 </reference>
 
+<reference anchor="WHATWG.HTML" target="https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address">
+  <front>
+    <title>HTML Standard</title>
+    <author>
+      <organization>WHATWG</organization>
+    </author>
+    <date year="2026"/>
+  </front>
+  <refcontent>Living Standard</refcontent>
+</reference>
+
 <reference anchor="LightweightFedCM" target="https://github.com/fedidcg/LightweightFedCM">
   <front>
     <title>Lightweight FedCM</title>
@@ -429,7 +440,15 @@ See [Signature Errors](#signature-errors) for how the issuer reports a failure a
 The issuer MUST verify the request body:
 
 1. Parsing the JSON body and extracting the `email` field
-2. Verifying the `email` field contains a syntactically valid email address
+2. Verifying the `email` field is a valid email address as defined below
+
+## Valid Email Address {#valid-email-address}
+
+An email address is valid for the purposes of this specification if it matches the "valid e-mail address" ABNF production of [@!WHATWG.HTML], Section 4.10.5.1.5. The same definition applies to the `email` field of the token request, to the `email` claim of the EVT, and to a private email address issued under [Private Email Addresses](#private-email).
+
+[@!RFC5322] defines a broader grammar than this. It admits comments, folding whitespace, and quoted local parts that no provider issues in practice and that no browser will accept from a user, and parsers that implement it fully disagree with each other at the edges. The [@!WHATWG.HTML] production is a deliberate narrowing of [@!RFC5322] chosen for exactly this problem, and it is already what the browser applies to the address before the protocol begins, since the user supplies it through a control validated against that production. Adopting it here makes the issuer's check and the browser's the same check.
+
+The production is willfully non-compliant with [@!RFC5322] and this specification adopts that non-compliance knowingly. An issuer whose users hold addresses outside it cannot verify them through this protocol.
 
 
 # Email Verification Token (EVT) {#evt}
@@ -1086,6 +1105,7 @@ The following implementations are known:
   - Required the EVT header `alg` to be fully specified. The EVT is an ordinary JWT and outside the scope of Signature-Key, so nothing else imposes this.
   - Added the `Signature-Error` response header to signature error responses, alongside this specification's existing JSON error body, and said how the two relate: the body reports `invalid_signature` in every case and the header carries which failure it was.
   - Added a Fully-Specified Algorithms subsection to Security Considerations giving the reason and naming which of the three signatures each rule reaches.
+  - Defined "valid email address" as the "valid e-mail address" production of [@!WHATWG.HTML] rather than leaving the term undefined, and said why that production rather than [@!RFC5322]. Addresses issue #2.
 
 - draft-hardt-email-verification-01
   - Updated Implementation Status: completed GMail issuer entry, added Chrome and Edge origin trials.
