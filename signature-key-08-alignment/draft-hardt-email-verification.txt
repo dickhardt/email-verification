@@ -5,8 +5,8 @@
 TBD                                                             D. Hardt
 Internet-Draft                                                     Hellō
 Intended status: Standards Track                                 S. Goto
-Expires: 8 February 2027                                          Google
-                                                           7 August 2026
+Expires: 19 February 2027                                         Google
+                                                          18 August 2026
 
 
                       Email Verification Protocol
@@ -64,7 +64,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 8 February 2027.
+   This Internet-Draft will expire on 19 February 2027.
 
 Copyright Notice
 
@@ -106,6 +106,7 @@ Table of Contents
        4.1.3.  Signature-Input Header
        4.1.4.  Example Signed Request
      4.2.  HTTP Request Verification
+     4.3.  Valid Email Address
    5.  Email Verification Token (EVT)
      5.1.  EVT Structure
        5.1.1.  Header
@@ -636,8 +637,33 @@ Table of Contents
    The issuer MUST verify the request body:
 
    1.  Parsing the JSON body and extracting the email field
-   2.  Verifying the email field contains a syntactically valid email
-       address
+   2.  Verifying the email field is a valid email address as defined
+       below
+
+4.3.  Valid Email Address
+
+   An email address is valid for the purposes of this specification if
+   it matches the "valid e-mail address" ABNF production of
+   [WHATWG.HTML], Section 4.10.5.1.5.  The same definition applies to
+   the email field of the token request, to the email claim of the EVT,
+   and to a private email address issued under Private Email Addresses
+   (#private-email).
+
+   [RFC5322] defines a broader grammar than this.  It admits comments,
+   folding whitespace, and quoted local parts that no provider issues in
+   practice and that no browser will accept from a user, and parsers
+   that implement it fully disagree with each other at the edges.  The
+   [WHATWG.HTML] production is a deliberate narrowing of [RFC5322]
+   chosen for exactly this problem, and it is already what the browser
+   applies to the address before the protocol begins, since the user
+   supplies it through a control validated against that production.
+   Adopting it here makes the issuer's check and the browser's the same
+   check.
+
+   The production is willfully non-compliant with [RFC5322] and this
+   specification adopts that non-compliance knowingly.  An issuer whose
+   users hold addresses outside it cannot verify them through this
+   protocol.
 
 5.  Email Verification Token (EVT)
 
@@ -1597,6 +1623,11 @@ Table of Contents
       Considerations giving the reason and naming which of the three
       signatures each rule reaches.
 
+   *  Defined "valid email address" as the "valid e-mail address"
+      production of [WHATWG.HTML] rather than leaving the term
+      undefined, and said why that production rather than [RFC5322].
+      Addresses issue #2.
+
    *  draft-hardt-email-verification-01
 
       -  Updated Implementation Status: completed GMail issuer entry,
@@ -1624,6 +1655,10 @@ Table of Contents
               May 2025, <https://datatracker.ietf.org/doc/html/draft-
               ietf-oauth-selective-disclosure-jwt-22>.
 
+   [RFC5322]  Resnick, P., Ed., "Internet Message Format", RFC 5322,
+              DOI 10.17487/RFC5322, October 2008,
+              <https://www.rfc-editor.org/info/rfc5322>.
+
    [RFC9421]  Backman, A., Ed., Richer, J., Ed., and M. Sporny, "HTTP
               Message Signatures", RFC 9421, DOI 10.17487/RFC9421,
               February 2024, <https://www.rfc-editor.org/info/rfc9421>.
@@ -1633,6 +1668,11 @@ Table of Contents
               Signing and Encryption (COSE)", RFC 9864,
               DOI 10.17487/RFC9864, October 2025,
               <https://www.rfc-editor.org/info/rfc9864>.
+
+   [WHATWG.HTML]
+              WHATWG, "HTML Standard", Living Standard, 2026,
+              <https://html.spec.whatwg.org/multipage/input.html#valid-
+              e-mail-address>.
 
 15.2.  Informative References
 
