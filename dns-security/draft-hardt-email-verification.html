@@ -19,14 +19,14 @@
 <meta content="draft-hardt-email-verification-latest" name="ietf.draft">
 <!-- Generator version information:
   xml2rfc 3.34.0
-    Python 3.14.5
+    Python 3.14.7
     ConfigArgParse 1.7.5
     google-i18n-address 3.1.1
     intervaltree 3.2.1
     Jinja2 3.1.6
     lxml 6.1.1
     natsort 8.4.0
-    platformdirs 4.11.0
+    platformdirs 4.11.3
     pycountry 24.6.1
     PyYAML 6.0.3
     requests 2.33.1
@@ -1050,7 +1050,7 @@ svg {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Hardt &amp; Goto</td>
-<td class="center">Expires 8 February 2027</td>
+<td class="center">Expires 19 February 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1063,12 +1063,12 @@ svg {
 <dd class="internet-draft">draft-hardt-email-verification-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-08-07" class="published">7 August 2026</time>
+<time datetime="2026-08-18" class="published">18 August 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-02-08">8 February 2027</time></dd>
+<dd class="expires"><time datetime="2027-02-19">19 February 2027</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1116,7 +1116,7 @@ svg {
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 8 February 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 19 February 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1563,10 +1563,15 @@ svg {
         <h3 id="name-email-discovery">
 <a href="#section-2.1" class="section-number selfRef">2.1. </a><a href="#name-email-discovery" class="section-name selfRef">Email Discovery</a>
         </h3>
-<p id="section-2.1-1">Before presenting the user with email address choices, the browser discovers which email accounts have active sessions with an issuer. There are two models for this discovery:<a href="#section-2.1-1" class="pilcrow">¶</a></p>
-<p id="section-2.1-2"><strong>Push model</strong>: The issuer proactively pushes account information to the browser using the FedCM Accounts Push mechanism (<span>[<a href="#LightweightFedCM" class="cite xref">LightweightFedCM</a>]</span>). The browser accumulates account data without making an explicit request.<a href="#section-2.1-2" class="pilcrow">¶</a></p>
-<p id="section-2.1-3"><strong>Pull model</strong>: The browser calls the issuer's accounts endpoint per the FedCM mechanism, as defined in the W3C Email Verification API (<span>[<a href="#EVP-Browser" class="cite xref">EVP-Browser</a>]</span>). The browser fetches the issuer's FedCM well-known configuration and requests the account list from the <code>accounts_endpoint</code>.<a href="#section-2.1-3" class="pilcrow">¶</a></p>
-<p id="section-2.1-4">The result of email discovery is the set of email addresses available for the current user, which the browser presents to the user in <a href="#email-acquisition">Email Acquisition</a>.<a href="#section-2.1-4" class="pilcrow">¶</a></p>
+<p id="section-2.1-1">Email discovery populates the set of addresses the browser offers the user in <a href="#email-acquisition">Email Acquisition</a>. It is a source of candidates for a chooser, and nothing more. It is not <a href="#issuer-discovery">Issuer Discovery</a>, it does not establish who is authoritative for an email domain, and a deployment may omit it entirely — a browser that offers addresses from its own store, or that takes one the user types, enters the protocol at <a href="#email-acquisition">Email Acquisition</a> with no discovery step at all.<a href="#section-2.1-1" class="pilcrow">¶</a></p>
+<p id="section-2.1-2">An issuer may surface accounts it holds a session for by either of two models:<a href="#section-2.1-2" class="pilcrow">¶</a></p>
+<p id="section-2.1-3"><strong>Push model</strong>: The issuer proactively pushes account information to the browser using the FedCM Accounts Push mechanism (<span>[<a href="#LightweightFedCM" class="cite xref">LightweightFedCM</a>]</span>). The browser accumulates account data without making an explicit request.<a href="#section-2.1-3" class="pilcrow">¶</a></p>
+<p id="section-2.1-4"><strong>Pull model</strong>: The browser calls the issuer's accounts endpoint per the FedCM mechanism, as defined in the W3C Email Verification API (<span>[<a href="#EVP-Browser" class="cite xref">EVP-Browser</a>]</span>). The browser fetches the issuer's FedCM well-known configuration and requests the account list from the <code>accounts_endpoint</code>.<a href="#section-2.1-4" class="pilcrow">¶</a></p>
+<p id="section-2.1-5">Both models run against issuers the browser already has a relationship with, which is why no email address is needed to reach them and no circularity with <a href="#issuer-discovery">Issuer Discovery</a> arises. What they establish is that the issuer holds a session for an account, not that the issuer may verify it.<a href="#section-2.1-5" class="pilcrow">¶</a></p>
+<p id="section-2.1-6">Whatever the source of the address, once the user selects one the browser performs <a href="#issuer-discovery">Issuer Discovery</a> on that address's domain, and the DNS delegation is what determines the issuer for it. An address surfaced by an issuer through Push or Pull is subject to that lookup on the same terms as one the user typed: an issuer's claim to hold an account for <code>user@example.com</code> gives it no authority to verify that address unless <code>_email-verification.example.com</code> delegates to it. An earlier revision of this section could be read as having the browser resolve an issuer before any address was known, which is not the case.<a href="#section-2.1-6" class="pilcrow">¶</a></p>
+<blockquote id="section-2.1-7">
+          <p id="section-2.1-7.1">Note: The W3C Email Verification API (<span>[<a href="#EVP-Browser" class="cite xref">EVP-Browser</a>]</span>) describes the ordering the other way around, with the browser suggesting addresses from its own autofill store and FedCM used to validate a selection rather than to source the suggestions. Both orderings reach the same place — issuer discovery runs on the selected address — and the two specifications will align on one description.<a href="#section-2.1-7.1" class="pilcrow">¶</a></p>
+</blockquote>
 </section>
 </div>
 <div id="session-binding">
@@ -3077,28 +3082,30 @@ Accept-Signature-Alg: Ed25519, ES256
 </li>
         <li class="normal" id="section-14-4.9">Defined "valid email address" as the "valid e-mail address" production of <span>[<a href="#WHATWG.HTML" class="cite xref">WHATWG.HTML</a>]</span> rather than leaving the term undefined, and said why that production rather than <span>[<a href="#RFC5322" class="cite xref">RFC5322</a>]</span>. Addresses issue #2.<a href="#section-14-4.9" class="pilcrow">¶</a>
 </li>
-        <li class="normal" id="section-14-4.10">Added a DNS Delegation subsection to Security Considerations. The delegation rests on an unauthenticated TXT record and the document said nothing about it. Separated the two lookups: spoofing the browser's resolver discloses the email address but yields no token the RP will accept, since cookies and WebAuthn credentials are origin-scoped and the RP resolves the record itself; spoofing the RP's resolver is the attack that matters and is not mitigated elsewhere. Recommended DNSSEC validation by RPs and zone signing by email domain operators, and stated the residual risk. Addresses issue #6.<a href="#section-14-4.10" class="pilcrow">¶</a>
+        <li class="normal" id="section-14-4.10">Rewrote Email Discovery. It read as though the browser resolved an issuer before any email address was known, which contradicts Issuer Discovery being a DNS lookup on the selected address. Said what the section actually does — populate a chooser — that it is optional, that Push and Pull run against issuers the browser already has a relationship with so no address is needed to reach them, and that an issuer surfacing an account gains no authority to verify it without the DNS delegation. Noted the ordering difference with the W3C API. Addresses issue #4.<a href="#section-14-4.10" class="pilcrow">¶</a>
 </li>
-        <li class="normal" id="section-14-4.11">Made the issuer identifier an HTTPS origin rather than a bare host name, aligning the <code>iss</code> claim with <span>[<a href="#OpenID.Core" class="cite xref">OpenID.Core</a>]</span> and <span>[<a href="#RFC8414" class="cite xref">RFC8414</a>]</span> and with what the browser implementation already enforces. The DNS TXT record still carries a host name; the identifier is derived from it by prefixing <code>https://</code>, and every comparison is byte-for-byte on the derived string. Added an Issuer Identifier section stating the derivation once. Addresses issue #7.<a href="#section-14-4.11" class="pilcrow">¶</a>
+        <li class="normal" id="section-14-4.11">Added a DNS Delegation subsection to Security Considerations. The delegation rests on an unauthenticated TXT record and the document said nothing about it. Separated the two lookups: spoofing the browser's resolver discloses the email address but yields no token the RP will accept, since cookies and WebAuthn credentials are origin-scoped and the RP resolves the record itself; spoofing the RP's resolver is the attack that matters and is not mitigated elsewhere. Recommended DNSSEC validation by RPs and zone signing by email domain operators, and stated the residual risk. Addresses issue #6.<a href="#section-14-4.11" class="pilcrow">¶</a>
 </li>
-        <li class="normal" id="section-14-4.12">Added the <code>issuer</code> member to the metadata document and required a fetching party to reject a document whose <code>issuer</code> does not match the identity it was fetched under, per <span>[<a href="#RFC8414" class="cite xref">RFC8414</a>]</span>, Section 3.3. This is the check Signature-Key -08 added for its own discovery, applied here.<a href="#section-14-4.12" class="pilcrow">¶</a>
+        <li class="normal" id="section-14-4.12">Made the issuer identifier an HTTPS origin rather than a bare host name, aligning the <code>iss</code> claim with <span>[<a href="#OpenID.Core" class="cite xref">OpenID.Core</a>]</span> and <span>[<a href="#RFC8414" class="cite xref">RFC8414</a>]</span> and with what the browser implementation already enforces. The DNS TXT record still carries a host name; the identifier is derived from it by prefixing <code>https://</code>, and every comparison is byte-for-byte on the derived string. Added an Issuer Identifier section stating the derivation once. Addresses issue #7.<a href="#section-14-4.12" class="pilcrow">¶</a>
 </li>
-        <li class="normal" id="section-14-4.13">Made coverage of the <code>cookie</code> component optional, and forbade an issuer from rejecting a request solely because it is not covered. In some browser architectures the Cookie header is attached after the request is constructed and signed, so the value does not exist at signing time and the requirement was unimplementable. Restated the Cookie Binding security property as one an issuer may not assume, and said what is lost when it is absent. Addresses issue #11.<a href="#section-14-4.13" class="pilcrow">¶</a>
+        <li class="normal" id="section-14-4.13">Added the <code>issuer</code> member to the metadata document and required a fetching party to reject a document whose <code>issuer</code> does not match the identity it was fetched under, per <span>[<a href="#RFC8414" class="cite xref">RFC8414</a>]</span>, Section 3.3. This is the check Signature-Key -08 added for its own discovery, applied here.<a href="#section-14-4.13" class="pilcrow">¶</a>
 </li>
-        <li class="normal" id="section-14-4.14">
-          <p id="section-14-4.14.1">Required the <code>Content-Digest</code> header (<span>[<a href="#RFC9530" class="cite xref">RFC9530</a>]</span>) on the token request and added <code>content-digest</code> to the covered components. The email address being verified is carried in the request body, which no covered component reached, so the signature attested to a request without attesting to which address it asked for. Required the issuer to recompute the digest against the received bytes rather than rely on the signature over the header alone. Addresses issue #3.<a href="#section-14-4.14.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-14-4.14">Made coverage of the <code>cookie</code> component optional, and forbade an issuer from rejecting a request solely because it is not covered. In some browser architectures the Cookie header is attached after the request is constructed and signed, so the value does not exist at signing time and the requirement was unimplementable. Restated the Cookie Binding security property as one an issuer may not assume, and said what is lost when it is absent. Addresses issue #11.<a href="#section-14-4.14" class="pilcrow">¶</a>
 </li>
         <li class="normal" id="section-14-4.15">
-          <p id="section-14-4.15.1">draft-hardt-email-verification-01<a href="#section-14-4.15.1" class="pilcrow">¶</a></p>
+          <p id="section-14-4.15.1">Required the <code>Content-Digest</code> header (<span>[<a href="#RFC9530" class="cite xref">RFC9530</a>]</span>) on the token request and added <code>content-digest</code> to the covered components. The email address being verified is carried in the request body, which no covered component reached, so the signature attested to a request without attesting to which address it asked for. Required the issuer to recompute the digest against the received bytes rather than rely on the signature over the header alone. Addresses issue #3.<a href="#section-14-4.15.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-14-4.16">
+          <p id="section-14-4.16.1">draft-hardt-email-verification-01<a href="#section-14-4.16.1" class="pilcrow">¶</a></p>
 <ul class="compact normal">
-<li class="compact normal" id="section-14-4.15.2.1">Updated Implementation Status: completed GMail issuer entry, added Chrome and Edge origin trials.<a href="#section-14-4.15.2.1" class="pilcrow">¶</a>
+<li class="compact normal" id="section-14-4.16.2.1">Updated Implementation Status: completed GMail issuer entry, added Chrome and Edge origin trials.<a href="#section-14-4.16.2.1" class="pilcrow">¶</a>
 </li>
           </ul>
 </li>
-        <li class="normal" id="section-14-4.16">
-          <p id="section-14-4.16.1">draft-hardt-email-verification-00<a href="#section-14-4.16.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-14-4.17">
+          <p id="section-14-4.17.1">draft-hardt-email-verification-00<a href="#section-14-4.17.1" class="pilcrow">¶</a></p>
 <ul class="compact normal">
-<li class="compact normal" id="section-14-4.16.2.1">Initial draft.<a href="#section-14-4.16.2.1" class="pilcrow">¶</a>
+<li class="compact normal" id="section-14-4.17.2.1">Initial draft.<a href="#section-14-4.17.2.1" class="pilcrow">¶</a>
 </li>
           </ul>
 </li>

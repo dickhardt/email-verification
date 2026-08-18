@@ -5,8 +5,8 @@
 TBD                                                             D. Hardt
 Internet-Draft                                                     Hellō
 Intended status: Standards Track                                 S. Goto
-Expires: 8 February 2027                                          Google
-                                                           7 August 2026
+Expires: 19 February 2027                                         Google
+                                                          18 August 2026
 
 
                       Email Verification Protocol
@@ -64,7 +64,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 8 February 2027.
+   This Internet-Draft will expire on 19 February 2027.
 
 Copyright Notice
 
@@ -297,9 +297,17 @@ Table of Contents
 
 2.1.  Email Discovery
 
-   Before presenting the user with email address choices, the browser
-   discovers which email accounts have active sessions with an issuer.
-   There are two models for this discovery:
+   Email discovery populates the set of addresses the browser offers the
+   user in Email Acquisition (#email-acquisition).  It is a source of
+   candidates for a chooser, and nothing more.  It is not Issuer
+   Discovery (#issuer-discovery), it does not establish who is
+   authoritative for an email domain, and a deployment may omit it
+   entirely — a browser that offers addresses from its own store, or
+   that takes one the user types, enters the protocol at Email
+   Acquisition (#email-acquisition) with no discovery step at all.
+
+   An issuer may surface accounts it holds a session for by either of
+   two models:
 
    *Push model*: The issuer proactively pushes account information to
    the browser using the FedCM Accounts Push mechanism
@@ -312,9 +320,30 @@ Table of Contents
    configuration and requests the account list from the
    accounts_endpoint.
 
-   The result of email discovery is the set of email addresses available
-   for the current user, which the browser presents to the user in Email
-   Acquisition (#email-acquisition).
+   Both models run against issuers the browser already has a
+   relationship with, which is why no email address is needed to reach
+   them and no circularity with Issuer Discovery (#issuer-discovery)
+   arises.  What they establish is that the issuer holds a session for
+   an account, not that the issuer may verify it.
+
+   Whatever the source of the address, once the user selects one the
+   browser performs Issuer Discovery (#issuer-discovery) on that
+   address's domain, and the DNS delegation is what determines the
+   issuer for it.  An address surfaced by an issuer through Push or Pull
+   is subject to that lookup on the same terms as one the user typed: an
+   issuer's claim to hold an account for user@example.com gives it no
+   authority to verify that address unless _email-
+   verification.example.com delegates to it.  An earlier revision of
+   this section could be read as having the browser resolve an issuer
+   before any address was known, which is not the case.
+
+   |  Note: The W3C Email Verification API ([EVP-Browser]) describes the
+   |  ordering the other way around, with the browser suggesting
+   |  addresses from its own autofill store and FedCM used to validate a
+   |  selection rather than to source the suggestions.  Both orderings
+   |  reach the same place — issuer discovery runs on the selected
+   |  address — and the two specifications will align on one
+   |  description.
 
 2.2.  Session Binding
 
@@ -1778,6 +1807,16 @@ Table of Contents
       production of [WHATWG.HTML] rather than leaving the term
       undefined, and said why that production rather than [RFC5322].
       Addresses issue #2.
+
+   *  Rewrote Email Discovery.  It read as though the browser resolved
+      an issuer before any email address was known, which contradicts
+      Issuer Discovery being a DNS lookup on the selected address.  Said
+      what the section actually does — populate a chooser — that it is
+      optional, that Push and Pull run against issuers the browser
+      already has a relationship with so no address is needed to reach
+      them, and that an issuer surfacing an account gains no authority
+      to verify it without the DNS delegation.  Noted the ordering
+      difference with the W3C API.  Addresses issue #4.
 
    *  Added a DNS Delegation subsection to Security Considerations.  The
       delegation rests on an unauthenticated TXT record and the document
