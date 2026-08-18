@@ -5,8 +5,8 @@
 TBD                                                             D. Hardt
 Internet-Draft                                                     Hellō
 Intended status: Standards Track                                 S. Goto
-Expires: 8 February 2027                                          Google
-                                                           7 August 2026
+Expires: 19 February 2027                                         Google
+                                                          18 August 2026
 
 
                       Email Verification Protocol
@@ -64,7 +64,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 8 February 2027.
+   This Internet-Draft will expire on 19 February 2027.
 
 Copyright Notice
 
@@ -154,10 +154,11 @@ Table of Contents
      11.1.  HTTP Message Signature Security
      11.2.  Signature-Key hwk Scheme
      11.3.  Fully-Specified Algorithms
-     11.4.  Email Existence Probing
-       11.4.1.  Uniform Error Responses
-       11.4.2.  Timing Attack Mitigations
-       11.4.3.  Additional Mitigations
+     11.4.  DNS Delegation
+     11.5.  Email Existence Probing
+       11.5.1.  Uniform Error Responses
+       11.5.2.  Timing Attack Mitigations
+       11.5.3.  Additional Mitigations
    12. Design Rationale
      12.1.  Why Not Solve Email Like SMS OTP?
      12.2.  Why the Three-Party Model?
@@ -296,9 +297,17 @@ Table of Contents
 
 2.1.  Email Discovery
 
-   Before presenting the user with email address choices, the browser
-   discovers which email accounts have active sessions with an issuer.
-   There are two models for this discovery:
+   Email discovery populates the set of addresses the browser offers the
+   user in Email Acquisition (#email-acquisition).  It is a source of
+   candidates for a chooser, and nothing more.  It is not Issuer
+   Discovery (#issuer-discovery), it does not establish who is
+   authoritative for an email domain, and a deployment may omit it
+   entirely — a browser that offers addresses from its own store, or
+   that takes one the user types, enters the protocol at Email
+   Acquisition (#email-acquisition) with no discovery step at all.
+
+   An issuer may surface accounts it holds a session for by either of
+   two models:
 
    *Push model*: The issuer proactively pushes account information to
    the browser using the FedCM Accounts Push mechanism
@@ -311,9 +320,30 @@ Table of Contents
    configuration and requests the account list from the
    accounts_endpoint.
 
-   The result of email discovery is the set of email addresses available
-   for the current user, which the browser presents to the user in Email
-   Acquisition (#email-acquisition).
+   Both models run against issuers the browser already has a
+   relationship with, which is why no email address is needed to reach
+   them and no circularity with Issuer Discovery (#issuer-discovery)
+   arises.  What they establish is that the issuer holds a session for
+   an account, not that the issuer may verify it.
+
+   Whatever the source of the address, once the user selects one the
+   browser performs Issuer Discovery (#issuer-discovery) on that
+   address's domain, and the DNS delegation is what determines the
+   issuer for it.  An address surfaced by an issuer through Push or Pull
+   is subject to that lookup on the same terms as one the user typed: an
+   issuer's claim to hold an account for user@example.com gives it no
+   authority to verify that address unless _email-
+   verification.example.com delegates to it.  An earlier revision of
+   this section could be read as having the browser resolve an issuer
+   before any address was known, which is not the case.
+
+   |  Note: The W3C Email Verification API ([EVP-Browser]) describes the
+   |  ordering the other way around, with the browser suggesting
+   |  addresses from its own autofill store and FedCM used to validate a
+   |  selection rather than to source the suggestions.  Both orderings
+   |  reach the same place — issuer discovery runs on the selected
+   |  address — and the two specifications will align on one
+   |  description.
 
 2.2.  Session Binding
 
@@ -1435,7 +1465,65 @@ Table of Contents
    and on the KB-JWT, whose alg is fixed by the cnf.jwk it is verified
    against (see KB-JWT Structure (#kb-structure)).
 
-11.4.  Email Existence Probing
+11.4.  DNS Delegation
+
+   The delegation from an email domain to an issuer is carried in an
+   unauthenticated DNS TXT record (DNS Delegation (#dns-delegation)).
+   An attacker who controls what a party sees for _email-
+   verification.$EMAIL_DOMAIN controls which issuer that party believes
+   is authoritative for the domain.  This section states what that
+   yields, and to whom.
+
+   Two parties resolve the record independently: the browser, to find
+   the issuance endpoint, and the RP, to check the iss claim of the EVT
+   it receives (EVT Verification (#evt-verification)).  The two lookups
+   are not equally valuable to an attacker.
+
+   *Spoofing the browser's resolver alone gains little.* The browser is
+   directed to an attacker-controlled issuer and discloses the email
+   address to it.  It does not disclose the user's credentials: cookies
+   are scoped to the real issuer's origin and are not sent to a
+   different one, and a WebAuthn challenge from the attacker carries the
+   attacker's rpId, so an authenticator will not produce an assertion
+   usable at the real issuer.  The attacker can mint an EVT, but its iss
+   is the attacker's identifier, and the RP — resolving the record
+   itself, over its own path — derives the real issuer identifier and
+   rejects the token.  The mismatch is what stops it, which is why
+   Issuer Identifier (#issuer-identifier) requires the comparison to be
+   exact.
+
+   *Spoofing the RP's resolver is the attack that matters.* An attacker
+   who controls the RP's view of DNS for the email domain, and who runs
+   an issuer, can present an EVT the RP accepts for any address at that
+   domain.  Nothing later in verification catches this: the token is
+   well-formed, correctly signed, and signed by the key the RP was told
+   to trust.  This is the residual risk of the design, and it is not
+   mitigated elsewhere in this document.
+
+   The RP is better placed to address this than the browser.  It is a
+   server, resolving on its own infrastructure, and can validate DNSSEC
+   or use a validating resolver over an authenticated channel.  RPs
+   SHOULD validate DNSSEC for _email-verification.$EMAIL_DOMAIN where
+   the email domain is signed, and SHOULD resolve through a resolver
+   they trust rather than whatever the host is configured with.  Email
+   domain operators publishing this record SHOULD sign their zone.
+
+   It has been argued that an authentication decision should never
+   depend on data fetched from DNS.  The objection is sound as a general
+   rule and this document does not dismiss it.  Two things are true
+   alongside it.  The delegation is a property of an email domain, and
+   the authoritative source for a property of an email domain is that
+   domain's DNS — the same place SPF, DKIM, and DMARC already sit, and
+   the same records an attacker with this capability could already forge
+   to redirect or authenticate mail for the domain.  And moving the
+   delegation to HTTPS would require every email domain to operate a web
+   server, which Why DNS Delegation? (#why-dns-delegation) explains is
+   the barrier this design set out to avoid.  The exposure this creates
+   is nonetheless real, unsigned DNS is weaker than HTTPS, and a
+   deployment that cannot obtain DNSSEC on the email domains it accepts
+   is accepting the risk described above.
+
+11.5.  Email Existence Probing
 
    Any software—not just browsers—can send requests to an issuer's
    issuance endpoint.  An attacker could attempt to use this to probe
@@ -1446,7 +1534,7 @@ Table of Contents
    2.  *Account enumeration*: Determine which email addresses have
        accounts at specific issuers.
 
-11.4.1.  Uniform Error Responses
+11.5.1.  Uniform Error Responses
 
    To prevent probing, issuers MUST NOT return different error responses
    based on whether an email address exists.  The
@@ -1460,7 +1548,7 @@ Table of Contents
    This ensures attackers cannot distinguish between "email exists" and
    "email does not exist" based on error responses.
 
-11.4.2.  Timing Attack Mitigations
+11.5.2.  Timing Attack Mitigations
 
    Response timing can also reveal whether an email address exists.  If
    the issuer performs a database lookup only when the email exists, or
@@ -1475,7 +1563,7 @@ Table of Contents
    *  *Response delay normalization*: Add delays to normalize response
       times across all error conditions to a consistent baseline.
 
-11.4.3.  Additional Mitigations
+11.5.3.  Additional Mitigations
 
    *  *User interaction required*: The browser API requires user gesture
       and consent before initiating verification, preventing automated
@@ -1719,6 +1807,27 @@ Table of Contents
       production of [WHATWG.HTML] rather than leaving the term
       undefined, and said why that production rather than [RFC5322].
       Addresses issue #2.
+
+   *  Rewrote Email Discovery.  It read as though the browser resolved
+      an issuer before any email address was known, which contradicts
+      Issuer Discovery being a DNS lookup on the selected address.  Said
+      what the section actually does — populate a chooser — that it is
+      optional, that Push and Pull run against issuers the browser
+      already has a relationship with so no address is needed to reach
+      them, and that an issuer surfacing an account gains no authority
+      to verify it without the DNS delegation.  Noted the ordering
+      difference with the W3C API.  Addresses issue #4.
+
+   *  Added a DNS Delegation subsection to Security Considerations.  The
+      delegation rests on an unauthenticated TXT record and the document
+      said nothing about it.  Separated the two lookups: spoofing the
+      browser's resolver discloses the email address but yields no token
+      the RP will accept, since cookies and WebAuthn credentials are
+      origin-scoped and the RP resolves the record itself; spoofing the
+      RP's resolver is the attack that matters and is not mitigated
+      elsewhere.  Recommended DNSSEC validation by RPs and zone signing
+      by email domain operators, and stated the residual risk.
+      Addresses issue #6.
 
    *  Made the issuer identifier an HTTPS origin rather than a bare host
       name, aligning the iss claim with [OpenID.Core] and [RFC8414] and
