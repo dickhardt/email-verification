@@ -236,7 +236,7 @@ Sec-Fetch-Dest: email-verification
 Content-Digest: \
     sha-256=:p8W2nSiyrdmtuSb49YHusp+pXM3er/ZiwRThsUgvua8=:
 Signature-Input: sig=("@method" "@authority" "@path" \
-    "content-digest" "cookie" "signature-key");created=1692345600
+    "content-digest" "signature-key");created=1692345600
 Signature: sig=:MEQCIHd8Y8qYKm5e3dV8y....:
 Signature-Key: sig=hwk;kty="OKP";crv="Ed25519"; \
     x="JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs";alg="Ed25519"
@@ -410,7 +410,7 @@ The covered components MUST include `@method`, `@authority`, `@path`, `content-d
 
 ```
 Signature-Input: sig=("@method" "@authority" "@path" \
-    "content-digest" "cookie" "signature-key");created=1692345600
+    "content-digest" "signature-key");created=1692345600
 ```
 
 ### Example Signed Request
@@ -424,7 +424,7 @@ Sec-Fetch-Dest: email-verification
 Content-Digest: \
     sha-256=:p8W2nSiyrdmtuSb49YHusp+pXM3er/ZiwRThsUgvua8=:
 Signature-Input: sig=("@method" "@authority" "@path" \
-    "content-digest" "cookie" "signature-key");created=1692345600
+    "content-digest" "signature-key");created=1692345600
 Signature: sig=:MEQCIHd8Y8qYKm5e3dV8y....:
 Signature-Key: sig=hwk;kty="OKP";crv="Ed25519"; \
     x="JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs";alg="Ed25519"
@@ -696,7 +696,7 @@ Cookie: webauthn_state=...
 Content-Type: application/json
 Sec-Fetch-Dest: email-verification
 Content-Digest: sha-256=:...:
-Signature-Input: sig=("@method" "@authority" "@path" "content-digest" "cookie" "signature-key");created=1692345600
+Signature-Input: sig=("@method" "@authority" "@path" "content-digest" "signature-key");created=1692345600
 Signature: sig=:...:
 Signature-Key: sig=hwk;kty="OKP";crv="Ed25519";x="JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs";alg="Ed25519"
 
