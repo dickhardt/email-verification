@@ -5,8 +5,8 @@
 TBD                                                             D. Hardt
 Internet-Draft                                                     Hellō
 Intended status: Standards Track                                 S. Goto
-Expires: 8 February 2027                                          Google
-                                                           7 August 2026
+Expires: 20 February 2027                                         Google
+                                                          19 August 2026
 
 
                       Email Verification Protocol
@@ -64,7 +64,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 8 February 2027.
+   This Internet-Draft will expire on 20 February 2027.
 
 Copyright Notice
 
@@ -360,7 +360,7 @@ Table of Contents
    Content-Digest: \
        sha-256=:p8W2nSiyrdmtuSb49YHusp+pXM3er/ZiwRThsUgvua8=:
    Signature-Input: sig=("@method" "@authority" "@path" \
-       "content-digest" "cookie" "signature-key");created=1692345600
+       "content-digest" "signature-key");created=1692345600
    Signature: sig=:MEQCIHd8Y8qYKm5e3dV8y....:
    Signature-Key: sig=hwk;kty="OKP";crv="Ed25519"; \
        x="JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs";alg="Ed25519"
@@ -602,7 +602,7 @@ Table of Contents
    included.
 
    Signature-Input: sig=("@method" "@authority" "@path" \
-       "content-digest" "cookie" "signature-key");created=1692345600
+       "content-digest" "signature-key");created=1692345600
 
 4.1.5.  Example Signed Request
 
@@ -614,7 +614,7 @@ Table of Contents
    Content-Digest: \
        sha-256=:p8W2nSiyrdmtuSb49YHusp+pXM3er/ZiwRThsUgvua8=:
    Signature-Input: sig=("@method" "@authority" "@path" \
-       "content-digest" "cookie" "signature-key");created=1692345600
+       "content-digest" "signature-key");created=1692345600
    Signature: sig=:MEQCIHd8Y8qYKm5e3dV8y....:
    Signature-Key: sig=hwk;kty="OKP";crv="Ed25519"; \
        x="JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs";alg="Ed25519"
@@ -969,7 +969,7 @@ Table of Contents
    Content-Type: application/json
    Sec-Fetch-Dest: email-verification
    Content-Digest: sha-256=:...:
-   Signature-Input: sig=("@method" "@authority" "@path" "content-digest" "cookie" "signature-key");created=1692345600
+   Signature-Input: sig=("@method" "@authority" "@path" "content-digest" "signature-key");created=1692345600
    Signature: sig=:...:
    Signature-Key: sig=hwk;kty="OKP";crv="Ed25519";x="JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs";alg="Ed25519"
 
