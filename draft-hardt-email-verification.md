@@ -197,19 +197,9 @@ Step                      RP Server     Browser              Issuer
 
 ## Email Discovery {#email-discovery}
 
-Email discovery populates the set of addresses the browser offers the user in [Email Acquisition](#email-acquisition). It is a source of candidates for a chooser, and nothing more. It is not [Issuer Discovery](#issuer-discovery), it does not establish who is authoritative for an email domain, and a deployment may omit it entirely — a browser that offers addresses from its own store, or that takes one the user types, enters the protocol at [Email Acquisition](#email-acquisition) with no discovery step at all.
+How the browser assembles candidate addresses — from its own store, from account information an issuer pushes or the browser pulls via FedCM ([@?LightweightFedCM]), or from the user typing one — is defined by the W3C Email Verification API ([@?EVP-Browser]) and is out of scope for this document. The browser MUST NOT offer an address that is not a valid email address (see [Valid Email Address](#valid-email-address)).
 
-An issuer may surface accounts it holds a session for by either of two models:
-
-**Push model**: The issuer proactively pushes account information to the browser using the FedCM Accounts Push mechanism ([@?LightweightFedCM]). The browser accumulates account data without making an explicit request.
-
-**Pull model**: The browser calls the issuer's accounts endpoint per the FedCM mechanism, as defined in the W3C Email Verification API ([@?EVP-Browser]). The browser fetches the issuer's FedCM well-known configuration and requests the account list from the `accounts_endpoint`.
-
-Both models run against issuers the browser already has a relationship with, which is why no email address is needed to reach them and no circularity with [Issuer Discovery](#issuer-discovery) arises. What they establish is that the issuer holds a session for an account, not that the issuer may verify it.
-
-Whatever the source of the address, once the user selects one the browser performs [Issuer Discovery](#issuer-discovery) on that address's domain, and the DNS delegation is what determines the issuer for it. An address surfaced by an issuer through Push or Pull is subject to that lookup on the same terms as one the user typed: an issuer's claim to hold an account for `user@example.com` gives it no authority to verify that address unless `_email-verification.example.com` delegates to it. An earlier revision of this section could be read as having the browser resolve an issuer before any address was known, which is not the case.
-
-> Note: The W3C Email Verification API ([@?EVP-Browser]) describes the ordering the other way around, with the browser suggesting addresses from its own autofill store and FedCM used to validate a selection rather than to source the suggestions. Both orderings reach the same place — issuer discovery runs on the selected address — and the two specifications will align on one description.
+Once the user selects an address, the browser performs [Issuer Discovery](#issuer-discovery) on the address's domain; the DNS delegation alone determines the issuer, whatever the source of the address. From selection onward the address is never altered: the browser sends it byte-for-byte in the token request, and an issuer that verifies it — by its own processing rules — returns it byte-for-byte in the `email` claim. Every comparison of email addresses in this protocol is byte-for-byte.
 
 ## Session Binding {#session-binding}
 
@@ -229,7 +219,7 @@ Once the browser has the email address and nonce:
 
 3. The browser creates a signed request per [HTTP Message Signatures](#http-signatures) and POSTs to the `issuance_endpoint`, including the issuer's cookies. The request body is a JSON object with the following parameters:
 
-   - `email` (REQUIRED): The email address to verify
+   - `email` (REQUIRED): The email address to verify, byte-for-byte as the user selected it
    - See [Private Email Addresses](#private-email) for parameters to request private email addresses
    - See [WebAuthn Authentication](#webauthn-authentication) for parameters to respond to a WebAuthn challenge
 
@@ -277,7 +267,7 @@ The browser MUST process any `Set-Cookie` headers in the response.
 On receiving the `issuance_token`:
 
 1. The browser verifies the EVT per [EVT Verification](#evt-verification), additionally confirming:
-   - The `email` claim matches the email address being verified
+   - The `email` claim is byte-for-byte identical to the email address being verified
    - The `cnf.jwk` claim matches the public key the browser generated
 
 2. The browser creates a KB-JWT per [KB-JWT Creation](#kb-creation-detail), binding the EVT to the RP's origin and session nonce.
@@ -389,7 +379,7 @@ The browser creates a signed request by:
 
 The request body is a JSON object with the following fields:
 
-- `email` (REQUIRED): The email address to verify
+- `email` (REQUIRED): The email address to verify, byte-for-byte as the user selected it
 - `private_email` (OPTIONAL): Request a new private email address. See [Private Email Addresses](#private-email).
 - `directed_email` (OPTIONAL): A previously issued private email address to reuse. See [Private Email Addresses](#private-email).
 
@@ -424,9 +414,7 @@ Signature-Key: sig=hwk;kty="OKP";crv="Ed25519"; \
 
 The covered components MUST include `@method`, `@authority`, `@path`, `content-digest`, and `signature-key`. The `created` parameter MUST be included.
 
-The `cookie` component MAY be included when the Cookie header is present, and MUST be omitted when it is not (per [@!RFC9421] Section 2.5). An issuer MUST NOT reject a request solely because `cookie` is not covered.
-
-Covering `cookie` binds the authenticating cookie to the request that carries it. That is worth having where a signer can get it, but it is not available everywhere: in some browser architectures the Cookie header is attached by the network stack after the request has been constructed and signed, so the value to be covered does not exist at signing time. Requiring it would exclude those implementations for a property the protocol does not depend on — the user is authenticated by the cookie, and the request is bound to the browser's key by the signature, whether or not the two are bound to each other.
+Covering the `cookie` component is RECOMMENDED when the Cookie header is available to the signer at signing time; the component MUST be omitted when the header is not present (per [@!RFC9421] Section 2.5). An issuer MUST NOT reject a request solely because `cookie` is not covered. See [HTTP Message Signature Security](#http-message-signature-security) for what coverage provides.
 
 ```
 Signature-Input: sig=("@method" "@authority" "@path" \
@@ -519,7 +507,7 @@ Required claims:
 - `iss`: The issuer identifier, an HTTPS origin (see [Issuer Identifier](#issuer-identifier))
 - `iat`: Issued at time (seconds since epoch)
 - `cnf`: Confirmation claim containing the browser's public key in `jwk` format (for SD-JWT Key Binding compatibility). The `jwk` is the key conveyed in the `Signature-Key` header of the token request, reproduced with the same members, including its fully-specified `alg`.
-- `email`: The verified email address
+- `email`: The verified email address, byte-for-byte as it appeared in the token request
 - `email_verified`: Boolean, MUST be `true`
 
 Optional claims:
@@ -575,7 +563,7 @@ Both the browser and RP verify the EVT. The verification steps are:
 
 The browser additionally verifies:
 
-- The `email` claim matches the email address being verified
+- The `email` claim is byte-for-byte identical to the email address being verified
 - The `cnf.jwk` claim matches the public key the browser generated
 
 
@@ -736,8 +724,6 @@ Signature-Key: sig=hwk;kty="OKP";crv="Ed25519";x="JrQLj5P_89iXES9-vFgrIy29clF9CC
 ```
 
 The `webauthn_response` object follows the structure of PublicKeyCredential as defined in [@WebAuthn].
-
-> Note: The `cookie` component MAY be included in the signature when cookies are present (such as those set by the challenge response), and is omitted when they are not, per [HTTP Request Signing](#request-signing). The issuer authenticates the WebAuthn response on its own terms; nothing in this exchange depends on the cookie being covered.
 
 ## WebAuthn Verification
 
@@ -980,13 +966,13 @@ The browser MAY store the private email address per RP origin to enable account 
 
 # Security Considerations
 
-## HTTP Message Signature Security
+## HTTP Message Signature Security {#http-message-signature-security}
 
 The use of HTTP Message Signatures ([@!RFC9421]) provides several security benefits:
 
 1. **Request Integrity**: The signature covers the HTTP method, authority, path, and — through `content-digest` — the request body, preventing tampering with any of these components. The body is what carries the email address being verified, so without that coverage the signature would attest to a request without attesting to which address it asked for.
 
-2. **Cookie Binding (optional)**: A signer that covers the `cookie` component binds the authenticating cookie to the request that carries it, so a cookie cannot be moved onto a different signed request. Coverage is optional (see [Signature-Input Header](#request-signing)), so this property is not one an issuer may assume. Where it is absent, the request is still bound to the browser's key by the signature, and the cookie still authenticates the user; what is lost is the binding between the two.
+2. **Cookie Binding (when covered)**: Covering the `cookie` component binds the authenticating cookie to the signed request. Coverage cannot be assumed — in some browser architectures the Cookie header is attached after the request is signed, so the value does not exist at signing time. Without it, the signature still binds the request to the browser's key, and the cookie still authenticates the user.
 
 3. **Replay Protection**: The `created` timestamp in the `Signature-Input` header is verified to be within 60 seconds, preventing replay attacks.
 
@@ -1014,7 +1000,7 @@ The delegation from an email domain to an issuer is carried in an unauthenticate
 
 Two parties resolve the record independently: the browser, to find the issuance endpoint, and the RP, to check the `iss` claim of the EVT it receives ([EVT Verification](#evt-verification)). The two lookups are not equally valuable to an attacker.
 
-**Spoofing the browser's resolver alone gains little.** The browser is directed to an attacker-controlled issuer and discloses the email address to it. It does not disclose the user's credentials: cookies are scoped to the real issuer's origin and are not sent to a different one, and a WebAuthn challenge from the attacker carries the attacker's `rpId`, so an authenticator will not produce an assertion usable at the real issuer. The attacker can mint an EVT, but its `iss` is the attacker's identifier, and the RP — resolving the record itself, over its own path — derives the real issuer identifier and rejects the token. The mismatch is what stops it, which is why [Issuer Identifier](#issuer-identifier) requires the comparison to be exact.
+**Spoofing the browser's resolver alone gains little.** The browser is directed to an attacker-controlled issuer and discloses the email address to it. It does not disclose the user's credentials: cookies are scoped to the real issuer's origin and are not sent to a different one. The attacker can mint an EVT, but its `iss` is the attacker's identifier, and the RP — resolving the record itself, over its own path — derives the real issuer identifier and rejects the token. The mismatch is what stops it, which is why [Issuer Identifier](#issuer-identifier) requires the comparison to be exact.
 
 **Spoofing the RP's resolver is the attack that matters.** An attacker who controls the RP's view of DNS for the email domain, and who runs an issuer, can present an EVT the RP accepts for any address at that domain. Nothing later in verification catches this: the token is well-formed, correctly signed, and signed by the key the RP was told to trust. This is the residual risk of the design, and it is not mitigated elsewhere in this document.
 
@@ -1160,10 +1146,11 @@ The following implementations are known:
   - Added a Fully-Specified Algorithms subsection to Security Considerations giving the reason and naming which of the three signatures each rule reaches.
   - Defined "valid email address" as the "valid e-mail address" production of [@!WHATWG.HTML] rather than leaving the term undefined, and said why that production rather than [@!RFC5322]. Addresses issue #2.
   - Rewrote Email Discovery. It read as though the browser resolved an issuer before any email address was known, which contradicts Issuer Discovery being a DNS lookup on the selected address. Said what the section actually does — populate a chooser — that it is optional, that Push and Pull run against issuers the browser already has a relationship with so no address is needed to reach them, and that an issuer surfacing an account gains no authority to verify it without the DNS delegation. Noted the ordering difference with the W3C API. Addresses issue #4.
-  - Added a DNS Delegation subsection to Security Considerations. The delegation rests on an unauthenticated TXT record and the document said nothing about it. Separated the two lookups: spoofing the browser's resolver discloses the email address but yields no token the RP will accept, since cookies and WebAuthn credentials are origin-scoped and the RP resolves the record itself; spoofing the RP's resolver is the attack that matters and is not mitigated elsewhere. Recommended DNSSEC validation by RPs and zone signing by email domain operators, and stated the residual risk. Addresses issue #6.
+  - Added a DNS Delegation subsection to Security Considerations. The delegation rests on an unauthenticated TXT record and the document said nothing about it. Separated the two lookups: spoofing the browser's resolver discloses the email address but yields no token the RP will accept, since cookies are origin-scoped and the RP resolves the record itself; spoofing the RP's resolver is the attack that matters and is not mitigated elsewhere. Recommended DNSSEC validation by RPs and zone signing by email domain operators, and stated the residual risk. Addresses issue #6.
   - Made the issuer identifier an HTTPS origin rather than a bare host name, aligning the `iss` claim with [@!OpenID.Core] and [@!RFC8414] and with what the browser implementation already enforces. The DNS TXT record still carries a host name; the identifier is derived from it by prefixing `https://`, and every comparison is byte-for-byte on the derived string. Added an Issuer Identifier section stating the derivation once. Addresses issue #7.
   - Added the `issuer` member to the metadata document and required a fetching party to reject a document whose `issuer` does not match the identity it was fetched under, per [@!RFC8414], Section 3.3. This is the check Signature-Key -08 added for its own discovery, applied here.
-  - Made coverage of the `cookie` component optional, and forbade an issuer from rejecting a request solely because it is not covered. In some browser architectures the Cookie header is attached after the request is constructed and signed, so the value does not exist at signing time and the requirement was unimplementable. Restated the Cookie Binding security property as one an issuer may not assume, and said what is lost when it is absent. Addresses issue #11.
+  - Made coverage of the `cookie` component RECOMMENDED when the header is available to the signer at signing time, rather than required, and forbade an issuer from rejecting a request solely because it is not covered. In some browser architectures the Cookie header is attached after the request is constructed and signed, so the requirement was unimplementable. Addresses issue #11.
+  - Replaced the Email Discovery models with what this protocol requires: candidate addresses come from the W3C Email Verification API, the browser offers only valid email addresses, and from selection onward the address is never altered — it is sent byte-for-byte in the token request, returned byte-for-byte in the `email` claim, and every email comparison is byte-for-byte. Addresses issues #13 and #24.
   - Required the `Content-Digest` header ([@!RFC9530]) on the token request and added `content-digest` to the covered components. The email address being verified is carried in the request body, which no covered component reached, so the signature attested to a request without attesting to which address it asked for. Required the issuer to recompute the digest against the received bytes rather than rely on the signature over the header alone. Addresses issue #3.
 
 - draft-hardt-email-verification-01
