@@ -54,23 +54,6 @@ organization = "Google"
   </front>
 </reference>
 
-<reference anchor="WebAuthn" target="https://www.w3.org/TR/webauthn-3/">
-  <front>
-    <title>Web Authentication: An API for accessing Public Key Credentials - Level 3</title>
-    <author initials="M." surname="Jones" fullname="Michael B. Jones">
-      <organization>Microsoft</organization>
-    </author>
-    <author initials="A." surname="Kumar" fullname="Akshay Kumar">
-      <organization>Microsoft</organization>
-    </author>
-    <author initials="E." surname="Lundberg" fullname="Emil Lundberg">
-      <organization>Yubico</organization>
-    </author>
-    <date year="2023"/>
-  </front>
-  <seriesInfo name="W3C" value="Recommendation"/>
-</reference>
-
 <reference anchor="EVP-Browser" target="https://wicg.github.io/email-verification/">
   <front>
     <title>Email Verification API</title>
@@ -221,7 +204,6 @@ Once the browser has the email address and nonce:
 
    - `email` (REQUIRED): The email address to verify, byte-for-byte as the user selected it
    - See [Private Email Addresses](#private-email) for parameters to request private email addresses
-   - See [WebAuthn Authentication](#webauthn-authentication) for parameters to respond to a WebAuthn challenge
 
 ```http
 POST /email-verification/issuance HTTP/1.1
@@ -248,7 +230,7 @@ On receipt of a token request:
 
 1. The issuer verifies the request per [Request Verification](#request-verification).
 
-2. The issuer checks if the cookies represent a logged-in user who controls the requested email address. If the issuer supports WebAuthn (`webauthn_supported: true`) and cookies are not present or invalid, the issuer MAY return a WebAuthn challenge (see [WebAuthn Authentication](#webauthn-authentication)).
+2. The issuer checks if the cookies represent a logged-in user who controls the requested email address. If they do not, the issuer returns an `authentication_required` error (see [Authentication Required](#authentication-required)).
 
 3. If authentication succeeds, the issuer creates an EVT per [EVT Creation](#evt-creation) and returns it as the value of `issuance_token` in an `application/json` response. The issuer MAY include `Set-Cookie` headers to establish or update session state:
 
@@ -343,7 +325,6 @@ The metadata document is JSON containing the following properties:
 - *issuance_endpoint* - the API endpoint the browser calls to obtain an EVT
 - *jwks_uri* - the URL where the issuer provides its public keys to verify the EVT
 - *signing_alg_values_supported* - OPTIONAL. JSON array containing a list of the signing algorithms (`alg` values) supported by the issuer for both HTTP Message Signatures and issued EVTs. Algorithm identifiers MUST be from the IANA "JSON Web Signature and Encryption Algorithms" registry, and MUST be fully specified per [@!RFC9864]: the polymorphic `EdDSA` identifier MUST NOT be used, and `Ed25519` or `Ed448` used instead. `none` and the symmetric MAC identifiers MUST NOT be used. For the HTTP Message Signature case these are the algorithms an issuer would state in `Accept-Signature-Alg` ([@!I-D.hardt-httpbis-signature-key]), and that document's requirements on the conveyed key apply. If omitted, `Ed25519` is the default. `Ed25519` SHOULD be included in the supported algorithms list.
-- *webauthn_supported* - OPTIONAL. Boolean indicating whether the issuer supports WebAuthn authentication as an alternative to cookies. If `true`, the issuer may return a WebAuthn challenge when cookies are not present or invalid. Defaults to `false`.
 - *private_email_supported* - OPTIONAL. Boolean indicating whether the issuer supports generating private email addresses. Defaults to `false`.
 
 Following is an example `.well-known/email-verification` file:
@@ -354,7 +335,6 @@ Following is an example `.well-known/email-verification` file:
   "issuance_endpoint": "https://accounts.issuer.example/email-verification/issuance",
   "jwks_uri": "https://accounts.issuer.example/email-verification/jwks",
   "signing_alg_values_supported": ["Ed25519", "ES256"],
-  "webauthn_supported": true,
   "private_email_supported": true
 }
 ```
@@ -659,77 +639,6 @@ The RP verifies the KB-JWT by:
 9. Verify the KB-JWT signature using the public key from the EVT's `cnf.jwk` claim, under the algorithm named by that key's `alg` member
 
 
-# WebAuthn Authentication {#webauthn-authentication}
-
-When the issuer supports WebAuthn (`webauthn_supported: true` in metadata) and a token request lacks valid authentication cookies, the issuer MAY return a WebAuthn challenge to authenticate the user. This enables email verification even when the user is not logged into the issuer via cookies, using any WebAuthn-compatible credential (passkeys, security keys, platform authenticators).
-
-## WebAuthn Challenge Response
-
-Instead of returning an error or an EVT, the issuer returns a WebAuthn challenge. The issuer MAY include `Set-Cookie` headers to maintain challenge state:
-
-**HTTP 401 Unauthorized**
-```http
-HTTP/1.1 401 Unauthorized
-Content-Type: application/json
-Set-Cookie: webauthn_state=...; Secure; HttpOnly; SameSite=None; Max-Age=300
-
-{
-  "webauthn_challenge": {
-    "challenge": "dGVzdC1jaGFsbGVuZ2UtZGF0YQ",
-    "timeout": 60000,
-    "rpId": "issuer.example",
-    "allowCredentials": [
-      {
-        "type": "public-key",
-        "id": "Y3JlZGVudGlhbC1pZA"
-      }
-    ],
-    "userVerification": "preferred"
-  }
-}
-```
-
-The `webauthn_challenge` object follows the structure of PublicKeyCredentialRequestOptions as defined in [@WebAuthn].
-
-The browser MUST process any `Set-Cookie` headers in the response. The issuer can use cookies to maintain challenge state, enabling stateless verification of the WebAuthn response. Alternatively, the issuer MAY store challenges server-side with a short TTL.
-
-## WebAuthn Response
-
-After the browser obtains a WebAuthn assertion (this mechanism is being defined by the W3C ([@EVP-Browser])), it sends a new request to the issuance endpoint with the `webauthn_response`. The browser MUST include any cookies set by the challenge response:
-
-```http
-POST /email-verification/issuance HTTP/1.1
-Host: accounts.issuer.example
-Cookie: webauthn_state=...
-Content-Type: application/json
-Sec-Fetch-Dest: email-verification
-Content-Digest: sha-256=:...:
-Signature-Input: sig=("@method" "@authority" "@path" "content-digest" "signature-key");created=1692345600
-Signature: sig=:...:
-Signature-Key: sig=hwk;kty="OKP";crv="Ed25519";x="JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs";alg="Ed25519"
-
-{
-  "email": "user@example.com",
-  "webauthn_response": {
-    "id": "Y3JlZGVudGlhbC1pZA",
-    "rawId": "Y3JlZGVudGlhbC1pZA",
-    "response": {
-      "authenticatorData": "...",
-      "clientDataJSON": "...",
-      "signature": "..."
-    },
-    "type": "public-key"
-  }
-}
-```
-
-The `webauthn_response` object follows the structure of PublicKeyCredential as defined in [@WebAuthn].
-
-## WebAuthn Verification
-
-The issuer verifies the WebAuthn response against its stored credentials for the email address. If verification succeeds, the issuer returns the EVT as described in [EVT Issuance](#evt-issuance).
-
-
 # Private Email Addresses {#private-email}
 
 Private email addresses allow users to provide site-specific email addresses to RPs, preventing RP-to-RP correlation of users by email address. A private email address can be:
@@ -862,7 +771,7 @@ Accept-Signature-Alg: Ed25519, ES256
 
 The two carry the same failure at different granularities, so an issuer MUST NOT return a `Signature-Error` header naming a failure the body contradicts.
 
-## Authentication Required
+## Authentication Required {#authentication-required}
 
 When the request lacks valid authentication cookies, contains expired/invalid cookies, or the authenticated user does not have control of the requested email address:
 
@@ -1151,6 +1060,7 @@ The following implementations are known:
   - Made coverage of the `cookie` component RECOMMENDED when the header is available to the signer at signing time, rather than required, and forbade an issuer from rejecting a request solely because it is not covered. In some browser architectures the Cookie header is attached after the request is constructed and signed, so the requirement was unimplementable. Addresses issue #11.
   - Replaced the Email Discovery models with what this protocol requires: candidate addresses come from the W3C Email Verification API, the browser offers only valid email addresses, and from selection onward the address is never altered — it is sent byte-for-byte in the token request, returned byte-for-byte in the `email` claim, and every email comparison is byte-for-byte. Addresses issues #4, #13, and #24.
   - Required the `Content-Digest` header ([@!RFC9530]) on the token request and added `content-digest` to the covered components. The email address being verified is carried in the request body, which no covered component reached, so the signature attested to a request without attesting to which address it asked for. Required the issuer to recompute the digest against the received bytes rather than rely on the signature over the header alone. Addresses issue #3.
+  - Removed the WebAuthn Authentication section, the `webauthn_supported` metadata member, and the WebAuthn challenge/response exchange. Nothing implements it, and it hardwired one authentication method into the protocol. A request without a valid session returns `authentication_required`. The replacement under discussion is an issuer-provided login URL using the FedCM Login Status continuation; see issue #26.
   - Widened the `created` acceptance window from 60 to 300 seconds. Device clocks skew by minutes, not seconds, and the window is not load-bearing for security: a replayed request yields an EVT bound to the original browser's key. Follows the clock-skew guidance of [@?RFC8725].
 
 - draft-hardt-email-verification-01
