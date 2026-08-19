@@ -432,7 +432,7 @@ This specification profiles that processing as follows:
 
 1. The `hwk` scheme is the only scheme this specification defines a use for. An issuer need implement no other, and rejects a request presenting one with `unsupported_scheme`.
 2. The signature MUST cover at minimum `@method`, `@authority`, `@path`, and `signature-key`, and MUST also cover `cookie` when the Cookie header is present. The issuer MUST reject a request whose signature does not.
-3. The issuer MUST reject a request whose `created` timestamp is more than 60 seconds from the current time.
+3. The issuer MUST reject a request whose `created` timestamp is more than 300 seconds from the current time. The window allows for client clock skew, following the guidance of [@?RFC8725] that leeway should be a few minutes at most.
 4. The algorithms the issuer accepts are the values of `signing_alg_values_supported` in its metadata (see [Issuer Metadata](#issuer-metadata)), which serves the role `Accept-Signature-Alg` serves in [@!I-D.hardt-httpbis-signature-key]. An issuer that publishes the member SHOULD also send `Accept-Signature-Alg` on an `unsupported_algorithm` response, so a client that did not read the metadata learns the same set.
 
 See [Signature Errors](#signature-errors) for how the issuer reports a failure alongside this specification's JSON error body.
@@ -949,7 +949,7 @@ The use of HTTP Message Signatures ([@!RFC9421]) provides several security benef
 
 2. **Cookie Binding**: By including the `cookie` component in the signature, the browser's authentication cookies are cryptographically bound to the specific request, preventing cookie injection or manipulation attacks.
 
-3. **Replay Protection**: The `created` timestamp in the `Signature-Input` header is verified to be within 60 seconds, preventing replay attacks.
+3. **Replay Protection**: The `created` timestamp in the `Signature-Input` header is verified to be within 300 seconds, bounding the replay window. A replayed request yields an EVT bound to the original browser's key through the `cnf` claim, so replay gains an attacker no token another party can use.
 
 4. **Public Key Binding**: The browser's public key transmitted via the `Signature-Key` header with the `hwk` scheme is bound to the request signature, ensuring the issuer knows which public key to include in the EVT's `cnf` claim. Because `signature-key` is a covered component, an attacker cannot substitute the key or the scheme without invalidating the signature; see Signature-Key Integrity in [@!I-D.hardt-httpbis-signature-key].
 
@@ -1100,12 +1100,13 @@ The following implementations are known:
   - Added the required `alg` parameter to every `Signature-Key` example. Signature-Key -08 makes the key's `alg` the single source of truth for the algorithm; -07 forbade the parameter outright.
   - Replaced the polymorphic `EdDSA` identifier with `Ed25519` throughout: the browser's key, the default when `signing_alg_values_supported` is absent, the EVT header, the KB-JWT header, and every example. `EdDSA` is deprecated by [@!RFC9864] and forbidden by Signature-Key -08.
   - Required `signing_alg_values_supported` to carry fully-specified identifiers, and forbade `EdDSA`, `none`, and the symmetric MAC identifiers. The member governs issued EVTs as well as HTTP Message Signatures, so the constraint is stated here rather than left to Signature-Key.
-  - Rewrote HTTP Request Verification to delegate to [@!RFC9421] and [@!I-D.hardt-httpbis-signature-key] rather than restate them, and to keep only what this specification profiles: `hwk` as the only scheme, the required covered components, the 60-second `created` window, and `signing_alg_values_supported` as the discovery-time form of `Accept-Signature-Alg`. The restated text was what went stale — the previous step listing the `hwk` parameters as `kty`, `crv`, and `x` silently became wrong when -08 added `alg`.
+  - Rewrote HTTP Request Verification to delegate to [@!RFC9421] and [@!I-D.hardt-httpbis-signature-key] rather than restate them, and to keep only what this specification profiles: `hwk` as the only scheme, the required covered components, the `created` window, and `signing_alg_values_supported` as the discovery-time form of `Accept-Signature-Alg`. The restated text was what went stale — the previous step listing the `hwk` parameters as `kty`, `crv`, and `x` silently became wrong when -08 added `alg`.
   - Carried the key's `alg` member into the EVT `cnf.jwk`, so the RP verifies the KB-JWT under a fully-specified algorithm rather than one derived from the key. Required the KB-JWT header `alg` to match it, and had the RP reject a KB-JWT where the two disagree.
   - Required the EVT header `alg` to be fully specified. The EVT is an ordinary JWT and outside the scope of Signature-Key, so nothing else imposes this.
   - Added the `Signature-Error` response header to signature error responses, alongside this specification's existing JSON error body, and said how the two relate: the body reports `invalid_signature` in every case and the header carries which failure it was.
   - Added a Fully-Specified Algorithms subsection to Security Considerations giving the reason and naming which of the three signatures each rule reaches.
   - Defined "valid email address" as the "valid e-mail address" production of [@!WHATWG.HTML] rather than leaving the term undefined, and said why that production rather than [@!RFC5322]. Addresses issue #2.
+  - Widened the `created` acceptance window from 60 to 300 seconds. Device clocks skew by minutes, not seconds, and the window is not load-bearing for security: a replayed request yields an EVT bound to the original browser's key. Follows the clock-skew guidance of [@?RFC8725].
 
 - draft-hardt-email-verification-01
   - Updated Implementation Status: completed GMail issuer entry, added Chrome and Edge origin trials.
