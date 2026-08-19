@@ -19,14 +19,14 @@
 <meta content="draft-hardt-email-verification-latest" name="ietf.draft">
 <!-- Generator version information:
   xml2rfc 3.34.0
-    Python 3.14.5
+    Python 3.14.7
     ConfigArgParse 1.7.5
     google-i18n-address 3.1.1
     intervaltree 3.2.1
     Jinja2 3.1.6
     lxml 6.1.1
     natsort 8.4.0
-    platformdirs 4.10.1
+    platformdirs 4.11.3
     pycountry 24.6.1
     PyYAML 6.0.3
     requests 2.33.1
@@ -1046,11 +1046,11 @@ svg {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">EVP</td>
-<td class="right">July 2026</td>
+<td class="right">August 2026</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Hardt &amp; Goto</td>
-<td class="center">Expires 31 January 2027</td>
+<td class="center">Expires 20 February 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1063,12 +1063,12 @@ svg {
 <dd class="internet-draft">draft-hardt-email-verification-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-07-30" class="published">30 July 2026</time>
+<time datetime="2026-08-19" class="published">19 August 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-01-31">31 January 2027</time></dd>
+<dd class="expires"><time datetime="2027-02-20">20 February 2027</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1116,7 +1116,7 @@ svg {
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 31 January 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 20 February 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1198,7 +1198,10 @@ svg {
                 <p id="section-toc.1-1.3.2.1.1"><a href="#section-3.1" class="auto internal xref">3.1</a>.  <a href="#name-dns-delegation" class="internal xref">DNS Delegation</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.2">
-                <p id="section-toc.1-1.3.2.2.1"><a href="#section-3.2" class="auto internal xref">3.2</a>.  <a href="#name-issuer-metadata" class="internal xref">Issuer Metadata</a></p>
+                <p id="section-toc.1-1.3.2.2.1"><a href="#section-3.2" class="auto internal xref">3.2</a>.  <a href="#name-issuer-identifier" class="internal xref">Issuer Identifier</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3.2.3">
+                <p id="section-toc.1-1.3.2.3.1"><a href="#section-3.3" class="auto internal xref">3.3</a>.  <a href="#name-issuer-metadata" class="internal xref">Issuer Metadata</a></p>
 </li>
             </ul>
 </li>
@@ -1212,18 +1215,24 @@ svg {
                     <p id="section-toc.1-1.4.2.1.2.1.1"><a href="#section-4.1.1" class="auto internal xref">4.1.1</a>.  <a href="#name-request-body" class="internal xref">Request Body</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1.2.2">
-                    <p id="section-toc.1-1.4.2.1.2.2.1"><a href="#section-4.1.2" class="auto internal xref">4.1.2</a>.  <a href="#name-signature-key-header" class="internal xref">Signature-Key Header</a></p>
+                    <p id="section-toc.1-1.4.2.1.2.2.1"><a href="#section-4.1.2" class="auto internal xref">4.1.2</a>.  <a href="#name-content-digest-header" class="internal xref">Content-Digest Header</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1.2.3">
-                    <p id="section-toc.1-1.4.2.1.2.3.1"><a href="#section-4.1.3" class="auto internal xref">4.1.3</a>.  <a href="#name-signature-input-header" class="internal xref">Signature-Input Header</a></p>
+                    <p id="section-toc.1-1.4.2.1.2.3.1"><a href="#section-4.1.3" class="auto internal xref">4.1.3</a>.  <a href="#name-signature-key-header" class="internal xref">Signature-Key Header</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1.2.4">
-                    <p id="section-toc.1-1.4.2.1.2.4.1"><a href="#section-4.1.4" class="auto internal xref">4.1.4</a>.  <a href="#name-example-signed-request" class="internal xref">Example Signed Request</a></p>
+                    <p id="section-toc.1-1.4.2.1.2.4.1"><a href="#section-4.1.4" class="auto internal xref">4.1.4</a>.  <a href="#name-signature-input-header" class="internal xref">Signature-Input Header</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.1.2.5">
+                    <p id="section-toc.1-1.4.2.1.2.5.1"><a href="#section-4.1.5" class="auto internal xref">4.1.5</a>.  <a href="#name-example-signed-request" class="internal xref">Example Signed Request</a></p>
 </li>
                 </ul>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.2">
                 <p id="section-toc.1-1.4.2.2.1"><a href="#section-4.2" class="auto internal xref">4.2</a>.  <a href="#name-http-request-verification" class="internal xref">HTTP Request Verification</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4.2.3">
+                <p id="section-toc.1-1.4.2.3.1"><a href="#section-4.3" class="auto internal xref">4.3</a>.  <a href="#name-valid-email-address" class="internal xref">Valid Email Address</a></p>
 </li>
             </ul>
 </li>
@@ -1376,16 +1385,22 @@ svg {
                 <p id="section-toc.1-1.11.2.2.1"><a href="#section-11.2" class="auto internal xref">11.2</a>.  <a href="#name-signature-key-hwk-scheme" class="internal xref">Signature-Key hwk Scheme</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.3">
-                <p id="section-toc.1-1.11.2.3.1"><a href="#section-11.3" class="auto internal xref">11.3</a>.  <a href="#name-email-existence-probing" class="internal xref">Email Existence Probing</a></p>
+                <p id="section-toc.1-1.11.2.3.1"><a href="#section-11.3" class="auto internal xref">11.3</a>.  <a href="#name-fully-specified-algorithms" class="internal xref">Fully-Specified Algorithms</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.4">
+                <p id="section-toc.1-1.11.2.4.1"><a href="#section-11.4" class="auto internal xref">11.4</a>.  <a href="#name-dns-delegation-2" class="internal xref">DNS Delegation</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.5">
+                <p id="section-toc.1-1.11.2.5.1"><a href="#section-11.5" class="auto internal xref">11.5</a>.  <a href="#name-email-existence-probing" class="internal xref">Email Existence Probing</a></p>
 <ul class="compact toc ulBare ulEmpty">
-<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.3.2.1">
-                    <p id="section-toc.1-1.11.2.3.2.1.1"><a href="#section-11.3.1" class="auto internal xref">11.3.1</a>.  <a href="#name-uniform-error-responses" class="internal xref">Uniform Error Responses</a></p>
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.5.2.1">
+                    <p id="section-toc.1-1.11.2.5.2.1.1"><a href="#section-11.5.1" class="auto internal xref">11.5.1</a>.  <a href="#name-uniform-error-responses" class="internal xref">Uniform Error Responses</a></p>
 </li>
-                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.3.2.2">
-                    <p id="section-toc.1-1.11.2.3.2.2.1"><a href="#section-11.3.2" class="auto internal xref">11.3.2</a>.  <a href="#name-timing-attack-mitigations" class="internal xref">Timing Attack Mitigations</a></p>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.5.2.2">
+                    <p id="section-toc.1-1.11.2.5.2.2.1"><a href="#section-11.5.2" class="auto internal xref">11.5.2</a>.  <a href="#name-timing-attack-mitigations" class="internal xref">Timing Attack Mitigations</a></p>
 </li>
-                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.3.2.3">
-                    <p id="section-toc.1-1.11.2.3.2.3.1"><a href="#section-11.3.3" class="auto internal xref">11.3.3</a>.  <a href="#name-additional-mitigations" class="internal xref">Additional Mitigations</a></p>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.5.2.3">
+                    <p id="section-toc.1-1.11.2.5.2.3.1"><a href="#section-11.5.3" class="auto internal xref">11.5.3</a>.  <a href="#name-additional-mitigations" class="internal xref">Additional Mitigations</a></p>
 </li>
                 </ul>
 </li>
@@ -1548,10 +1563,8 @@ svg {
         <h3 id="name-email-discovery">
 <a href="#section-2.1" class="section-number selfRef">2.1. </a><a href="#name-email-discovery" class="section-name selfRef">Email Discovery</a>
         </h3>
-<p id="section-2.1-1">Before presenting the user with email address choices, the browser discovers which email accounts have active sessions with an issuer. There are two models for this discovery:<a href="#section-2.1-1" class="pilcrow">¶</a></p>
-<p id="section-2.1-2"><strong>Push model</strong>: The issuer proactively pushes account information to the browser using the FedCM Accounts Push mechanism (<span>[<a href="#LightweightFedCM" class="cite xref">LightweightFedCM</a>]</span>). The browser accumulates account data without making an explicit request.<a href="#section-2.1-2" class="pilcrow">¶</a></p>
-<p id="section-2.1-3"><strong>Pull model</strong>: The browser calls the issuer's accounts endpoint per the FedCM mechanism, as defined in the W3C Email Verification API (<span>[<a href="#EVP-Browser" class="cite xref">EVP-Browser</a>]</span>). The browser fetches the issuer's FedCM well-known configuration and requests the account list from the <code>accounts_endpoint</code>.<a href="#section-2.1-3" class="pilcrow">¶</a></p>
-<p id="section-2.1-4">The result of email discovery is the set of email addresses available for the current user, which the browser presents to the user in <a href="#email-acquisition">Email Acquisition</a>.<a href="#section-2.1-4" class="pilcrow">¶</a></p>
+<p id="section-2.1-1">How the browser assembles candidate addresses — from its own store, from account information an issuer pushes or the browser pulls via FedCM (<span>[<a href="#LightweightFedCM" class="cite xref">LightweightFedCM</a>]</span>), or from the user typing one — is defined by the W3C Email Verification API (<span>[<a href="#EVP-Browser" class="cite xref">EVP-Browser</a>]</span>) and is out of scope for this document. The browser MUST NOT offer an address that is not a valid email address (see <a href="#valid-email-address">Valid Email Address</a>).<a href="#section-2.1-1" class="pilcrow">¶</a></p>
+<p id="section-2.1-2">Once the user selects an address, the browser performs <a href="#issuer-discovery">Issuer Discovery</a> on the address's domain; the DNS delegation alone determines the issuer, whatever the source of the address. From selection onward the address is never altered: the browser sends it byte-for-byte in the token request, and an issuer that verifies it — by its own processing rules — returns it byte-for-byte in the <code>email</code> claim. Every comparison of email addresses in this protocol is byte-for-byte.<a href="#section-2.1-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="session-binding">
@@ -1581,13 +1594,13 @@ svg {
             <p id="section-2.4-2.1.1">The browser performs <a href="#issuer-discovery">Issuer Discovery</a> for the email address to obtain the issuer's metadata, including the <code>issuance_endpoint</code>.<a href="#section-2.4-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-2.4-2.2">
-            <p id="section-2.4-2.2.1">The browser generates a fresh private/public key pair. The browser SHOULD select an algorithm from the issuer's <code>signing_alg_values_supported</code> array, or use "EdDSA" if not present.<a href="#section-2.4-2.2.1" class="pilcrow">¶</a></p>
+            <p id="section-2.4-2.2.1">The browser generates a fresh private/public key pair. The browser SHOULD select an algorithm from the issuer's <code>signing_alg_values_supported</code> array, or use <code>Ed25519</code> if not present.<a href="#section-2.4-2.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-2.4-2.3">
             <p id="section-2.4-2.3.1">The browser creates a signed request per <a href="#http-signatures">HTTP Message Signatures</a> and POSTs to the <code>issuance_endpoint</code>, including the issuer's cookies. The request body is a JSON object with the following parameters:<a href="#section-2.4-2.3.1" class="pilcrow">¶</a></p>
 <ul class="compact">
 <li class="compact" id="section-2.4-2.3.2.1">
-                <code>email</code> (REQUIRED): The email address to verify<a href="#section-2.4-2.3.2.1" class="pilcrow">¶</a>
+                <code>email</code> (REQUIRED): The email address to verify, byte-for-byte as the user selected it<a href="#section-2.4-2.3.2.1" class="pilcrow">¶</a>
 </li>
               <li class="compact" id="section-2.4-2.3.2.2">See <a href="#private-email">Private Email Addresses</a> for parameters to request private email addresses<a href="#section-2.4-2.3.2.2" class="pilcrow">¶</a>
 </li>
@@ -1602,11 +1615,13 @@ Host: accounts.issuer.example
 Cookie: session=...
 Content-Type: application/json
 Sec-Fetch-Dest: email-verification
+Content-Digest: \
+    sha-256=:p8W2nSiyrdmtuSb49YHusp+pXM3er/ZiwRThsUgvua8=:
 Signature-Input: sig=("@method" "@authority" "@path" \
-    "cookie" "signature-key");created=1692345600
+    "content-digest" "signature-key");created=1692345600
 Signature: sig=:MEQCIHd8Y8qYKm5e3dV8y....:
-Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; \
-    x="JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs"
+Signature-Key: sig=hwk;kty="OKP";crv="Ed25519"; \
+    x="JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs";alg="Ed25519"
 
 {"email":"user@example.com"}
 
@@ -1639,7 +1654,7 @@ Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; \
 Content-Type: application/json
 Set-Cookie: session=...; Secure; HttpOnly; SameSite=None
 
-{"issuance_token":"eyJhbGciOiJFZERTQSIsImtpZCI6IjIwMjQtMDgtMTkiLCJ0eXAiOiJldnQrand0In0...~"}
+{"issuance_token":"eyJhbGciOiJFZDI1NTE5Iiwia2lkIjoiMjAyNC0wOC0xOSIsInR5cCI6ImV2dCtqd3QifQ...~"}
 
 </pre><a href="#section-2.5-3" class="pilcrow">¶</a>
 </div>
@@ -1656,7 +1671,7 @@ Set-Cookie: session=...; Secure; HttpOnly; SameSite=None
 <li id="section-2.6-2.1">
             <p id="section-2.6-2.1.1">The browser verifies the EVT per <a href="#evt-verification">EVT Verification</a>, additionally confirming:<a href="#section-2.6-2.1.1" class="pilcrow">¶</a></p>
 <ul class="compact">
-<li class="compact" id="section-2.6-2.1.2.1">The <code>email</code> claim matches the email address being verified<a href="#section-2.6-2.1.2.1" class="pilcrow">¶</a>
+<li class="compact" id="section-2.6-2.1.2.1">The <code>email</code> claim is byte-for-byte identical to the email address being verified<a href="#section-2.6-2.1.2.1" class="pilcrow">¶</a>
 </li>
               <li class="compact" id="section-2.6-2.1.2.2">The <code>cnf.jwk</code> claim matches the public key the browser generated<a href="#section-2.6-2.1.2.2" class="pilcrow">¶</a>
 </li>
@@ -1671,10 +1686,10 @@ Set-Cookie: session=...; Secure; HttpOnly; SameSite=None
         </ol>
 <p id="section-2.6-3">Example EVT+KB (line breaks for display):<a href="#section-2.6-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-2.6-4">
-<pre>eyJhbGciOiJFZERTQSIsImtpZCI6IjIwMjQtMDgtMTkiLCJ0eXAiOiJldnQrand0In0.
-eyJpc3MiOiJpc3N1ZXIuZXhhbXBsZSIsImlhdCI6MTcyNDA4MzIwMCwiY25mIjp7...}.
+<pre>eyJhbGciOiJFZDI1NTE5Iiwia2lkIjoiMjAyNC0wOC0xOSIsInR5cCI6ImV2dCtqd3QifQ.
+eyJpc3MiOiJodHRwczovL2lzc3Vlci5leGFtcGxlIiwiaWF0IjoxNzI0MDgzMjAw...}.
 signature~
-eyJhbGciOiJFZERTQSIsInR5cCI6ImtiK2p3dCJ9.
+eyJhbGciOiJFZDI1NTE5IiwidHlwIjoia2Irand0In0.
 eyJhdWQiOiJodHRwczovL3JwLmV4YW1wbGUiLCJub25jZSI6IjI1OWM1ZWFlLTQ4...}.
 signature
 
@@ -1723,14 +1738,14 @@ signature
         <h3 id="name-dns-delegation">
 <a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-dns-delegation" class="section-name selfRef">DNS Delegation</a>
         </h3>
-<p id="section-3.1-1">The email domain delegates email verification to an issuer via a DNS TXT record. Given an email address, parse the email domain (<code>EMAIL_DOMAIN) and look up the `TXT` record for `_email-verification.</code>EMAIL_DOMAIN<code>. The contents of the record MUST start with</code>iss=<code>followed by the issuer identifier. There MUST be only one</code>TXT<code>record for</code>_email-verification.$EMAIL_DOMAIN`.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.1-1">The email domain delegates email verification to an issuer via a DNS TXT record. Given an email address, parse the email domain (<code>EMAIL_DOMAIN) and look up the `TXT` record for `_email-verification.</code>EMAIL_DOMAIN<code>. The contents of the record MUST start with</code>iss=<code>followed by the issuer host name. There MUST be only one</code>TXT<code>record for</code>_email-verification.$EMAIL_DOMAIN`.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
 <p id="section-3.1-2">Example record:<a href="#section-3.1-2" class="pilcrow">¶</a></p>
 <div class="lang-bash sourcecode" id="section-3.1-3">
 <pre>_email-verification.email-domain.example   TXT   iss=issuer.example
 
 </pre><a href="#section-3.1-3" class="pilcrow">¶</a>
 </div>
-<p id="section-3.1-4">This record states that <code>email-domain.example</code> has delegated email verification to the issuer <code>issuer.example</code>.<a href="#section-3.1-4" class="pilcrow">¶</a></p>
+<p id="section-3.1-4">This record states that <code>email-domain.example</code> has delegated email verification to the issuer at the host <code>issuer.example</code>.<a href="#section-3.1-4" class="pilcrow">¶</a></p>
 <p id="section-3.1-5">If the email domain and the issuer are the same domain, then the record would be:<a href="#section-3.1-5" class="pilcrow">¶</a></p>
 <div class="lang-bash sourcecode" id="section-3.1-6">
 <pre>_email-verification.issuer.example   TXT   iss=issuer.example
@@ -1742,41 +1757,55 @@ signature
 </blockquote>
 </section>
 </div>
-<div id="issuer-metadata">
+<div id="issuer-identifier">
 <section id="section-3.2">
-        <h3 id="name-issuer-metadata">
-<a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-issuer-metadata" class="section-name selfRef">Issuer Metadata</a>
+        <h3 id="name-issuer-identifier">
+<a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-issuer-identifier" class="section-name selfRef">Issuer Identifier</a>
         </h3>
-<p id="section-3.2-1">Once the issuer identifier is known, fetch the metadata document from <code>https://$ISSUER/.well-known/email-verification</code>.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
-<p id="section-3.2-2">The metadata document is JSON containing the following properties:<a href="#section-3.2-2" class="pilcrow">¶</a></p>
+<p id="section-3.2-1">The record carries a host name. The <strong>issuer identifier</strong> is the HTTPS origin of that host: the string <code>https://</code> followed by the host, with no port, no path, and no trailing slash. For the record above, the issuer identifier is <code>https://issuer.example</code>.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
+<p id="section-3.2-2">The identifier is an origin rather than a bare host so that it names the same thing as the <code>iss</code> claim of <span>[<a href="#OpenID.Core" class="cite xref">OpenID.Core</a>]</span> and the issuer of <span>[<a href="#RFC8414" class="cite xref">RFC8414</a>]</span>, and so that it is directly comparable to the values those specifications define. A bare host would have to be widened to an origin at every comparison, which is where mismatches arise.<a href="#section-3.2-2" class="pilcrow">¶</a></p>
+<p id="section-3.2-3">Every use of the issuer identity in this specification — the <code>iss</code> claim of the EVT, the <code>issuer</code> member of the metadata document, and the base of the well-known URL — is this origin. Comparisons between them are byte-for-byte on the derived string; no scheme defaulting, port normalization, or trailing-slash tolerance is applied.<a href="#section-3.2-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="issuer-metadata">
+<section id="section-3.3">
+        <h3 id="name-issuer-metadata">
+<a href="#section-3.3" class="section-number selfRef">3.3. </a><a href="#name-issuer-metadata" class="section-name selfRef">Issuer Metadata</a>
+        </h3>
+<p id="section-3.3-1">Once the issuer identifier is known, fetch the metadata document from <code>$ISSUER/.well-known/email-verification</code>, where <code>$ISSUER</code> is the issuer identifier defined above. For <code>https://issuer.example</code> this is <code>https://issuer.example/.well-known/email-verification</code>.<a href="#section-3.3-1" class="pilcrow">¶</a></p>
+<p id="section-3.3-2">The metadata document is JSON containing the following properties:<a href="#section-3.3-2" class="pilcrow">¶</a></p>
 <ul class="compact">
-<li class="compact" id="section-3.2-3.1">
-            <em>issuance_endpoint</em> - the API endpoint the browser calls to obtain an EVT<a href="#section-3.2-3.1" class="pilcrow">¶</a>
+<li class="compact" id="section-3.3-3.1">
+            <em>issuer</em> - the issuer identifier. The value MUST be identical to the issuer identifier the document was fetched under, and a party that fetches the document MUST reject it if it is not. This is the check of <span>[<a href="#RFC8414" class="cite xref">RFC8414</a>]</span>, Section 3.3, and it prevents a document served at one identity from claiming another.<a href="#section-3.3-3.1" class="pilcrow">¶</a>
 </li>
-          <li class="compact" id="section-3.2-3.2">
-            <em>jwks_uri</em> - the URL where the issuer provides its public keys to verify the EVT<a href="#section-3.2-3.2" class="pilcrow">¶</a>
+          <li class="compact" id="section-3.3-3.2">
+            <em>issuance_endpoint</em> - the API endpoint the browser calls to obtain an EVT<a href="#section-3.3-3.2" class="pilcrow">¶</a>
 </li>
-          <li class="compact" id="section-3.2-3.3">
-            <em>signing_alg_values_supported</em> - OPTIONAL. JSON array containing a list of the signing algorithms ("alg" values) supported by the issuer for both HTTP Message Signatures and issued EVTs. Algorithm identifiers MUST be from the IANA "JSON Web Signature and Encryption Algorithms" registry. If omitted, "EdDSA" is the default. "EdDSA" SHOULD be included in the supported algorithms list. The value "none" MUST NOT be used.<a href="#section-3.2-3.3" class="pilcrow">¶</a>
+          <li class="compact" id="section-3.3-3.3">
+            <em>jwks_uri</em> - the URL where the issuer provides its public keys to verify the EVT<a href="#section-3.3-3.3" class="pilcrow">¶</a>
 </li>
-          <li class="compact" id="section-3.2-3.4">
-            <em>webauthn_supported</em> - OPTIONAL. Boolean indicating whether the issuer supports WebAuthn authentication as an alternative to cookies. If <code>true</code>, the issuer may return a WebAuthn challenge when cookies are not present or invalid. Defaults to <code>false</code>.<a href="#section-3.2-3.4" class="pilcrow">¶</a>
+          <li class="compact" id="section-3.3-3.4">
+            <em>signing_alg_values_supported</em> - OPTIONAL. JSON array containing a list of the signing algorithms (<code>alg</code> values) supported by the issuer for both HTTP Message Signatures and issued EVTs. Algorithm identifiers MUST be from the IANA "JSON Web Signature and Encryption Algorithms" registry, and MUST be fully specified per <span>[<a href="#RFC9864" class="cite xref">RFC9864</a>]</span>: the polymorphic <code>EdDSA</code> identifier MUST NOT be used, and <code>Ed25519</code> or <code>Ed448</code> used instead. <code>none</code> and the symmetric MAC identifiers MUST NOT be used. For the HTTP Message Signature case these are the algorithms an issuer would state in <code>Accept-Signature-Alg</code> (<span>[<a href="#I-D.hardt-httpbis-signature-key" class="cite xref">I-D.hardt-httpbis-signature-key</a>]</span>), and that document's requirements on the conveyed key apply. If omitted, <code>Ed25519</code> is the default. <code>Ed25519</code> SHOULD be included in the supported algorithms list.<a href="#section-3.3-3.4" class="pilcrow">¶</a>
 </li>
-          <li class="compact" id="section-3.2-3.5">
-            <em>private_email_supported</em> - OPTIONAL. Boolean indicating whether the issuer supports generating private email addresses. Defaults to <code>false</code>.<a href="#section-3.2-3.5" class="pilcrow">¶</a>
+          <li class="compact" id="section-3.3-3.5">
+            <em>webauthn_supported</em> - OPTIONAL. Boolean indicating whether the issuer supports WebAuthn authentication as an alternative to cookies. If <code>true</code>, the issuer may return a WebAuthn challenge when cookies are not present or invalid. Defaults to <code>false</code>.<a href="#section-3.3-3.5" class="pilcrow">¶</a>
+</li>
+          <li class="compact" id="section-3.3-3.6">
+            <em>private_email_supported</em> - OPTIONAL. Boolean indicating whether the issuer supports generating private email addresses. Defaults to <code>false</code>.<a href="#section-3.3-3.6" class="pilcrow">¶</a>
 </li>
         </ul>
-<p id="section-3.2-4">Following is an example <code>.well-known/email-verification</code> file:<a href="#section-3.2-4" class="pilcrow">¶</a></p>
-<div class="lang-json sourcecode" id="section-3.2-5">
+<p id="section-3.3-4">Following is an example <code>.well-known/email-verification</code> file:<a href="#section-3.3-4" class="pilcrow">¶</a></p>
+<div class="lang-json sourcecode" id="section-3.3-5">
 <pre>{
+  "issuer": "https://issuer.example",
   "issuance_endpoint": "https://accounts.issuer.example/email-verification/issuance",
   "jwks_uri": "https://accounts.issuer.example/email-verification/jwks",
-  "signing_alg_values_supported": ["EdDSA", "RS256"],
+  "signing_alg_values_supported": ["Ed25519", "ES256"],
   "webauthn_supported": true,
   "private_email_supported": true
 }
 
-</pre><a href="#section-3.2-5" class="pilcrow">¶</a>
+</pre><a href="#section-3.3-5" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -1787,7 +1816,7 @@ signature
       <h2 id="name-http-message-signatures">
 <a href="#section-4" class="section-number selfRef">4. </a><a href="#name-http-message-signatures" class="section-name selfRef">HTTP Message Signatures</a>
       </h2>
-<p id="section-4-1">This section defines how HTTP Message Signatures (<span>[<a href="#RFC9421" class="cite xref">RFC9421</a>]</span>) are used in token requests. The browser signs requests to prove possession of a key pair, and the issuer verifies these signatures.<a href="#section-4-1" class="pilcrow">¶</a></p>
+<p id="section-4-1">This section defines how HTTP Message Signatures (<span>[<a href="#RFC9421" class="cite xref">RFC9421</a>]</span>) are used in token requests. The browser signs requests to prove possession of a key pair, and the issuer verifies these signatures. The browser's public key is conveyed with the <code>hwk</code> scheme of <span>[<a href="#I-D.hardt-httpbis-signature-key" class="cite xref">I-D.hardt-httpbis-signature-key</a>]</span>; that document's requirements apply in full, and this section states how they are met here.<a href="#section-4-1" class="pilcrow">¶</a></p>
 <div id="request-signing">
 <section id="section-4.1">
         <h3 id="name-http-request-signing">
@@ -1797,13 +1826,15 @@ signature
 <ol start="1" type="1" class="compact type-1" id="section-4.1-2">
 <li id="section-4.1-2.1">Creating a JSON request body with the email address and optional parameters<a href="#section-4.1-2.1" class="pilcrow">¶</a>
 </li>
-          <li id="section-4.1-2.2">Creating the <code>Signature-Key</code> header using the <code>hwk</code> scheme (<span>[<a href="#I-D.hardt-httpbis-signature-key" class="cite xref">I-D.hardt-httpbis-signature-key</a>]</span>) with the browser's public key<a href="#section-4.1-2.2" class="pilcrow">¶</a>
+          <li id="section-4.1-2.2">Creating the <code>Content-Digest</code> header (<span>[<a href="#RFC9530" class="cite xref">RFC9530</a>]</span>) over the request body<a href="#section-4.1-2.2" class="pilcrow">¶</a>
 </li>
-          <li id="section-4.1-2.3">Creating the <code>Signature-Input</code> header specifying the covered components<a href="#section-4.1-2.3" class="pilcrow">¶</a>
+          <li id="section-4.1-2.3">Creating the <code>Signature-Key</code> header using the <code>hwk</code> scheme (<span>[<a href="#I-D.hardt-httpbis-signature-key" class="cite xref">I-D.hardt-httpbis-signature-key</a>]</span>) with the browser's public key<a href="#section-4.1-2.3" class="pilcrow">¶</a>
 </li>
-          <li id="section-4.1-2.4">Computing the signature base per <span>[<a href="#RFC9421" class="cite xref">RFC9421</a>]</span> Section 2.5 and signing with the browser's private key<a href="#section-4.1-2.4" class="pilcrow">¶</a>
+          <li id="section-4.1-2.4">Creating the <code>Signature-Input</code> header specifying the covered components<a href="#section-4.1-2.4" class="pilcrow">¶</a>
 </li>
-          <li id="section-4.1-2.5">Creating the <code>Signature</code> header with the base64-encoded signature<a href="#section-4.1-2.5" class="pilcrow">¶</a>
+          <li id="section-4.1-2.5">Computing the signature base per <span>[<a href="#RFC9421" class="cite xref">RFC9421</a>]</span> Section 2.5 and signing with the browser's private key<a href="#section-4.1-2.5" class="pilcrow">¶</a>
+</li>
+          <li id="section-4.1-2.6">Creating the <code>Signature</code> header with the base64-encoded signature<a href="#section-4.1-2.6" class="pilcrow">¶</a>
 </li>
         </ol>
 <div id="request-body">
@@ -1814,7 +1845,7 @@ signature
 <p id="section-4.1.1-1">The request body is a JSON object with the following fields:<a href="#section-4.1.1-1" class="pilcrow">¶</a></p>
 <ul class="compact">
 <li class="compact" id="section-4.1.1-2.1">
-              <code>email</code> (REQUIRED): The email address to verify<a href="#section-4.1.1-2.1" class="pilcrow">¶</a>
+              <code>email</code> (REQUIRED): The email address to verify, byte-for-byte as the user selected it<a href="#section-4.1.1-2.1" class="pilcrow">¶</a>
 </li>
             <li class="compact" id="section-4.1.1-2.2">
               <code>private_email</code> (OPTIONAL): Request a new private email address. See <a href="#private-email">Private Email Addresses</a>.<a href="#section-4.1.1-2.2" class="pilcrow">¶</a>
@@ -1833,54 +1864,72 @@ signature
 </div>
 </section>
 </div>
-<div id="signature-key-header">
+<div id="content-digest-header">
 <section id="section-4.1.2">
-          <h4 id="name-signature-key-header">
-<a href="#section-4.1.2" class="section-number selfRef">4.1.2. </a><a href="#name-signature-key-header" class="section-name selfRef">Signature-Key Header</a>
+          <h4 id="name-content-digest-header">
+<a href="#section-4.1.2" class="section-number selfRef">4.1.2. </a><a href="#name-content-digest-header" class="section-name selfRef">Content-Digest Header</a>
           </h4>
-<p id="section-4.1.2-1">The <code>Signature-Key</code> header uses the <code>hwk</code> scheme to convey the browser's public key:<a href="#section-4.1.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.1.2-1">The browser MUST include a <code>Content-Digest</code> header (<span>[<a href="#RFC9530" class="cite xref">RFC9530</a>]</span>) carrying a digest of the request body. The <code>sha-256</code> algorithm MUST be supported and SHOULD be used.<a href="#section-4.1.2-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.1.2-2">
-<pre>Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; \
-    x="JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs"
+<pre>Content-Digest: \
+    sha-256=:p8W2nSiyrdmtuSb49YHusp+pXM3er/ZiwRThsUgvua8=:
 
 </pre><a href="#section-4.1.2-2" class="pilcrow">¶</a>
 </div>
+<p id="section-4.1.2-3">The email address being verified is carried in the request body, not in any covered component of the URL. Without a digest of that body among the covered components, the signature says nothing about which address was requested, and an intermediary or a party that captures the request can substitute a different one within the <code>created</code> window while the signature still verifies. Covering <code>content-digest</code> binds the address to the signature, and so to the key that appears in the EVT's <code>cnf</code> claim.<a href="#section-4.1.2-3" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="signature-input-header">
+<div id="signature-key-header">
 <section id="section-4.1.3">
-          <h4 id="name-signature-input-header">
-<a href="#section-4.1.3" class="section-number selfRef">4.1.3. </a><a href="#name-signature-input-header" class="section-name selfRef">Signature-Input Header</a>
+          <h4 id="name-signature-key-header">
+<a href="#section-4.1.3" class="section-number selfRef">4.1.3. </a><a href="#name-signature-key-header" class="section-name selfRef">Signature-Key Header</a>
           </h4>
-<p id="section-4.1.3-1">The covered components MUST include <code>@method</code>, <code>@authority</code>, <code>@path</code>, and <code>signature-key</code>. The <code>cookie</code> component MUST be included when the Cookie header is present, and MUST be omitted when it is not (per <span>[<a href="#RFC9421" class="cite xref">RFC9421</a>]</span> Section 2.5). The <code>created</code> parameter MUST be included.<a href="#section-4.1.3-1" class="pilcrow">¶</a></p>
+<p id="section-4.1.3-1">The <code>Signature-Key</code> header uses the <code>hwk</code> scheme to convey the browser's public key. The scheme is defined by <span>[<a href="#I-D.hardt-httpbis-signature-key" class="cite xref">I-D.hardt-httpbis-signature-key</a>]</span>, whose parameter and algorithm requirements apply unchanged; the key's <code>alg</code> is the fully-specified identifier the browser selected per <a href="#token-request">Token Request</a>.<a href="#section-4.1.3-1" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-4.1.3-2">
-<pre>Signature-Input: sig=("@method" "@authority" "@path" \
-    "cookie" "signature-key");created=1692345600
+<pre>Signature-Key: sig=hwk;kty="OKP";crv="Ed25519"; \
+    x="JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs";alg="Ed25519"
 
 </pre><a href="#section-4.1.3-2" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
-<div id="example-signed-request">
+<div id="signature-input-header">
 <section id="section-4.1.4">
-          <h4 id="name-example-signed-request">
-<a href="#section-4.1.4" class="section-number selfRef">4.1.4. </a><a href="#name-example-signed-request" class="section-name selfRef">Example Signed Request</a>
+          <h4 id="name-signature-input-header">
+<a href="#section-4.1.4" class="section-number selfRef">4.1.4. </a><a href="#name-signature-input-header" class="section-name selfRef">Signature-Input Header</a>
           </h4>
-<div class="lang-http sourcecode" id="section-4.1.4-1">
+<p id="section-4.1.4-1">The covered components MUST include <code>@method</code>, <code>@authority</code>, <code>@path</code>, <code>content-digest</code>, and <code>signature-key</code>. The <code>created</code> parameter MUST be included.<a href="#section-4.1.4-1" class="pilcrow">¶</a></p>
+<p id="section-4.1.4-2">Covering the <code>cookie</code> component is RECOMMENDED when the Cookie header is available to the signer at signing time; the component MUST be omitted when the header is not present (per <span>[<a href="#RFC9421" class="cite xref">RFC9421</a>]</span> Section 2.5). An issuer MUST NOT reject a request solely because <code>cookie</code> is not covered. See <a href="#http-message-signature-security">HTTP Message Signature Security</a> for what coverage provides.<a href="#section-4.1.4-2" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.1.4-3">
+<pre>Signature-Input: sig=("@method" "@authority" "@path" \
+    "content-digest" "signature-key");created=1692345600
+
+</pre><a href="#section-4.1.4-3" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="example-signed-request">
+<section id="section-4.1.5">
+          <h4 id="name-example-signed-request">
+<a href="#section-4.1.5" class="section-number selfRef">4.1.5. </a><a href="#name-example-signed-request" class="section-name selfRef">Example Signed Request</a>
+          </h4>
+<div class="lang-http sourcecode" id="section-4.1.5-1">
 <pre>POST /email-verification/issuance HTTP/1.1
 Host: accounts.issuer.example
 Cookie: session=...
 Content-Type: application/json
 Sec-Fetch-Dest: email-verification
+Content-Digest: \
+    sha-256=:p8W2nSiyrdmtuSb49YHusp+pXM3er/ZiwRThsUgvua8=:
 Signature-Input: sig=("@method" "@authority" "@path" \
-    "cookie" "signature-key");created=1692345600
+    "content-digest" "signature-key");created=1692345600
 Signature: sig=:MEQCIHd8Y8qYKm5e3dV8y....:
-Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; \
-    x="JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs"
+Signature-Key: sig=hwk;kty="OKP";crv="Ed25519"; \
+    x="JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs";alg="Ed25519"
 
 {"email":"user@example.com"}
 
-</pre><a href="#section-4.1.4-1" class="pilcrow">¶</a>
+</pre><a href="#section-4.1.5-1" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -1900,37 +1949,50 @@ Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; \
             <code>Sec-Fetch-Dest</code> is <code>email-verification</code><a href="#section-4.2-2.2" class="pilcrow">¶</a>
 </li>
           <li class="compact" id="section-4.2-2.3">
-            <code>Signature-Input</code> is present<a href="#section-4.2-2.3" class="pilcrow">¶</a>
+            <code>Content-Digest</code> is present and names a digest algorithm the issuer supports<a href="#section-4.2-2.3" class="pilcrow">¶</a>
 </li>
           <li class="compact" id="section-4.2-2.4">
-            <code>Signature</code> is present<a href="#section-4.2-2.4" class="pilcrow">¶</a>
+            <code>Signature-Input</code> is present<a href="#section-4.2-2.4" class="pilcrow">¶</a>
 </li>
           <li class="compact" id="section-4.2-2.5">
-            <code>Signature-Key</code> is present with <code>sig=hwk</code> scheme<a href="#section-4.2-2.5" class="pilcrow">¶</a>
+            <code>Signature</code> is present<a href="#section-4.2-2.5" class="pilcrow">¶</a>
+</li>
+          <li class="compact" id="section-4.2-2.6">
+            <code>Signature-Key</code> is present with <code>sig=hwk</code> scheme<a href="#section-4.2-2.6" class="pilcrow">¶</a>
 </li>
         </ul>
-<p id="section-4.2-3">The issuer MUST verify the HTTP Message Signature by:<a href="#section-4.2-3" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="compact type-1" id="section-4.2-4">
-<li id="section-4.2-4.1">Parsing the <code>Signature-Key</code> header and extracting the public key from the <code>hwk</code> parameters (<code>kty</code>, <code>crv</code>, <code>x</code> for OKP keys)<a href="#section-4.2-4.1" class="pilcrow">¶</a>
+<p id="section-4.2-3">The issuer MUST verify the HTTP Message Signature per <span>[<a href="#RFC9421" class="cite xref">RFC9421</a>]</span> and <span>[<a href="#I-D.hardt-httpbis-signature-key" class="cite xref">I-D.hardt-httpbis-signature-key</a>]</span>. Resolving the key from the <code>Signature-Key</code> header, determining the signature algorithm, validating the key, and reporting failure through the <code>Signature-Error</code> header are defined by <span>[<a href="#I-D.hardt-httpbis-signature-key" class="cite xref">I-D.hardt-httpbis-signature-key</a>]</span> and are not restated here.<a href="#section-4.2-3" class="pilcrow">¶</a></p>
+<p id="section-4.2-4">This specification profiles that processing as follows:<a href="#section-4.2-4" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="compact type-1" id="section-4.2-5">
+<li id="section-4.2-5.1">The <code>hwk</code> scheme is the only scheme this specification defines a use for. An issuer need implement no other, and rejects a request presenting one with <code>unsupported_scheme</code>.<a href="#section-4.2-5.1" class="pilcrow">¶</a>
 </li>
-          <li id="section-4.2-4.2">Parsing the <code>Signature-Input</code> header to determine the covered components<a href="#section-4.2-4.2" class="pilcrow">¶</a>
+          <li id="section-4.2-5.2">The signature MUST cover at minimum <code>@method</code>, <code>@authority</code>, <code>@path</code>, <code>content-digest</code>, and <code>signature-key</code>. The issuer MUST reject a request whose signature does not. The <code>cookie</code> component is optional; an issuer MUST NOT reject a request solely because <code>cookie</code> is not covered, and MUST verify the signature over whatever covered components the request does list.<a href="#section-4.2-5.2" class="pilcrow">¶</a>
 </li>
-          <li id="section-4.2-4.3">Verifying that the signature covers at minimum: <code>@method</code>, <code>@authority</code>, <code>@path</code>, and <code>signature-key</code>. The signature MUST also cover <code>cookie</code> when the Cookie header is present.<a href="#section-4.2-4.3" class="pilcrow">¶</a>
+          <li id="section-4.2-5.3">The issuer MUST recompute the digest of the received body and reject the request if it does not match the <code>Content-Digest</code> header, per <span>[<a href="#RFC9530" class="cite xref">RFC9530</a>]</span>, Section 2. The issuer MUST perform this check before acting on the body. Verifying the signature over <code>content-digest</code> establishes only that the header was signed; it is the recomputation that ties the header to the bytes received.<a href="#section-4.2-5.3" class="pilcrow">¶</a>
 </li>
-          <li id="section-4.2-4.4">Reconstructing the signature base per <span>[<a href="#RFC9421" class="cite xref">RFC9421</a>]</span> Section 2.5<a href="#section-4.2-4.4" class="pilcrow">¶</a>
+          <li id="section-4.2-5.4">The issuer MUST reject a request whose <code>created</code> timestamp is more than 300 seconds from the current time. The window allows for client clock skew, following the guidance of <span>[<a href="#RFC8725" class="cite xref">RFC8725</a>]</span> that leeway should be a few minutes at most.<a href="#section-4.2-5.4" class="pilcrow">¶</a>
 </li>
-          <li id="section-4.2-4.5">Verifying the signature in the <code>Signature</code> header using the extracted public key<a href="#section-4.2-4.5" class="pilcrow">¶</a>
-</li>
-          <li id="section-4.2-4.6">Verifying the <code>created</code> timestamp in <code>Signature-Input</code> is within 60 seconds of the current time<a href="#section-4.2-4.6" class="pilcrow">¶</a>
-</li>
-        </ol>
-<p id="section-4.2-5">The issuer MUST verify the request body:<a href="#section-4.2-5" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="compact type-1" id="section-4.2-6">
-<li id="section-4.2-6.1">Parsing the JSON body and extracting the <code>email</code> field<a href="#section-4.2-6.1" class="pilcrow">¶</a>
-</li>
-          <li id="section-4.2-6.2">Verifying the <code>email</code> field contains a syntactically valid email address<a href="#section-4.2-6.2" class="pilcrow">¶</a>
+          <li id="section-4.2-5.5">The algorithms the issuer accepts are the values of <code>signing_alg_values_supported</code> in its metadata (see <a href="#issuer-metadata">Issuer Metadata</a>), which serves the role <code>Accept-Signature-Alg</code> serves in <span>[<a href="#I-D.hardt-httpbis-signature-key" class="cite xref">I-D.hardt-httpbis-signature-key</a>]</span>. An issuer that publishes the member SHOULD also send <code>Accept-Signature-Alg</code> on an <code>unsupported_algorithm</code> response, so a client that did not read the metadata learns the same set.<a href="#section-4.2-5.5" class="pilcrow">¶</a>
 </li>
         </ol>
+<p id="section-4.2-6">See <a href="#signature-errors">Signature Errors</a> for how the issuer reports a failure alongside this specification's JSON error body.<a href="#section-4.2-6" class="pilcrow">¶</a></p>
+<p id="section-4.2-7">The issuer MUST verify the request body:<a href="#section-4.2-7" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="compact type-1" id="section-4.2-8">
+<li id="section-4.2-8.1">Parsing the JSON body and extracting the <code>email</code> field<a href="#section-4.2-8.1" class="pilcrow">¶</a>
+</li>
+          <li id="section-4.2-8.2">Verifying the <code>email</code> field is a valid email address as defined below<a href="#section-4.2-8.2" class="pilcrow">¶</a>
+</li>
+        </ol>
+</section>
+</div>
+<div id="valid-email-address">
+<section id="section-4.3">
+        <h3 id="name-valid-email-address">
+<a href="#section-4.3" class="section-number selfRef">4.3. </a><a href="#name-valid-email-address" class="section-name selfRef">Valid Email Address</a>
+        </h3>
+<p id="section-4.3-1">An email address is valid for the purposes of this specification if it matches the "valid e-mail address" ABNF production of <span>[<a href="#WHATWG.HTML" class="cite xref">WHATWG.HTML</a>]</span>, Section 4.10.5.1.5. The same definition applies to the <code>email</code> field of the token request, to the <code>email</code> claim of the EVT, and to a private email address issued under <a href="#private-email">Private Email Addresses</a>.<a href="#section-4.3-1" class="pilcrow">¶</a></p>
+<p id="section-4.3-2"><span>[<a href="#RFC5322" class="cite xref">RFC5322</a>]</span> defines a broader grammar than this. It admits comments, folding whitespace, and quoted local parts that no provider issues in practice and that no browser will accept from a user, and parsers that implement it fully disagree with each other at the edges. The <span>[<a href="#WHATWG.HTML" class="cite xref">WHATWG.HTML</a>]</span> production is a deliberate narrowing of <span>[<a href="#RFC5322" class="cite xref">RFC5322</a>]</span> chosen for exactly this problem, and it is already what the browser applies to the address before the protocol begins, since the user supplies it through a control validated against that production. Adopting it here makes the issuer's check and the browser's the same check.<a href="#section-4.3-2" class="pilcrow">¶</a></p>
+<p id="section-4.3-3">The production is willfully non-compliant with <span>[<a href="#RFC5322" class="cite xref">RFC5322</a>]</span> and this specification adopts that non-compliance knowingly. An issuer whose users hold addresses outside it cannot verify them through this protocol.<a href="#section-4.3-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -1954,7 +2016,7 @@ Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; \
           </h4>
 <ul class="compact">
 <li class="compact" id="section-5.1.1-1.1">
-              <code>alg</code> (REQUIRED): Signing algorithm<a href="#section-5.1.1-1.1" class="pilcrow">¶</a>
+              <code>alg</code> (REQUIRED): Signing algorithm. MUST be a fully-specified identifier from the IANA "JSON Web Signature and Encryption Algorithms" registry. The polymorphic <code>EdDSA</code> identifier MUST NOT be used; use <code>Ed25519</code> or <code>Ed448</code>.<a href="#section-5.1.1-1.1" class="pilcrow">¶</a>
 </li>
             <li class="compact" id="section-5.1.1-1.2">
               <code>kid</code> (REQUIRED): Key identifier of the key used to sign<a href="#section-5.1.1-1.2" class="pilcrow">¶</a>
@@ -1966,7 +2028,7 @@ Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; \
 <p id="section-5.1.1-2">Example:<a href="#section-5.1.1-2" class="pilcrow">¶</a></p>
 <div class="lang-json sourcecode" id="section-5.1.1-3">
 <pre>{
-  "alg": "EdDSA",
+  "alg": "Ed25519",
   "kid": "2024-08-19",
   "typ": "evt+jwt"
 }
@@ -1983,16 +2045,16 @@ Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; \
 <p id="section-5.1.2-1">Required claims:<a href="#section-5.1.2-1" class="pilcrow">¶</a></p>
 <ul class="compact">
 <li class="compact" id="section-5.1.2-2.1">
-              <code>iss</code>: The issuer identifier<a href="#section-5.1.2-2.1" class="pilcrow">¶</a>
+              <code>iss</code>: The issuer identifier, an HTTPS origin (see <a href="#issuer-identifier">Issuer Identifier</a>)<a href="#section-5.1.2-2.1" class="pilcrow">¶</a>
 </li>
             <li class="compact" id="section-5.1.2-2.2">
               <code>iat</code>: Issued at time (seconds since epoch)<a href="#section-5.1.2-2.2" class="pilcrow">¶</a>
 </li>
             <li class="compact" id="section-5.1.2-2.3">
-              <code>cnf</code>: Confirmation claim containing the browser's public key in <code>jwk</code> format (for SD-JWT Key Binding compatibility)<a href="#section-5.1.2-2.3" class="pilcrow">¶</a>
+              <code>cnf</code>: Confirmation claim containing the browser's public key in <code>jwk</code> format (for SD-JWT Key Binding compatibility). The <code>jwk</code> is the key conveyed in the <code>Signature-Key</code> header of the token request, reproduced with the same members, including its fully-specified <code>alg</code>.<a href="#section-5.1.2-2.3" class="pilcrow">¶</a>
 </li>
             <li class="compact" id="section-5.1.2-2.4">
-              <code>email</code>: The verified email address<a href="#section-5.1.2-2.4" class="pilcrow">¶</a>
+              <code>email</code>: The verified email address, byte-for-byte as it appeared in the token request<a href="#section-5.1.2-2.4" class="pilcrow">¶</a>
 </li>
             <li class="compact" id="section-5.1.2-2.5">
               <code>email_verified</code>: Boolean, MUST be <code>true</code><a href="#section-5.1.2-2.5" class="pilcrow">¶</a>
@@ -2007,13 +2069,14 @@ Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; \
 <p id="section-5.1.2-5">Example:<a href="#section-5.1.2-5" class="pilcrow">¶</a></p>
 <div class="lang-json sourcecode" id="section-5.1.2-6">
 <pre>{
-  "iss": "issuer.example",
+  "iss": "https://issuer.example",
   "iat": 1724083200,
   "cnf": {
     "jwk": {
       "kty": "OKP",
       "crv": "Ed25519",
-      "x": "JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs"
+      "x": "JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs",
+      "alg": "Ed25519"
     }
   },
   "email": "user@example.com",
@@ -2043,7 +2106,7 @@ Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; \
 <ol start="1" type="1" class="compact type-1" id="section-5.2-2">
 <li id="section-5.2-2.1">Construct the header with <code>alg</code>, <code>kid</code>, and <code>typ</code><a href="#section-5.2-2.1" class="pilcrow">¶</a>
 </li>
-          <li id="section-5.2-2.2">Construct the payload with <code>iss</code>, <code>iat</code>, <code>cnf</code> (containing the public key from the <code>Signature-Key</code> header), <code>email</code>, and <code>email_verified</code><a href="#section-5.2-2.2" class="pilcrow">¶</a>
+          <li id="section-5.2-2.2">Construct the payload with <code>iss</code>, <code>iat</code>, <code>cnf</code> (containing the public key from the <code>Signature-Key</code> header, including its <code>alg</code> member), <code>email</code>, and <code>email_verified</code><a href="#section-5.2-2.2" class="pilcrow">¶</a>
 </li>
           <li id="section-5.2-2.3">If a private email is requested, include <code>is_private_email: true</code> and set <code>email</code> to the private address<a href="#section-5.2-2.3" class="pilcrow">¶</a>
 </li>
@@ -2066,11 +2129,11 @@ Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; \
 <ol start="1" type="1" class="compact type-1" id="section-5.3-2">
 <li id="section-5.3-2.1">Parse the EVT into header, payload, and signature components<a href="#section-5.3-2.1" class="pilcrow">¶</a>
 </li>
-          <li id="section-5.3-2.2">Extract and validate the <code>alg</code> and <code>kid</code> from the header<a href="#section-5.3-2.2" class="pilcrow">¶</a>
+          <li id="section-5.3-2.2">Extract and validate the <code>alg</code> and <code>kid</code> from the header. Reject an <code>alg</code> that is absent, polymorphic, <code>none</code>, or a symmetric MAC identifier.<a href="#section-5.3-2.2" class="pilcrow">¶</a>
 </li>
           <li id="section-5.3-2.3">Extract and validate the <code>iss</code>, <code>iat</code>, <code>cnf</code>, <code>email</code>, and <code>email_verified</code> claims from the payload<a href="#section-5.3-2.3" class="pilcrow">¶</a>
 </li>
-          <li id="section-5.3-2.4">Perform <a href="#issuer-discovery">Issuer Discovery</a> for the email domain to verify the <code>iss</code> claim matches the issuer identifier<a href="#section-5.3-2.4" class="pilcrow">¶</a>
+          <li id="section-5.3-2.4">Perform <a href="#issuer-discovery">Issuer Discovery</a> for the email domain to derive the issuer identifier, and verify the <code>iss</code> claim is byte-for-byte identical to it<a href="#section-5.3-2.4" class="pilcrow">¶</a>
 </li>
           <li id="section-5.3-2.5">Fetch the issuer's public keys from the <code>jwks_uri</code> in the issuer metadata<a href="#section-5.3-2.5" class="pilcrow">¶</a>
 </li>
@@ -2083,7 +2146,7 @@ Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; \
         </ol>
 <p id="section-5.3-3">The browser additionally verifies:<a href="#section-5.3-3" class="pilcrow">¶</a></p>
 <ul class="compact">
-<li class="compact" id="section-5.3-4.1">The <code>email</code> claim matches the email address being verified<a href="#section-5.3-4.1" class="pilcrow">¶</a>
+<li class="compact" id="section-5.3-4.1">The <code>email</code> claim is byte-for-byte identical to the email address being verified<a href="#section-5.3-4.1" class="pilcrow">¶</a>
 </li>
           <li class="compact" id="section-5.3-4.2">The <code>cnf.jwk</code> claim matches the public key the browser generated<a href="#section-5.3-4.2" class="pilcrow">¶</a>
 </li>
@@ -2111,7 +2174,7 @@ Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; \
           </h4>
 <ul class="compact">
 <li class="compact" id="section-6.1.1-1.1">
-              <code>alg</code> (REQUIRED): Signing algorithm (same as the browser's key pair)<a href="#section-6.1.1-1.1" class="pilcrow">¶</a>
+              <code>alg</code> (REQUIRED): Signing algorithm. MUST be the fully-specified identifier carried in the <code>alg</code> member of the EVT's <code>cnf.jwk</code>, which is the same key the browser used to sign the token request.<a href="#section-6.1.1-1.1" class="pilcrow">¶</a>
 </li>
             <li class="compact" id="section-6.1.1-1.2">
               <code>typ</code> (REQUIRED): Set to "kb+jwt" for SD-JWT library compatibility<a href="#section-6.1.1-1.2" class="pilcrow">¶</a>
@@ -2120,7 +2183,7 @@ Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; \
 <p id="section-6.1.1-2">Example:<a href="#section-6.1.1-2" class="pilcrow">¶</a></p>
 <div class="lang-json sourcecode" id="section-6.1.1-3">
 <pre>{
-  "alg": "EdDSA",
+  "alg": "Ed25519",
   "typ": "kb+jwt"
 }
 
@@ -2253,15 +2316,17 @@ Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; \
 </li>
           <li id="section-6.5-2.3">Extract <code>alg</code> from the header and <code>aud</code>, <code>nonce</code>, <code>iat</code>, <code>sd_hash</code> from the payload<a href="#section-6.5-2.3" class="pilcrow">¶</a>
 </li>
-          <li id="section-6.5-2.4">Verify <code>aud</code> matches the RP's origin<a href="#section-6.5-2.4" class="pilcrow">¶</a>
+          <li id="section-6.5-2.4">Verify <code>alg</code> matches the <code>alg</code> member of the EVT's <code>cnf.jwk</code>, and reject the KB-JWT if it does not<a href="#section-6.5-2.4" class="pilcrow">¶</a>
 </li>
-          <li id="section-6.5-2.5">Verify <code>nonce</code> matches the nonce from the RP's session<a href="#section-6.5-2.5" class="pilcrow">¶</a>
+          <li id="section-6.5-2.5">Verify <code>aud</code> matches the RP's origin<a href="#section-6.5-2.5" class="pilcrow">¶</a>
 </li>
-          <li id="section-6.5-2.6">Verify <code>iat</code> is within a reasonable time window<a href="#section-6.5-2.6" class="pilcrow">¶</a>
+          <li id="section-6.5-2.6">Verify <code>nonce</code> matches the nonce from the RP's session<a href="#section-6.5-2.6" class="pilcrow">¶</a>
 </li>
-          <li id="section-6.5-2.7">Compute the SHA-256 hash of the EVT and verify it matches <code>sd_hash</code><a href="#section-6.5-2.7" class="pilcrow">¶</a>
+          <li id="section-6.5-2.7">Verify <code>iat</code> is within a reasonable time window<a href="#section-6.5-2.7" class="pilcrow">¶</a>
 </li>
-          <li id="section-6.5-2.8">Verify the KB-JWT signature using the public key from the EVT's <code>cnf.jwk</code> claim<a href="#section-6.5-2.8" class="pilcrow">¶</a>
+          <li id="section-6.5-2.8">Compute the SHA-256 hash of the EVT and verify it matches <code>sd_hash</code><a href="#section-6.5-2.8" class="pilcrow">¶</a>
+</li>
+          <li id="section-6.5-2.9">Verify the KB-JWT signature using the public key from the EVT's <code>cnf.jwk</code> claim, under the algorithm named by that key's <code>alg</code> member<a href="#section-6.5-2.9" class="pilcrow">¶</a>
 </li>
         </ol>
 </section>
@@ -2319,9 +2384,10 @@ Host: accounts.issuer.example
 Cookie: webauthn_state=...
 Content-Type: application/json
 Sec-Fetch-Dest: email-verification
-Signature-Input: sig=("@method" "@authority" "@path" "cookie" "signature-key");created=1692345600
+Content-Digest: sha-256=:...:
+Signature-Input: sig=("@method" "@authority" "@path" "content-digest" "signature-key");created=1692345600
 Signature: sig=:...:
-Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; x="JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs"
+Signature-Key: sig=hwk;kty="OKP";crv="Ed25519";x="JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs";alg="Ed25519"
 
 {
   "email": "user@example.com",
@@ -2340,9 +2406,6 @@ Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; x="JrQLj5P_89iXES9-vFgrIy29clF
 </pre><a href="#section-7.2-2" class="pilcrow">¶</a>
 </div>
 <p id="section-7.2-3">The <code>webauthn_response</code> object follows the structure of PublicKeyCredential as defined in <span>[<a href="#WebAuthn" class="cite xref">WebAuthn</a>]</span>.<a href="#section-7.2-3" class="pilcrow">¶</a></p>
-<blockquote id="section-7.2-4">
-          <p id="section-7.2-4.1">Note: The <code>cookie</code> component MUST be included in the signature when cookies are present (such as those set by the challenge response). If no cookies are present, the <code>cookie</code> component is omitted per <a href="#request-signing">HTTP Request Signing</a>.<a href="#section-7.2-4.1" class="pilcrow">¶</a></p>
-</blockquote>
 </section>
 </div>
 <div id="webauthn-verification">
@@ -2437,8 +2500,8 @@ Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; x="JrQLj5P_89iXES9-vFgrIy29clF
         <h3 id="name-issuer-flexibility">
 <a href="#section-8.4" class="section-number selfRef">8.4. </a><a href="#name-issuer-flexibility" class="section-name selfRef">Issuer Flexibility</a>
         </h3>
-<p id="section-8.4-1">The domain of the private email address does not need to match the domain of the user's actual email address. Additionally, the <code>iss</code> claim in the EVT corresponds to the issuer for the private email domain, which may differ from the issuer the browser initially contacted.<a href="#section-8.4-1" class="pilcrow">¶</a></p>
-<p id="section-8.4-2">For example, a user with <code>user@example.com</code> may receive a private email address <code>u7x9k2m4@privaterelay.different.example</code>. The EVT's <code>iss</code> claim would be the issuer for <code>privaterelay.different.example</code>. The browser verifies the EVT by performing issuer discovery on the private email domain and validating the signature against that issuer's JWKS. This allows email providers to delegate private email functionality to a separate service. It also enables privacy for users with vanity domains (e.g., <code>me@dickhardt.example</code>) where the domain itself is a unique identifier that would otherwise reveal the user's identity.<a href="#section-8.4-2" class="pilcrow">¶</a></p>
+<p id="section-8.4-1">The domain of the private email address does not need to match the domain of the user's actual email address. Additionally, the <code>iss</code> claim in the EVT is the issuer identifier for the private email domain, which may differ from the issuer the browser initially contacted.<a href="#section-8.4-1" class="pilcrow">¶</a></p>
+<p id="section-8.4-2">For example, a user with <code>user@example.com</code> may receive a private email address <code>u7x9k2m4@privaterelay.different.example</code>. The EVT's <code>iss</code> claim would be the issuer identifier derived for <code>privaterelay.different.example</code>. The browser verifies the EVT by performing issuer discovery on the private email domain and validating the signature against that issuer's JWKS. This allows email providers to delegate private email functionality to a separate service. It also enables privacy for users with vanity domains (e.g., <code>me@dickhardt.example</code>) where the domain itself is a unique identifier that would otherwise reveal the user's identity.<a href="#section-8.4-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="example-evt-payload">
@@ -2449,13 +2512,14 @@ Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; x="JrQLj5P_89iXES9-vFgrIy29clF
 <p id="section-8.5-1">When a private email is issued, the EVT contains the private address in the <code>email</code> claim and includes <code>is_private_email: true</code>:<a href="#section-8.5-1" class="pilcrow">¶</a></p>
 <div class="lang-json sourcecode" id="section-8.5-2">
 <pre>{
-  "iss": "privaterelay.different.example",
+  "iss": "https://privaterelay.different.example",
   "iat": 1724083200,
   "cnf": {
     "jwk": {
       "kty": "OKP",
       "crv": "Ed25519",
-      "x": "JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs"
+      "x": "JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs",
+      "alg": "Ed25519"
     }
   },
   "email": "u7x9k2m4@privaterelay.different.example",
@@ -2503,27 +2567,40 @@ Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; x="JrQLj5P_89iXES9-vFgrIy29clF
 <p id="section-9.2-4">The <code>error_description</code> SHOULD specify that the Sec-Fetch-Dest header is missing or invalid.<a href="#section-9.2-4" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="invalid-or-missing-http-message-signature">
+<div id="signature-errors">
 <section id="section-9.3">
         <h3 id="name-invalid-or-missing-http-mes">
 <a href="#section-9.3" class="section-number selfRef">9.3. </a><a href="#name-invalid-or-missing-http-mes" class="section-name selfRef">Invalid or Missing HTTP Message Signature</a>
         </h3>
-<p id="section-9.3-1">When the HTTP Message Signature is missing, malformed, or verification fails:<a href="#section-9.3-1" class="pilcrow">¶</a></p>
+<p id="section-9.3-1">When the HTTP Message Signature is missing, malformed, or verification fails, the issuer MUST return the <code>error</code> field <code>invalid_signature</code> in the JSON body, and SHOULD include the <code>Signature-Error</code> response header of <span>[<a href="#I-D.hardt-httpbis-signature-key" class="cite xref">I-D.hardt-httpbis-signature-key</a>]</span> naming the specific error code. The header is the machine-readable carrier; the JSON body remains for clients that do not process it.<a href="#section-9.3-1" class="pilcrow">¶</a></p>
 <p id="section-9.3-2"><strong>HTTP 400 Bad Request</strong><a href="#section-9.3-2" class="pilcrow">¶</a></p>
-<div class="lang-json sourcecode" id="section-9.3-3">
-<pre>{
+<div class="lang-http sourcecode" id="section-9.3-3">
+<pre>HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Signature-Error: error=invalid_signature
+
+{
   "error": "invalid_signature",
   "error_description": "HTTP Message Signature verification failed"
 }
 
 </pre><a href="#section-9.3-3" class="pilcrow">¶</a>
 </div>
-<p id="section-9.3-4">This includes cases where:
-- The <code>Signature</code>, <code>Signature-Input</code>, or <code>Signature-Key</code> headers are missing
-- The <code>Signature-Key</code> header does not use the <code>hwk</code> scheme or is malformed
-- The signature does not cover the required components
-- The signature verification fails using the public key from <code>Signature-Key</code>
-- The <code>created</code> timestamp is outside the acceptable time window<a href="#section-9.3-4" class="pilcrow">¶</a></p>
+<p id="section-9.3-4">This covers every signature-related failure defined by <span>[<a href="#I-D.hardt-httpbis-signature-key" class="cite xref">I-D.hardt-httpbis-signature-key</a>]</span> — an unresolvable or invalid key, an unsupported algorithm or scheme, a missing covered component, an expired <code>created</code> timestamp, and a signature that does not verify — and a <code>Content-Digest</code> that does not match the received body. The body's <code>error</code> field is <code>invalid_signature</code> in all of them; the <code>Signature-Error</code> header carries which one it was, and the accompanying headers that document defines say what would have worked:<a href="#section-9.3-4" class="pilcrow">¶</a></p>
+<div class="lang-http sourcecode" id="section-9.3-5">
+<pre>HTTP/1.1 400 Bad Request
+Content-Type: application/json
+Signature-Error: error=unsupported_algorithm
+Accept-Signature-Alg: Ed25519, ES256
+
+{
+  "error": "invalid_signature",
+  "error_description": "Unsupported signature algorithm"
+}
+
+</pre><a href="#section-9.3-5" class="pilcrow">¶</a>
+</div>
+<p id="section-9.3-6">The two carry the same failure at different granularities, so an issuer MUST NOT return a <code>Signature-Error</code> header naming a failure the body contradicts.<a href="#section-9.3-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="authentication-required">
@@ -2699,16 +2776,16 @@ Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; x="JrQLj5P_89iXES9-vFgrIy29clF
 <p id="section-11.1-1">The use of HTTP Message Signatures (<span>[<a href="#RFC9421" class="cite xref">RFC9421</a>]</span>) provides several security benefits:<a href="#section-11.1-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-11.1-2">
 <li id="section-11.1-2.1">
-            <p id="section-11.1-2.1.1"><strong>Request Integrity</strong>: The signature covers the HTTP method, authority, path, and cookies, preventing tampering with any of these components.<a href="#section-11.1-2.1.1" class="pilcrow">¶</a></p>
+            <p id="section-11.1-2.1.1"><strong>Request Integrity</strong>: The signature covers the HTTP method, authority, path, and — through <code>content-digest</code> — the request body, preventing tampering with any of these components. The body is what carries the email address being verified, so without that coverage the signature would attest to a request without attesting to which address it asked for.<a href="#section-11.1-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-11.1-2.2">
-            <p id="section-11.1-2.2.1"><strong>Cookie Binding</strong>: By including the <code>cookie</code> component in the signature, the browser's authentication cookies are cryptographically bound to the specific request, preventing cookie injection or manipulation attacks.<a href="#section-11.1-2.2.1" class="pilcrow">¶</a></p>
+            <p id="section-11.1-2.2.1"><strong>Cookie Binding (when covered)</strong>: Covering the <code>cookie</code> component binds the authenticating cookie to the signed request. Coverage cannot be assumed — in some browser architectures the Cookie header is attached after the request is signed, so the value does not exist at signing time. Without it, the signature still binds the request to the browser's key, and the cookie still authenticates the user.<a href="#section-11.1-2.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-11.1-2.3">
-            <p id="section-11.1-2.3.1"><strong>Replay Protection</strong>: The <code>created</code> timestamp in the <code>Signature-Input</code> header is verified to be within 60 seconds, preventing replay attacks.<a href="#section-11.1-2.3.1" class="pilcrow">¶</a></p>
+            <p id="section-11.1-2.3.1"><strong>Replay Protection</strong>: The <code>created</code> timestamp in the <code>Signature-Input</code> header is verified to be within 300 seconds, bounding the replay window. A replayed request yields an EVT bound to the original browser's key through the <code>cnf</code> claim, so replay gains an attacker no token another party can use.<a href="#section-11.1-2.3.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-11.1-2.4">
-            <p id="section-11.1-2.4.1"><strong>Public Key Binding</strong>: The browser's public key transmitted via the <code>Signature-Key</code> header with the <code>hwk</code> scheme is bound to the request signature, ensuring the issuer knows which public key to include in the EVT's <code>cnf</code> claim.<a href="#section-11.1-2.4.1" class="pilcrow">¶</a></p>
+            <p id="section-11.1-2.4.1"><strong>Public Key Binding</strong>: The browser's public key transmitted via the <code>Signature-Key</code> header with the <code>hwk</code> scheme is bound to the request signature, ensuring the issuer knows which public key to include in the EVT's <code>cnf</code> claim. Because <code>signature-key</code> is a covered component, an attacker cannot substitute the key or the scheme without invalidating the signature; see Signature-Key Integrity in <span>[<a href="#I-D.hardt-httpbis-signature-key" class="cite xref">I-D.hardt-httpbis-signature-key</a>]</span>.<a href="#section-11.1-2.4.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
 </section>
@@ -2732,74 +2809,96 @@ Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; x="JrQLj5P_89iXES9-vFgrIy29clF
         </ol>
 </section>
 </div>
-<div id="email-existence-probing">
+<div id="fully-specified-algorithms">
 <section id="section-11.3">
-        <h3 id="name-email-existence-probing">
-<a href="#section-11.3" class="section-number selfRef">11.3. </a><a href="#name-email-existence-probing" class="section-name selfRef">Email Existence Probing</a>
+        <h3 id="name-fully-specified-algorithms">
+<a href="#section-11.3" class="section-number selfRef">11.3. </a><a href="#name-fully-specified-algorithms" class="section-name selfRef">Fully-Specified Algorithms</a>
         </h3>
-<p id="section-11.3-1">Any software—not just browsers—can send requests to an issuer's issuance endpoint. An attacker could attempt to use this to probe for valid email addresses:<a href="#section-11.3-1" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="compact type-1" id="section-11.3-2">
-<li id="section-11.3-2.1">
-            <strong>Build email lists</strong>: Probe many addresses to identify valid ones for spam targeting.<a href="#section-11.3-2.1" class="pilcrow">¶</a>
+<p id="section-11.3-1">Every algorithm identifier in this protocol is fully specified: it names the signature operation completely, including curve and hash where applicable. A key whose algorithm is not determined by its identifier invites downgrade and confused-verifier conditions, in which two parties disagree on the operation a signature represents. <span>[<a href="#RFC9864" class="cite xref">RFC9864</a>]</span> gives the analysis and deprecates the polymorphic identifiers, of which <code>EdDSA</code> is the one this protocol would otherwise have used.<a href="#section-11.3-1" class="pilcrow">¶</a></p>
+<p id="section-11.3-2">For the browser's request-signing key, <span>[<a href="#I-D.hardt-httpbis-signature-key" class="cite xref">I-D.hardt-httpbis-signature-key</a>]</span> imposes this and states how the issuer enforces it. The EVT and the KB-JWT are outside that document's scope, so this specification imposes it on them directly: on the issuer's EVT signing key (see <a href="#evt-structure">EVT Structure</a>) and on the KB-JWT, whose <code>alg</code> is fixed by the <code>cnf.jwk</code> it is verified against (see <a href="#kb-structure">KB-JWT Structure</a>).<a href="#section-11.3-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="dns-delegation-security">
+<section id="section-11.4">
+        <h3 id="name-dns-delegation-2">
+<a href="#section-11.4" class="section-number selfRef">11.4. </a><a href="#name-dns-delegation-2" class="section-name selfRef">DNS Delegation</a>
+        </h3>
+<p id="section-11.4-1">The delegation from an email domain to an issuer is carried in an unauthenticated DNS TXT record (<a href="#dns-delegation">DNS Delegation</a>). An attacker who controls what a party sees for <code>_email-verification.$EMAIL_DOMAIN</code> controls which issuer that party believes is authoritative for the domain. This section states what that yields, and to whom.<a href="#section-11.4-1" class="pilcrow">¶</a></p>
+<p id="section-11.4-2">Two parties resolve the record independently: the browser, to find the issuance endpoint, and the RP, to check the <code>iss</code> claim of the EVT it receives (<a href="#evt-verification">EVT Verification</a>). The two lookups are not equally valuable to an attacker.<a href="#section-11.4-2" class="pilcrow">¶</a></p>
+<p id="section-11.4-3"><strong>Spoofing the browser's resolver alone gains little.</strong> The browser is directed to an attacker-controlled issuer and discloses the email address to it. It does not disclose the user's credentials: cookies are scoped to the real issuer's origin and are not sent to a different one. The attacker can mint an EVT, but its <code>iss</code> is the attacker's identifier, and the RP — resolving the record itself, over its own path — derives the real issuer identifier and rejects the token. The mismatch is what stops it, which is why <a href="#issuer-identifier">Issuer Identifier</a> requires the comparison to be exact.<a href="#section-11.4-3" class="pilcrow">¶</a></p>
+<p id="section-11.4-4"><strong>Spoofing the RP's resolver is the attack that matters.</strong> An attacker who controls the RP's view of DNS for the email domain, and who runs an issuer, can present an EVT the RP accepts for any address at that domain. Nothing later in verification catches this: the token is well-formed, correctly signed, and signed by the key the RP was told to trust. This is the residual risk of the design, and it is not mitigated elsewhere in this document.<a href="#section-11.4-4" class="pilcrow">¶</a></p>
+<p id="section-11.4-5">The RP is better placed to address this than the browser. It is a server, resolving on its own infrastructure, and can validate DNSSEC or use a validating resolver over an authenticated channel. RPs SHOULD validate DNSSEC for <code>_email-verification.$EMAIL_DOMAIN</code> where the email domain is signed, and SHOULD resolve through a resolver they trust rather than whatever the host is configured with. Email domain operators publishing this record SHOULD sign their zone.<a href="#section-11.4-5" class="pilcrow">¶</a></p>
+<p id="section-11.4-6">It has been argued that an authentication decision should never depend on data fetched from DNS. The objection is sound as a general rule and this document does not dismiss it. Two things are true alongside it. The delegation is a property of an email domain, and the authoritative source for a property of an email domain is that domain's DNS — the same place SPF, DKIM, and DMARC already sit, and the same records an attacker with this capability could already forge to redirect or authenticate mail for the domain. And moving the delegation to HTTPS would require every email domain to operate a web server, which <a href="#why-dns-delegation">Why DNS Delegation?</a> explains is the barrier this design set out to avoid. The exposure this creates is nonetheless real, unsigned DNS is weaker than HTTPS, and a deployment that cannot obtain DNSSEC on the email domains it accepts is accepting the risk described above.<a href="#section-11.4-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="email-existence-probing">
+<section id="section-11.5">
+        <h3 id="name-email-existence-probing">
+<a href="#section-11.5" class="section-number selfRef">11.5. </a><a href="#name-email-existence-probing" class="section-name selfRef">Email Existence Probing</a>
+        </h3>
+<p id="section-11.5-1">Any software—not just browsers—can send requests to an issuer's issuance endpoint. An attacker could attempt to use this to probe for valid email addresses:<a href="#section-11.5-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="compact type-1" id="section-11.5-2">
+<li id="section-11.5-2.1">
+            <strong>Build email lists</strong>: Probe many addresses to identify valid ones for spam targeting.<a href="#section-11.5-2.1" class="pilcrow">¶</a>
 </li>
-          <li id="section-11.3-2.2">
-            <strong>Account enumeration</strong>: Determine which email addresses have accounts at specific issuers.<a href="#section-11.3-2.2" class="pilcrow">¶</a>
+          <li id="section-11.5-2.2">
+            <strong>Account enumeration</strong>: Determine which email addresses have accounts at specific issuers.<a href="#section-11.5-2.2" class="pilcrow">¶</a>
 </li>
         </ol>
 <div id="uniform-error-responses">
-<section id="section-11.3.1">
+<section id="section-11.5.1">
           <h4 id="name-uniform-error-responses">
-<a href="#section-11.3.1" class="section-number selfRef">11.3.1. </a><a href="#name-uniform-error-responses" class="section-name selfRef">Uniform Error Responses</a>
+<a href="#section-11.5.1" class="section-number selfRef">11.5.1. </a><a href="#name-uniform-error-responses" class="section-name selfRef">Uniform Error Responses</a>
           </h4>
-<p id="section-11.3.1-1">To prevent probing, issuers MUST NOT return different error responses based on whether an email address exists. The <code>authentication_required</code> error should be returned uniformly whether:<a href="#section-11.3.1-1" class="pilcrow">¶</a></p>
+<p id="section-11.5.1-1">To prevent probing, issuers MUST NOT return different error responses based on whether an email address exists. The <code>authentication_required</code> error should be returned uniformly whether:<a href="#section-11.5.1-1" class="pilcrow">¶</a></p>
 <ul class="compact">
-<li class="compact" id="section-11.3.1-2.1">The email address does not exist at this issuer<a href="#section-11.3.1-2.1" class="pilcrow">¶</a>
+<li class="compact" id="section-11.5.1-2.1">The email address does not exist at this issuer<a href="#section-11.5.1-2.1" class="pilcrow">¶</a>
 </li>
-            <li class="compact" id="section-11.3.1-2.2">The email address exists but the user is not authenticated<a href="#section-11.3.1-2.2" class="pilcrow">¶</a>
+            <li class="compact" id="section-11.5.1-2.2">The email address exists but the user is not authenticated<a href="#section-11.5.1-2.2" class="pilcrow">¶</a>
 </li>
-            <li class="compact" id="section-11.3.1-2.3">The email address exists but the authenticated user does not control it<a href="#section-11.3.1-2.3" class="pilcrow">¶</a>
+            <li class="compact" id="section-11.5.1-2.3">The email address exists but the authenticated user does not control it<a href="#section-11.5.1-2.3" class="pilcrow">¶</a>
 </li>
           </ul>
-<p id="section-11.3.1-3">This ensures attackers cannot distinguish between "email exists" and "email does not exist" based on error responses.<a href="#section-11.3.1-3" class="pilcrow">¶</a></p>
+<p id="section-11.5.1-3">This ensures attackers cannot distinguish between "email exists" and "email does not exist" based on error responses.<a href="#section-11.5.1-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="timing-attack-mitigations">
-<section id="section-11.3.2">
+<section id="section-11.5.2">
           <h4 id="name-timing-attack-mitigations">
-<a href="#section-11.3.2" class="section-number selfRef">11.3.2. </a><a href="#name-timing-attack-mitigations" class="section-name selfRef">Timing Attack Mitigations</a>
+<a href="#section-11.5.2" class="section-number selfRef">11.5.2. </a><a href="#name-timing-attack-mitigations" class="section-name selfRef">Timing Attack Mitigations</a>
           </h4>
-<p id="section-11.3.2-1">Response timing can also reveal whether an email address exists. If the issuer performs a database lookup only when the email exists, or takes different code paths based on email existence, an attacker can measure response times to infer information.<a href="#section-11.3.2-1" class="pilcrow">¶</a></p>
-<p id="section-11.3.2-2">Issuers SHOULD mitigate timing attacks using techniques such as:<a href="#section-11.3.2-2" class="pilcrow">¶</a></p>
+<p id="section-11.5.2-1">Response timing can also reveal whether an email address exists. If the issuer performs a database lookup only when the email exists, or takes different code paths based on email existence, an attacker can measure response times to infer information.<a href="#section-11.5.2-1" class="pilcrow">¶</a></p>
+<p id="section-11.5.2-2">Issuers SHOULD mitigate timing attacks using techniques such as:<a href="#section-11.5.2-2" class="pilcrow">¶</a></p>
 <ul class="compact">
-<li class="compact" id="section-11.3.2-3.1">
-              <strong>Uniform code paths</strong>: Execute the same operations (database lookups, cryptographic operations) regardless of whether the email exists, avoiding early returns that skip processing steps.<a href="#section-11.3.2-3.1" class="pilcrow">¶</a>
+<li class="compact" id="section-11.5.2-3.1">
+              <strong>Uniform code paths</strong>: Execute the same operations (database lookups, cryptographic operations) regardless of whether the email exists, avoiding early returns that skip processing steps.<a href="#section-11.5.2-3.1" class="pilcrow">¶</a>
 </li>
-            <li class="compact" id="section-11.3.2-3.2">
-              <strong>Response delay normalization</strong>: Add delays to normalize response times across all error conditions to a consistent baseline.<a href="#section-11.3.2-3.2" class="pilcrow">¶</a>
+            <li class="compact" id="section-11.5.2-3.2">
+              <strong>Response delay normalization</strong>: Add delays to normalize response times across all error conditions to a consistent baseline.<a href="#section-11.5.2-3.2" class="pilcrow">¶</a>
 </li>
           </ul>
 </section>
 </div>
 <div id="additional-mitigations">
-<section id="section-11.3.3">
+<section id="section-11.5.3">
           <h4 id="name-additional-mitigations">
-<a href="#section-11.3.3" class="section-number selfRef">11.3.3. </a><a href="#name-additional-mitigations" class="section-name selfRef">Additional Mitigations</a>
+<a href="#section-11.5.3" class="section-number selfRef">11.5.3. </a><a href="#name-additional-mitigations" class="section-name selfRef">Additional Mitigations</a>
           </h4>
 <ul class="compact">
-<li class="compact" id="section-11.3.3-1.1">
-              <strong>User interaction required</strong>: The browser API requires user gesture and consent before initiating verification, preventing automated probing from browsers.<a href="#section-11.3.3-1.1" class="pilcrow">¶</a>
+<li class="compact" id="section-11.5.3-1.1">
+              <strong>User interaction required</strong>: The browser API requires user gesture and consent before initiating verification, preventing automated probing from browsers.<a href="#section-11.5.3-1.1" class="pilcrow">¶</a>
 </li>
-            <li class="compact" id="section-11.3.3-1.2">
-              <strong>Rate limiting</strong>: Issuers SHOULD rate-limit requests per IP address to slow down probing attempts from any client.<a href="#section-11.3.3-1.2" class="pilcrow">¶</a>
+            <li class="compact" id="section-11.5.3-1.2">
+              <strong>Rate limiting</strong>: Issuers SHOULD rate-limit requests per IP address to slow down probing attempts from any client.<a href="#section-11.5.3-1.2" class="pilcrow">¶</a>
 </li>
-            <li class="compact" id="section-11.3.3-1.3">
-              <strong>Sec-Fetch-Dest verification</strong>: The required <code>Sec-Fetch-Dest: email-verification</code> header provides a signal that the request originates from a browser, though this can be spoofed by non-browser clients.<a href="#section-11.3.3-1.3" class="pilcrow">¶</a>
+            <li class="compact" id="section-11.5.3-1.3">
+              <strong>Sec-Fetch-Dest verification</strong>: The required <code>Sec-Fetch-Dest: email-verification</code> header provides a signal that the request originates from a browser, though this can be spoofed by non-browser clients.<a href="#section-11.5.3-1.3" class="pilcrow">¶</a>
 </li>
-            <li class="compact" id="section-11.3.3-1.4">
-              <strong>Same information as email OTP</strong>: An attacker can already determine email existence by sending verification emails and checking for bounces. EVP does not create new information disclosure beyond what is already possible.<a href="#section-11.3.3-1.4" class="pilcrow">¶</a>
+            <li class="compact" id="section-11.5.3-1.4">
+              <strong>Same information as email OTP</strong>: An attacker can already determine email existence by sending verification emails and checking for bounces. EVP does not create new information disclosure beyond what is already possible.<a href="#section-11.5.3-1.4" class="pilcrow">¶</a>
 </li>
           </ul>
-<p id="section-11.3.3-2">Issuers SHOULD implement appropriate rate limiting and abuse detection.<a href="#section-11.3.3-2" class="pilcrow">¶</a></p>
+<p id="section-11.5.3-2">Issuers SHOULD implement appropriate rate limiting and abuse detection.<a href="#section-11.5.3-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2905,7 +3004,7 @@ Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; x="JrQLj5P_89iXES9-vFgrIy29clF
             <strong>Standards-Based</strong>: <span>[<a href="#RFC9421" class="cite xref">RFC9421</a>]</span> is a published standard for signing HTTP messages, providing better interoperability<a href="#section-12.6-2.1" class="pilcrow">¶</a>
 </li>
           <li id="section-12.6-2.2">
-            <strong>Cookie Binding</strong>: HTTP Message Signatures can directly sign the <code>cookie</code> header, providing stronger binding between authentication cookies and the request<a href="#section-12.6-2.2" class="pilcrow">¶</a>
+            <strong>Cookie Binding</strong>: HTTP Message Signatures can directly sign the <code>cookie</code> header where a signer is able to, providing stronger binding between authentication cookies and the request<a href="#section-12.6-2.2" class="pilcrow">¶</a>
 </li>
           <li id="section-12.6-2.3">
             <strong>Flexibility</strong>: The signature can cover any HTTP components, making it easier to add additional protections in the future<a href="#section-12.6-2.3" class="pilcrow">¶</a>
@@ -2948,18 +3047,56 @@ Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; x="JrQLj5P_89iXES9-vFgrIy29clF
 <a href="#section-14" class="section-number selfRef">14. </a><a href="#name-document-history" class="section-name selfRef">Document History</a>
       </h2>
 <p id="section-14-1"><em>Note: This section is to be removed before publishing as an RFC.</em><a href="#section-14-1" class="pilcrow">¶</a></p>
+<ul class="compact">
+<li class="compact" id="section-14-2.1">draft-hardt-email-verification-02<a href="#section-14-2.1" class="pilcrow">¶</a>
+</li>
+      </ul>
+<p id="section-14-3">Tracked the breaking changes in draft-hardt-httpbis-signature-key-08. A token request serialized per -01 is rejected by an issuer implementing this version, and one serialized per this version is rejected by an issuer implementing -01. There is nothing to negotiate over, so both ends of a deployment move together.<a href="#section-14-3" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-14-2.1">
-          <p id="section-14-2.1.1">draft-hardt-email-verification-01<a href="#section-14-2.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-14-4.1">Added the required <code>alg</code> parameter to every <code>Signature-Key</code> example. Signature-Key -08 makes the key's <code>alg</code> the single source of truth for the algorithm; -07 forbade the parameter outright.<a href="#section-14-4.1" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-14-4.2">Replaced the polymorphic <code>EdDSA</code> identifier with <code>Ed25519</code> throughout: the browser's key, the default when <code>signing_alg_values_supported</code> is absent, the EVT header, the KB-JWT header, and every example. <code>EdDSA</code> is deprecated by <span>[<a href="#RFC9864" class="cite xref">RFC9864</a>]</span> and forbidden by Signature-Key -08.<a href="#section-14-4.2" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-14-4.3">Required <code>signing_alg_values_supported</code> to carry fully-specified identifiers, and forbade <code>EdDSA</code>, <code>none</code>, and the symmetric MAC identifiers. The member governs issued EVTs as well as HTTP Message Signatures, so the constraint is stated here rather than left to Signature-Key.<a href="#section-14-4.3" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-14-4.4">Rewrote HTTP Request Verification to delegate to <span>[<a href="#RFC9421" class="cite xref">RFC9421</a>]</span> and <span>[<a href="#I-D.hardt-httpbis-signature-key" class="cite xref">I-D.hardt-httpbis-signature-key</a>]</span> rather than restate them, and to keep only what this specification profiles: <code>hwk</code> as the only scheme, the required covered components, the <code>created</code> window, and <code>signing_alg_values_supported</code> as the discovery-time form of <code>Accept-Signature-Alg</code>. The restated text was what went stale — the previous step listing the <code>hwk</code> parameters as <code>kty</code>, <code>crv</code>, and <code>x</code> silently became wrong when -08 added <code>alg</code>.<a href="#section-14-4.4" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-14-4.5">Carried the key's <code>alg</code> member into the EVT <code>cnf.jwk</code>, so the RP verifies the KB-JWT under a fully-specified algorithm rather than one derived from the key. Required the KB-JWT header <code>alg</code> to match it, and had the RP reject a KB-JWT where the two disagree.<a href="#section-14-4.5" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-14-4.6">Required the EVT header <code>alg</code> to be fully specified. The EVT is an ordinary JWT and outside the scope of Signature-Key, so nothing else imposes this.<a href="#section-14-4.6" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-14-4.7">Added the <code>Signature-Error</code> response header to signature error responses, alongside this specification's existing JSON error body, and said how the two relate: the body reports <code>invalid_signature</code> in every case and the header carries which failure it was.<a href="#section-14-4.7" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-14-4.8">Added a Fully-Specified Algorithms subsection to Security Considerations giving the reason and naming which of the three signatures each rule reaches.<a href="#section-14-4.8" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-14-4.9">Defined "valid email address" as the "valid e-mail address" production of <span>[<a href="#WHATWG.HTML" class="cite xref">WHATWG.HTML</a>]</span> rather than leaving the term undefined, and said why that production rather than <span>[<a href="#RFC5322" class="cite xref">RFC5322</a>]</span>. Addresses issue #2.<a href="#section-14-4.9" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-14-4.10">Added a DNS Delegation subsection to Security Considerations. The delegation rests on an unauthenticated TXT record and the document said nothing about it. Separated the two lookups: spoofing the browser's resolver discloses the email address but yields no token the RP will accept, since cookies are origin-scoped and the RP resolves the record itself; spoofing the RP's resolver is the attack that matters and is not mitigated elsewhere. Recommended DNSSEC validation by RPs and zone signing by email domain operators, and stated the residual risk. Addresses issue #6.<a href="#section-14-4.10" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-14-4.11">Made the issuer identifier an HTTPS origin rather than a bare host name, aligning the <code>iss</code> claim with <span>[<a href="#OpenID.Core" class="cite xref">OpenID.Core</a>]</span> and <span>[<a href="#RFC8414" class="cite xref">RFC8414</a>]</span> and with what the browser implementation already enforces. The DNS TXT record still carries a host name; the identifier is derived from it by prefixing <code>https://</code>, and every comparison is byte-for-byte on the derived string. Added an Issuer Identifier section stating the derivation once. Addresses issue #7.<a href="#section-14-4.11" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-14-4.12">Added the <code>issuer</code> member to the metadata document and required a fetching party to reject a document whose <code>issuer</code> does not match the identity it was fetched under, per <span>[<a href="#RFC8414" class="cite xref">RFC8414</a>]</span>, Section 3.3. This is the check Signature-Key -08 added for its own discovery, applied here.<a href="#section-14-4.12" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-14-4.13">Made coverage of the <code>cookie</code> component RECOMMENDED when the header is available to the signer at signing time, rather than required, and forbade an issuer from rejecting a request solely because it is not covered. In some browser architectures the Cookie header is attached after the request is constructed and signed, so the requirement was unimplementable. Addresses issue #11.<a href="#section-14-4.13" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-14-4.14">Replaced the Email Discovery models with what this protocol requires: candidate addresses come from the W3C Email Verification API, the browser offers only valid email addresses, and from selection onward the address is never altered — it is sent byte-for-byte in the token request, returned byte-for-byte in the <code>email</code> claim, and every email comparison is byte-for-byte. Addresses issues #4, #13, and #24.<a href="#section-14-4.14" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-14-4.15">Required the <code>Content-Digest</code> header (<span>[<a href="#RFC9530" class="cite xref">RFC9530</a>]</span>) on the token request and added <code>content-digest</code> to the covered components. The email address being verified is carried in the request body, which no covered component reached, so the signature attested to a request without attesting to which address it asked for. Required the issuer to recompute the digest against the received bytes rather than rely on the signature over the header alone. Addresses issue #3.<a href="#section-14-4.15" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-14-4.16">
+          <p id="section-14-4.16.1">Widened the <code>created</code> acceptance window from 60 to 300 seconds. Device clocks skew by minutes, not seconds, and the window is not load-bearing for security: a replayed request yields an EVT bound to the original browser's key. Follows the clock-skew guidance of <span>[<a href="#RFC8725" class="cite xref">RFC8725</a>]</span>.<a href="#section-14-4.16.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-14-4.17">
+          <p id="section-14-4.17.1">draft-hardt-email-verification-01<a href="#section-14-4.17.1" class="pilcrow">¶</a></p>
 <ul class="compact normal">
-<li class="compact normal" id="section-14-2.1.2.1">Updated Implementation Status: completed GMail issuer entry, added Chrome and Edge origin trials.<a href="#section-14-2.1.2.1" class="pilcrow">¶</a>
+<li class="compact normal" id="section-14-4.17.2.1">Updated Implementation Status: completed GMail issuer entry, added Chrome and Edge origin trials.<a href="#section-14-4.17.2.1" class="pilcrow">¶</a>
 </li>
           </ul>
 </li>
-        <li class="normal" id="section-14-2.2">
-          <p id="section-14-2.2.1">draft-hardt-email-verification-00<a href="#section-14-2.2.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-14-4.18">
+          <p id="section-14-4.18.1">draft-hardt-email-verification-00<a href="#section-14-4.18.1" class="pilcrow">¶</a></p>
 <ul class="compact normal">
-<li class="compact normal" id="section-14-2.2.2.1">Initial draft.<a href="#section-14-2.2.2.1" class="pilcrow">¶</a>
+<li class="compact normal" id="section-14-4.18.2.1">Initial draft.<a href="#section-14-4.18.2.1" class="pilcrow">¶</a>
 </li>
           </ul>
 </li>
@@ -2977,15 +3114,39 @@ Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; x="JrQLj5P_89iXES9-vFgrIy29clF
 <dl class="references">
 <dt id="I-D.hardt-httpbis-signature-key">[I-D.hardt-httpbis-signature-key]</dt>
         <dd>
-<span class="refAuthor">Hardt, D.</span> and <span class="refAuthor">T. Meunier</span>, <span class="refTitle">"HTTP Signature Keys"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-hardt-httpbis-signature-key-07</span>, <time datetime="2026-07-04" class="refDate">4 July 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-hardt-httpbis-signature-key-07">https://datatracker.ietf.org/doc/html/draft-hardt-httpbis-signature-key-07</a>&gt;</span>. </dd>
+<span class="refAuthor">Hardt, D.</span> and <span class="refAuthor">T. Meunier</span>, <span class="refTitle">"HTTP Signature Keys"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-hardt-httpbis-signature-key-08</span>, <time datetime="2026-08-05" class="refDate">5 August 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-hardt-httpbis-signature-key-08">https://datatracker.ietf.org/doc/html/draft-hardt-httpbis-signature-key-08</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="I-D.ietf-oauth-selective-disclosure-jwt">[I-D.ietf-oauth-selective-disclosure-jwt]</dt>
         <dd>
 <span class="refAuthor">Fett, D.</span>, <span class="refAuthor">Yasuda, K.</span>, and <span class="refAuthor">B. Campbell</span>, <span class="refTitle">"Selective Disclosure for JWTs (SD-JWT)"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-oauth-selective-disclosure-jwt-22</span>, <time datetime="2025-05-29" class="refDate">29 May 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-oauth-selective-disclosure-jwt-22">https://datatracker.ietf.org/doc/html/draft-ietf-oauth-selective-disclosure-jwt-22</a>&gt;</span>. </dd>
 <dd class="break"></dd>
+<dt id="OpenID.Core">[OpenID.Core]</dt>
+        <dd>
+<span class="refAuthor">Sakimura, N.</span>, <span class="refAuthor">Bradley, J.</span>, <span class="refAuthor">Jones, M.</span>, <span class="refAuthor">de Medeiros, B.</span>, and <span class="refAuthor">C. Mortimore</span>, <span class="refTitle">"OpenID Connect Core 1.0"</span>, <time datetime="2014-11" class="refDate">November 2014</time>, <span>&lt;<a href="https://openid.net/specs/openid-connect-core-1_0.html">https://openid.net/specs/openid-connect-core-1_0.html</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC5322">[RFC5322]</dt>
+        <dd>
+<span class="refAuthor">Resnick, P., Ed.</span>, <span class="refTitle">"Internet Message Format"</span>, <span class="seriesInfo">RFC 5322</span>, <span class="seriesInfo">DOI 10.17487/RFC5322</span>, <time datetime="2008-10" class="refDate">October 2008</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc5322">https://www.rfc-editor.org/info/rfc5322</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8414">[RFC8414]</dt>
+        <dd>
+<span class="refAuthor">Jones, M.</span>, <span class="refAuthor">Sakimura, N.</span>, and <span class="refAuthor">J. Bradley</span>, <span class="refTitle">"OAuth 2.0 Authorization Server Metadata"</span>, <span class="seriesInfo">RFC 8414</span>, <span class="seriesInfo">DOI 10.17487/RFC8414</span>, <time datetime="2018-06" class="refDate">June 2018</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc8414">https://www.rfc-editor.org/info/rfc8414</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="RFC9421">[RFC9421]</dt>
-      <dd>
+        <dd>
 <span class="refAuthor">Backman, A., Ed.</span>, <span class="refAuthor">Richer, J., Ed.</span>, and <span class="refAuthor">M. Sporny</span>, <span class="refTitle">"HTTP Message Signatures"</span>, <span class="seriesInfo">RFC 9421</span>, <span class="seriesInfo">DOI 10.17487/RFC9421</span>, <time datetime="2024-02" class="refDate">February 2024</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc9421">https://www.rfc-editor.org/info/rfc9421</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9530">[RFC9530]</dt>
+        <dd>
+<span class="refAuthor">Polli, R.</span> and <span class="refAuthor">L. Pardue</span>, <span class="refTitle">"Digest Fields"</span>, <span class="seriesInfo">RFC 9530</span>, <span class="seriesInfo">DOI 10.17487/RFC9530</span>, <time datetime="2024-02" class="refDate">February 2024</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc9530">https://www.rfc-editor.org/info/rfc9530</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9864">[RFC9864]</dt>
+        <dd>
+<span class="refAuthor">Jones, M.B.</span> and <span class="refAuthor">O. Steele</span>, <span class="refTitle">"Fully-Specified Algorithms for JSON Object Signing and Encryption (JOSE) and CBOR Object Signing and Encryption (COSE)"</span>, <span class="seriesInfo">RFC 9864</span>, <span class="seriesInfo">DOI 10.17487/RFC9864</span>, <time datetime="2025-10" class="refDate">October 2025</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc9864">https://www.rfc-editor.org/info/rfc9864</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="WHATWG.HTML">[WHATWG.HTML]</dt>
+      <dd>
+<span class="refAuthor">WHATWG</span>, <span class="refTitle">"HTML Standard"</span>, <span class="refContent">Living Standard</span>, <time datetime="2026" class="refDate">2026</time>, <span>&lt;<a href="https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address">https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
 </section>
@@ -3009,6 +3170,10 @@ Signature-Key: sig=hwk; kty="OKP"; crv="Ed25519"; x="JrQLj5P_89iXES9-vFgrIy29clF
 <dt id="RFC7942">[RFC7942]</dt>
         <dd>
 <span class="refAuthor">Sheffer, Y.</span> and <span class="refAuthor">A. Farrel</span>, <span class="refTitle">"Improving Awareness of Running Code: The Implementation Status Section"</span>, <span class="seriesInfo">BCP 205</span>, <span class="seriesInfo">RFC 7942</span>, <span class="seriesInfo">DOI 10.17487/RFC7942</span>, <time datetime="2016-07" class="refDate">July 2016</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc7942">https://www.rfc-editor.org/info/rfc7942</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8725">[RFC8725]</dt>
+        <dd>
+<span class="refAuthor">Sheffer, Y.</span>, <span class="refAuthor">Hardt, D.</span>, and <span class="refAuthor">M. Jones</span>, <span class="refTitle">"JSON Web Token Best Current Practices"</span>, <span class="seriesInfo">BCP 225</span>, <span class="seriesInfo">RFC 8725</span>, <span class="seriesInfo">DOI 10.17487/RFC8725</span>, <time datetime="2020-02" class="refDate">February 2020</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc8725">https://www.rfc-editor.org/info/rfc8725</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="WebAuthn">[WebAuthn]</dt>
       <dd>
