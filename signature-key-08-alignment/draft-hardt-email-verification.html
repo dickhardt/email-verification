@@ -1050,7 +1050,7 @@ svg {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Hardt &amp; Goto</td>
-<td class="center">Expires 19 February 2027</td>
+<td class="center">Expires 20 February 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1063,12 +1063,12 @@ svg {
 <dd class="internet-draft">draft-hardt-email-verification-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-08-18" class="published">18 August 2026</time>
+<time datetime="2026-08-19" class="published">19 August 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-02-19">19 February 2027</time></dd>
+<dd class="expires"><time datetime="2027-02-20">20 February 2027</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1116,7 +1116,7 @@ svg {
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 19 February 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 20 February 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1922,7 +1922,7 @@ Signature-Key: sig=hwk;kty="OKP";crv="Ed25519"; \
 </li>
           <li id="section-4.2-5.2">The signature MUST cover at minimum <code>@method</code>, <code>@authority</code>, <code>@path</code>, and <code>signature-key</code>, and MUST also cover <code>cookie</code> when the Cookie header is present. The issuer MUST reject a request whose signature does not.<a href="#section-4.2-5.2" class="pilcrow">¶</a>
 </li>
-          <li id="section-4.2-5.3">The issuer MUST reject a request whose <code>created</code> timestamp is more than 60 seconds from the current time.<a href="#section-4.2-5.3" class="pilcrow">¶</a>
+          <li id="section-4.2-5.3">The issuer MUST reject a request whose <code>created</code> timestamp is more than 300 seconds from the current time. The window allows for client clock skew, following the guidance of <span>[<a href="#RFC8725" class="cite xref">RFC8725</a>]</span> that leeway should be a few minutes at most.<a href="#section-4.2-5.3" class="pilcrow">¶</a>
 </li>
           <li id="section-4.2-5.4">The algorithms the issuer accepts are the values of <code>signing_alg_values_supported</code> in its metadata (see <a href="#issuer-metadata">Issuer Metadata</a>), which serves the role <code>Accept-Signature-Alg</code> serves in <span>[<a href="#I-D.hardt-httpbis-signature-key" class="cite xref">I-D.hardt-httpbis-signature-key</a>]</span>. An issuer that publishes the member SHOULD also send <code>Accept-Signature-Alg</code> on an <code>unsupported_algorithm</code> response, so a client that did not read the metadata learns the same set.<a href="#section-4.2-5.4" class="pilcrow">¶</a>
 </li>
@@ -2736,7 +2736,7 @@ Accept-Signature-Alg: Ed25519, ES256
             <p id="section-11.1-2.2.1"><strong>Cookie Binding</strong>: By including the <code>cookie</code> component in the signature, the browser's authentication cookies are cryptographically bound to the specific request, preventing cookie injection or manipulation attacks.<a href="#section-11.1-2.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-11.1-2.3">
-            <p id="section-11.1-2.3.1"><strong>Replay Protection</strong>: The <code>created</code> timestamp in the <code>Signature-Input</code> header is verified to be within 60 seconds, preventing replay attacks.<a href="#section-11.1-2.3.1" class="pilcrow">¶</a></p>
+            <p id="section-11.1-2.3.1"><strong>Replay Protection</strong>: The <code>created</code> timestamp in the <code>Signature-Input</code> header is verified to be within 300 seconds, bounding the replay window. A replayed request yields an EVT bound to the original browser's key through the <code>cnf</code> claim, so replay gains an attacker no token another party can use.<a href="#section-11.1-2.3.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-11.1-2.4">
             <p id="section-11.1-2.4.1"><strong>Public Key Binding</strong>: The browser's public key transmitted via the <code>Signature-Key</code> header with the <code>hwk</code> scheme is bound to the request signature, ensuring the issuer knows which public key to include in the EVT's <code>cnf</code> claim. Because <code>signature-key</code> is a covered component, an attacker cannot substitute the key or the scheme without invalidating the signature; see Signature-Key Integrity in <span>[<a href="#I-D.hardt-httpbis-signature-key" class="cite xref">I-D.hardt-httpbis-signature-key</a>]</span>.<a href="#section-11.1-2.4.1" class="pilcrow">¶</a></p>
@@ -3000,7 +3000,7 @@ Accept-Signature-Alg: Ed25519, ES256
 </li>
         <li class="normal" id="section-14-4.3">Required <code>signing_alg_values_supported</code> to carry fully-specified identifiers, and forbade <code>EdDSA</code>, <code>none</code>, and the symmetric MAC identifiers. The member governs issued EVTs as well as HTTP Message Signatures, so the constraint is stated here rather than left to Signature-Key.<a href="#section-14-4.3" class="pilcrow">¶</a>
 </li>
-        <li class="normal" id="section-14-4.4">Rewrote HTTP Request Verification to delegate to <span>[<a href="#RFC9421" class="cite xref">RFC9421</a>]</span> and <span>[<a href="#I-D.hardt-httpbis-signature-key" class="cite xref">I-D.hardt-httpbis-signature-key</a>]</span> rather than restate them, and to keep only what this specification profiles: <code>hwk</code> as the only scheme, the required covered components, the 60-second <code>created</code> window, and <code>signing_alg_values_supported</code> as the discovery-time form of <code>Accept-Signature-Alg</code>. The restated text was what went stale — the previous step listing the <code>hwk</code> parameters as <code>kty</code>, <code>crv</code>, and <code>x</code> silently became wrong when -08 added <code>alg</code>.<a href="#section-14-4.4" class="pilcrow">¶</a>
+        <li class="normal" id="section-14-4.4">Rewrote HTTP Request Verification to delegate to <span>[<a href="#RFC9421" class="cite xref">RFC9421</a>]</span> and <span>[<a href="#I-D.hardt-httpbis-signature-key" class="cite xref">I-D.hardt-httpbis-signature-key</a>]</span> rather than restate them, and to keep only what this specification profiles: <code>hwk</code> as the only scheme, the required covered components, the <code>created</code> window, and <code>signing_alg_values_supported</code> as the discovery-time form of <code>Accept-Signature-Alg</code>. The restated text was what went stale — the previous step listing the <code>hwk</code> parameters as <code>kty</code>, <code>crv</code>, and <code>x</code> silently became wrong when -08 added <code>alg</code>.<a href="#section-14-4.4" class="pilcrow">¶</a>
 </li>
         <li class="normal" id="section-14-4.5">Carried the key's <code>alg</code> member into the EVT <code>cnf.jwk</code>, so the RP verifies the KB-JWT under a fully-specified algorithm rather than one derived from the key. Required the KB-JWT header <code>alg</code> to match it, and had the RP reject a KB-JWT where the two disagree.<a href="#section-14-4.5" class="pilcrow">¶</a>
 </li>
@@ -3010,20 +3010,22 @@ Accept-Signature-Alg: Ed25519, ES256
 </li>
         <li class="normal" id="section-14-4.8">Added a Fully-Specified Algorithms subsection to Security Considerations giving the reason and naming which of the three signatures each rule reaches.<a href="#section-14-4.8" class="pilcrow">¶</a>
 </li>
-        <li class="normal" id="section-14-4.9">
-          <p id="section-14-4.9.1">Defined "valid email address" as the "valid e-mail address" production of <span>[<a href="#WHATWG.HTML" class="cite xref">WHATWG.HTML</a>]</span> rather than leaving the term undefined, and said why that production rather than <span>[<a href="#RFC5322" class="cite xref">RFC5322</a>]</span>. Addresses issue #2.<a href="#section-14-4.9.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-14-4.9">Defined "valid email address" as the "valid e-mail address" production of <span>[<a href="#WHATWG.HTML" class="cite xref">WHATWG.HTML</a>]</span> rather than leaving the term undefined, and said why that production rather than <span>[<a href="#RFC5322" class="cite xref">RFC5322</a>]</span>. Addresses issue #2.<a href="#section-14-4.9" class="pilcrow">¶</a>
 </li>
         <li class="normal" id="section-14-4.10">
-          <p id="section-14-4.10.1">draft-hardt-email-verification-01<a href="#section-14-4.10.1" class="pilcrow">¶</a></p>
+          <p id="section-14-4.10.1">Widened the <code>created</code> acceptance window from 60 to 300 seconds. Device clocks skew by minutes, not seconds, and the window is not load-bearing for security: a replayed request yields an EVT bound to the original browser's key. Follows the clock-skew guidance of <span>[<a href="#RFC8725" class="cite xref">RFC8725</a>]</span>.<a href="#section-14-4.10.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-14-4.11">
+          <p id="section-14-4.11.1">draft-hardt-email-verification-01<a href="#section-14-4.11.1" class="pilcrow">¶</a></p>
 <ul class="compact normal">
-<li class="compact normal" id="section-14-4.10.2.1">Updated Implementation Status: completed GMail issuer entry, added Chrome and Edge origin trials.<a href="#section-14-4.10.2.1" class="pilcrow">¶</a>
+<li class="compact normal" id="section-14-4.11.2.1">Updated Implementation Status: completed GMail issuer entry, added Chrome and Edge origin trials.<a href="#section-14-4.11.2.1" class="pilcrow">¶</a>
 </li>
           </ul>
 </li>
-        <li class="normal" id="section-14-4.11">
-          <p id="section-14-4.11.1">draft-hardt-email-verification-00<a href="#section-14-4.11.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-14-4.12">
+          <p id="section-14-4.12.1">draft-hardt-email-verification-00<a href="#section-14-4.12.1" class="pilcrow">¶</a></p>
 <ul class="compact normal">
-<li class="compact normal" id="section-14-4.11.2.1">Initial draft.<a href="#section-14-4.11.2.1" class="pilcrow">¶</a>
+<li class="compact normal" id="section-14-4.12.2.1">Initial draft.<a href="#section-14-4.12.2.1" class="pilcrow">¶</a>
 </li>
           </ul>
 </li>
@@ -3085,6 +3087,10 @@ Accept-Signature-Alg: Ed25519, ES256
 <dt id="RFC7942">[RFC7942]</dt>
         <dd>
 <span class="refAuthor">Sheffer, Y.</span> and <span class="refAuthor">A. Farrel</span>, <span class="refTitle">"Improving Awareness of Running Code: The Implementation Status Section"</span>, <span class="seriesInfo">BCP 205</span>, <span class="seriesInfo">RFC 7942</span>, <span class="seriesInfo">DOI 10.17487/RFC7942</span>, <time datetime="2016-07" class="refDate">July 2016</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc7942">https://www.rfc-editor.org/info/rfc7942</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8725">[RFC8725]</dt>
+        <dd>
+<span class="refAuthor">Sheffer, Y.</span>, <span class="refAuthor">Hardt, D.</span>, and <span class="refAuthor">M. Jones</span>, <span class="refTitle">"JSON Web Token Best Current Practices"</span>, <span class="seriesInfo">BCP 225</span>, <span class="seriesInfo">RFC 8725</span>, <span class="seriesInfo">DOI 10.17487/RFC8725</span>, <time datetime="2020-02" class="refDate">February 2020</time>, <span>&lt;<a href="https://www.rfc-editor.org/info/rfc8725">https://www.rfc-editor.org/info/rfc8725</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="WebAuthn">[WebAuthn]</dt>
       <dd>

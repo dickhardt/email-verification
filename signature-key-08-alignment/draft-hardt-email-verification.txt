@@ -5,8 +5,8 @@
 TBD                                                             D. Hardt
 Internet-Draft                                                     Hellō
 Intended status: Standards Track                                 S. Goto
-Expires: 19 February 2027                                         Google
-                                                          18 August 2026
+Expires: 20 February 2027                                         Google
+                                                          19 August 2026
 
 
                       Email Verification Protocol
@@ -64,7 +64,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 19 February 2027.
+   This Internet-Draft will expire on 20 February 2027.
 
 Copyright Notice
 
@@ -622,7 +622,9 @@ Table of Contents
        header is present.  The issuer MUST reject a request whose
        signature does not.
    3.  The issuer MUST reject a request whose created timestamp is more
-       than 60 seconds from the current time.
+       than 300 seconds from the current time.  The window allows for
+       client clock skew, following the guidance of [RFC8725] that
+       leeway should be a few minutes at most.
    4.  The algorithms the issuer accepts are the values of
        signing_alg_values_supported in its metadata (see Issuer Metadata
        (#issuer-metadata)), which serves the role Accept-Signature-Alg
@@ -1298,8 +1300,10 @@ Table of Contents
        cookie injection or manipulation attacks.
 
    3.  *Replay Protection*: The created timestamp in the Signature-Input
-       header is verified to be within 60 seconds, preventing replay
-       attacks.
+       header is verified to be within 300 seconds, bounding the replay
+       window.  A replayed request yields an EVT bound to the original
+       browser's key through the cnf claim, so replay gains an attacker
+       no token another party can use.
 
    4.  *Public Key Binding*: The browser's public key transmitted via
        the Signature-Key header with the hwk scheme is bound to the
@@ -1598,11 +1602,11 @@ Table of Contents
    *  Rewrote HTTP Request Verification to delegate to [RFC9421] and
       [I-D.hardt-httpbis-signature-key] rather than restate them, and to
       keep only what this specification profiles: hwk as the only
-      scheme, the required covered components, the 60-second created
-      window, and signing_alg_values_supported as the discovery-time
-      form of Accept-Signature-Alg. The restated text was what went
-      stale — the previous step listing the hwk parameters as kty, crv,
-      and x silently became wrong when -08 added alg.
+      scheme, the required covered components, the created window, and
+      signing_alg_values_supported as the discovery-time form of Accept-
+      Signature-Alg. The restated text was what went stale — the
+      previous step listing the hwk parameters as kty, crv, and x
+      silently became wrong when -08 added alg.
 
    *  Carried the key's alg member into the EVT cnf.jwk, so the RP
       verifies the KB-JWT under a fully-specified algorithm rather than
@@ -1627,6 +1631,12 @@ Table of Contents
       production of [WHATWG.HTML] rather than leaving the term
       undefined, and said why that production rather than [RFC5322].
       Addresses issue #2.
+
+   *  Widened the created acceptance window from 60 to 300 seconds.
+      Device clocks skew by minutes, not seconds, and the window is not
+      load-bearing for security: a replayed request yields an EVT bound
+      to the original browser's key.  Follows the clock-skew guidance of
+      [RFC8725].
 
    *  draft-hardt-email-verification-01
 
@@ -1694,6 +1704,11 @@ Table of Contents
               Code: The Implementation Status Section", BCP 205,
               RFC 7942, DOI 10.17487/RFC7942, July 2016,
               <https://www.rfc-editor.org/info/rfc7942>.
+
+   [RFC8725]  Sheffer, Y., Hardt, D., and M. Jones, "JSON Web Token Best
+              Current Practices", BCP 225, RFC 8725,
+              DOI 10.17487/RFC8725, February 2020,
+              <https://www.rfc-editor.org/info/rfc8725>.
 
    [WebAuthn] Jones, M., Kumar, A., and E. Lundberg, "Web
               Authentication: An API for accessing Public Key
