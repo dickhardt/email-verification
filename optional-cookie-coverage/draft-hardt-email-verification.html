@@ -1050,7 +1050,7 @@ svg {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Hardt &amp; Goto</td>
-<td class="center">Expires 19 February 2027</td>
+<td class="center">Expires 20 February 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1063,12 +1063,12 @@ svg {
 <dd class="internet-draft">draft-hardt-email-verification-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-08-18" class="published">18 August 2026</time>
+<time datetime="2026-08-19" class="published">19 August 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-02-19">19 February 2027</time></dd>
+<dd class="expires"><time datetime="2027-02-20">20 February 2027</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1116,7 +1116,7 @@ svg {
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 19 February 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 20 February 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1563,15 +1563,8 @@ svg {
         <h3 id="name-email-discovery">
 <a href="#section-2.1" class="section-number selfRef">2.1. </a><a href="#name-email-discovery" class="section-name selfRef">Email Discovery</a>
         </h3>
-<p id="section-2.1-1">Email discovery populates the set of addresses the browser offers the user in <a href="#email-acquisition">Email Acquisition</a>. It is a source of candidates for a chooser, and nothing more. It is not <a href="#issuer-discovery">Issuer Discovery</a>, it does not establish who is authoritative for an email domain, and a deployment may omit it entirely — a browser that offers addresses from its own store, or that takes one the user types, enters the protocol at <a href="#email-acquisition">Email Acquisition</a> with no discovery step at all.<a href="#section-2.1-1" class="pilcrow">¶</a></p>
-<p id="section-2.1-2">An issuer may surface accounts it holds a session for by either of two models:<a href="#section-2.1-2" class="pilcrow">¶</a></p>
-<p id="section-2.1-3"><strong>Push model</strong>: The issuer proactively pushes account information to the browser using the FedCM Accounts Push mechanism (<span>[<a href="#LightweightFedCM" class="cite xref">LightweightFedCM</a>]</span>). The browser accumulates account data without making an explicit request.<a href="#section-2.1-3" class="pilcrow">¶</a></p>
-<p id="section-2.1-4"><strong>Pull model</strong>: The browser calls the issuer's accounts endpoint per the FedCM mechanism, as defined in the W3C Email Verification API (<span>[<a href="#EVP-Browser" class="cite xref">EVP-Browser</a>]</span>). The browser fetches the issuer's FedCM well-known configuration and requests the account list from the <code>accounts_endpoint</code>.<a href="#section-2.1-4" class="pilcrow">¶</a></p>
-<p id="section-2.1-5">Both models run against issuers the browser already has a relationship with, which is why no email address is needed to reach them and no circularity with <a href="#issuer-discovery">Issuer Discovery</a> arises. What they establish is that the issuer holds a session for an account, not that the issuer may verify it.<a href="#section-2.1-5" class="pilcrow">¶</a></p>
-<p id="section-2.1-6">Whatever the source of the address, once the user selects one the browser performs <a href="#issuer-discovery">Issuer Discovery</a> on that address's domain, and the DNS delegation is what determines the issuer for it. An address surfaced by an issuer through Push or Pull is subject to that lookup on the same terms as one the user typed: an issuer's claim to hold an account for <code>user@example.com</code> gives it no authority to verify that address unless <code>_email-verification.example.com</code> delegates to it. An earlier revision of this section could be read as having the browser resolve an issuer before any address was known, which is not the case.<a href="#section-2.1-6" class="pilcrow">¶</a></p>
-<blockquote id="section-2.1-7">
-          <p id="section-2.1-7.1">Note: The W3C Email Verification API (<span>[<a href="#EVP-Browser" class="cite xref">EVP-Browser</a>]</span>) describes the ordering the other way around, with the browser suggesting addresses from its own autofill store and FedCM used to validate a selection rather than to source the suggestions. Both orderings reach the same place — issuer discovery runs on the selected address — and the two specifications will align on one description.<a href="#section-2.1-7.1" class="pilcrow">¶</a></p>
-</blockquote>
+<p id="section-2.1-1">How the browser assembles candidate addresses — from its own store, from account information an issuer pushes or the browser pulls via FedCM (<span>[<a href="#LightweightFedCM" class="cite xref">LightweightFedCM</a>]</span>), or from the user typing one — is defined by the W3C Email Verification API (<span>[<a href="#EVP-Browser" class="cite xref">EVP-Browser</a>]</span>) and is out of scope for this document. The browser MUST NOT offer an address that is not a valid email address (see <a href="#valid-email-address">Valid Email Address</a>).<a href="#section-2.1-1" class="pilcrow">¶</a></p>
+<p id="section-2.1-2">Once the user selects an address, the browser performs <a href="#issuer-discovery">Issuer Discovery</a> on the address's domain; the DNS delegation alone determines the issuer, whatever the source of the address. From selection onward the address is never altered: the browser sends it byte-for-byte in the token request, and an issuer that verifies it — by its own processing rules — returns it byte-for-byte in the <code>email</code> claim. Every comparison of email addresses in this protocol is byte-for-byte.<a href="#section-2.1-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="session-binding">
@@ -1607,7 +1600,7 @@ svg {
             <p id="section-2.4-2.3.1">The browser creates a signed request per <a href="#http-signatures">HTTP Message Signatures</a> and POSTs to the <code>issuance_endpoint</code>, including the issuer's cookies. The request body is a JSON object with the following parameters:<a href="#section-2.4-2.3.1" class="pilcrow">¶</a></p>
 <ul class="compact">
 <li class="compact" id="section-2.4-2.3.2.1">
-                <code>email</code> (REQUIRED): The email address to verify<a href="#section-2.4-2.3.2.1" class="pilcrow">¶</a>
+                <code>email</code> (REQUIRED): The email address to verify, byte-for-byte as the user selected it<a href="#section-2.4-2.3.2.1" class="pilcrow">¶</a>
 </li>
               <li class="compact" id="section-2.4-2.3.2.2">See <a href="#private-email">Private Email Addresses</a> for parameters to request private email addresses<a href="#section-2.4-2.3.2.2" class="pilcrow">¶</a>
 </li>
@@ -1678,7 +1671,7 @@ Set-Cookie: session=...; Secure; HttpOnly; SameSite=None
 <li id="section-2.6-2.1">
             <p id="section-2.6-2.1.1">The browser verifies the EVT per <a href="#evt-verification">EVT Verification</a>, additionally confirming:<a href="#section-2.6-2.1.1" class="pilcrow">¶</a></p>
 <ul class="compact">
-<li class="compact" id="section-2.6-2.1.2.1">The <code>email</code> claim matches the email address being verified<a href="#section-2.6-2.1.2.1" class="pilcrow">¶</a>
+<li class="compact" id="section-2.6-2.1.2.1">The <code>email</code> claim is byte-for-byte identical to the email address being verified<a href="#section-2.6-2.1.2.1" class="pilcrow">¶</a>
 </li>
               <li class="compact" id="section-2.6-2.1.2.2">The <code>cnf.jwk</code> claim matches the public key the browser generated<a href="#section-2.6-2.1.2.2" class="pilcrow">¶</a>
 </li>
@@ -1852,7 +1845,7 @@ signature
 <p id="section-4.1.1-1">The request body is a JSON object with the following fields:<a href="#section-4.1.1-1" class="pilcrow">¶</a></p>
 <ul class="compact">
 <li class="compact" id="section-4.1.1-2.1">
-              <code>email</code> (REQUIRED): The email address to verify<a href="#section-4.1.1-2.1" class="pilcrow">¶</a>
+              <code>email</code> (REQUIRED): The email address to verify, byte-for-byte as the user selected it<a href="#section-4.1.1-2.1" class="pilcrow">¶</a>
 </li>
             <li class="compact" id="section-4.1.1-2.2">
               <code>private_email</code> (OPTIONAL): Request a new private email address. See <a href="#private-email">Private Email Addresses</a>.<a href="#section-4.1.1-2.2" class="pilcrow">¶</a>
@@ -1906,13 +1899,12 @@ signature
 <a href="#section-4.1.4" class="section-number selfRef">4.1.4. </a><a href="#name-signature-input-header" class="section-name selfRef">Signature-Input Header</a>
           </h4>
 <p id="section-4.1.4-1">The covered components MUST include <code>@method</code>, <code>@authority</code>, <code>@path</code>, <code>content-digest</code>, and <code>signature-key</code>. The <code>created</code> parameter MUST be included.<a href="#section-4.1.4-1" class="pilcrow">¶</a></p>
-<p id="section-4.1.4-2">The <code>cookie</code> component MAY be included when the Cookie header is present, and MUST be omitted when it is not (per <span>[<a href="#RFC9421" class="cite xref">RFC9421</a>]</span> Section 2.5). An issuer MUST NOT reject a request solely because <code>cookie</code> is not covered.<a href="#section-4.1.4-2" class="pilcrow">¶</a></p>
-<p id="section-4.1.4-3">Covering <code>cookie</code> binds the authenticating cookie to the request that carries it. That is worth having where a signer can get it, but it is not available everywhere: in some browser architectures the Cookie header is attached by the network stack after the request has been constructed and signed, so the value to be covered does not exist at signing time. Requiring it would exclude those implementations for a property the protocol does not depend on — the user is authenticated by the cookie, and the request is bound to the browser's key by the signature, whether or not the two are bound to each other.<a href="#section-4.1.4-3" class="pilcrow">¶</a></p>
-<div class="alignLeft art-text artwork" id="section-4.1.4-4">
+<p id="section-4.1.4-2">Covering the <code>cookie</code> component is RECOMMENDED when the Cookie header is available to the signer at signing time; the component MUST be omitted when the header is not present (per <span>[<a href="#RFC9421" class="cite xref">RFC9421</a>]</span> Section 2.5). An issuer MUST NOT reject a request solely because <code>cookie</code> is not covered. See <a href="#http-message-signature-security">HTTP Message Signature Security</a> for what coverage provides.<a href="#section-4.1.4-2" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-4.1.4-3">
 <pre>Signature-Input: sig=("@method" "@authority" "@path" \
     "content-digest" "signature-key");created=1692345600
 
-</pre><a href="#section-4.1.4-4" class="pilcrow">¶</a>
+</pre><a href="#section-4.1.4-3" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -2062,7 +2054,7 @@ Signature-Key: sig=hwk;kty="OKP";crv="Ed25519"; \
               <code>cnf</code>: Confirmation claim containing the browser's public key in <code>jwk</code> format (for SD-JWT Key Binding compatibility). The <code>jwk</code> is the key conveyed in the <code>Signature-Key</code> header of the token request, reproduced with the same members, including its fully-specified <code>alg</code>.<a href="#section-5.1.2-2.3" class="pilcrow">¶</a>
 </li>
             <li class="compact" id="section-5.1.2-2.4">
-              <code>email</code>: The verified email address<a href="#section-5.1.2-2.4" class="pilcrow">¶</a>
+              <code>email</code>: The verified email address, byte-for-byte as it appeared in the token request<a href="#section-5.1.2-2.4" class="pilcrow">¶</a>
 </li>
             <li class="compact" id="section-5.1.2-2.5">
               <code>email_verified</code>: Boolean, MUST be <code>true</code><a href="#section-5.1.2-2.5" class="pilcrow">¶</a>
@@ -2154,7 +2146,7 @@ Signature-Key: sig=hwk;kty="OKP";crv="Ed25519"; \
         </ol>
 <p id="section-5.3-3">The browser additionally verifies:<a href="#section-5.3-3" class="pilcrow">¶</a></p>
 <ul class="compact">
-<li class="compact" id="section-5.3-4.1">The <code>email</code> claim matches the email address being verified<a href="#section-5.3-4.1" class="pilcrow">¶</a>
+<li class="compact" id="section-5.3-4.1">The <code>email</code> claim is byte-for-byte identical to the email address being verified<a href="#section-5.3-4.1" class="pilcrow">¶</a>
 </li>
           <li class="compact" id="section-5.3-4.2">The <code>cnf.jwk</code> claim matches the public key the browser generated<a href="#section-5.3-4.2" class="pilcrow">¶</a>
 </li>
@@ -2414,9 +2406,6 @@ Signature-Key: sig=hwk;kty="OKP";crv="Ed25519";x="JrQLj5P_89iXES9-vFgrIy29clF9CC
 </pre><a href="#section-7.2-2" class="pilcrow">¶</a>
 </div>
 <p id="section-7.2-3">The <code>webauthn_response</code> object follows the structure of PublicKeyCredential as defined in <span>[<a href="#WebAuthn" class="cite xref">WebAuthn</a>]</span>.<a href="#section-7.2-3" class="pilcrow">¶</a></p>
-<blockquote id="section-7.2-4">
-          <p id="section-7.2-4.1">Note: The <code>cookie</code> component MAY be included in the signature when cookies are present (such as those set by the challenge response), and is omitted when they are not, per <a href="#request-signing">HTTP Request Signing</a>. The issuer authenticates the WebAuthn response on its own terms; nothing in this exchange depends on the cookie being covered.<a href="#section-7.2-4.1" class="pilcrow">¶</a></p>
-</blockquote>
 </section>
 </div>
 <div id="webauthn-verification">
@@ -2790,7 +2779,7 @@ Accept-Signature-Alg: Ed25519, ES256
             <p id="section-11.1-2.1.1"><strong>Request Integrity</strong>: The signature covers the HTTP method, authority, path, and — through <code>content-digest</code> — the request body, preventing tampering with any of these components. The body is what carries the email address being verified, so without that coverage the signature would attest to a request without attesting to which address it asked for.<a href="#section-11.1-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-11.1-2.2">
-            <p id="section-11.1-2.2.1"><strong>Cookie Binding (optional)</strong>: A signer that covers the <code>cookie</code> component binds the authenticating cookie to the request that carries it, so a cookie cannot be moved onto a different signed request. Coverage is optional (see <a href="#request-signing">Signature-Input Header</a>), so this property is not one an issuer may assume. Where it is absent, the request is still bound to the browser's key by the signature, and the cookie still authenticates the user; what is lost is the binding between the two.<a href="#section-11.1-2.2.1" class="pilcrow">¶</a></p>
+            <p id="section-11.1-2.2.1"><strong>Cookie Binding (when covered)</strong>: Covering the <code>cookie</code> component binds the authenticating cookie to the signed request. Coverage cannot be assumed — in some browser architectures the Cookie header is attached after the request is signed, so the value does not exist at signing time. Without it, the signature still binds the request to the browser's key, and the cookie still authenticates the user.<a href="#section-11.1-2.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-11.1-2.3">
             <p id="section-11.1-2.3.1"><strong>Replay Protection</strong>: The <code>created</code> timestamp in the <code>Signature-Input</code> header is verified to be within 60 seconds, preventing replay attacks.<a href="#section-11.1-2.3.1" class="pilcrow">¶</a></p>
@@ -2836,7 +2825,7 @@ Accept-Signature-Alg: Ed25519, ES256
         </h3>
 <p id="section-11.4-1">The delegation from an email domain to an issuer is carried in an unauthenticated DNS TXT record (<a href="#dns-delegation">DNS Delegation</a>). An attacker who controls what a party sees for <code>_email-verification.$EMAIL_DOMAIN</code> controls which issuer that party believes is authoritative for the domain. This section states what that yields, and to whom.<a href="#section-11.4-1" class="pilcrow">¶</a></p>
 <p id="section-11.4-2">Two parties resolve the record independently: the browser, to find the issuance endpoint, and the RP, to check the <code>iss</code> claim of the EVT it receives (<a href="#evt-verification">EVT Verification</a>). The two lookups are not equally valuable to an attacker.<a href="#section-11.4-2" class="pilcrow">¶</a></p>
-<p id="section-11.4-3"><strong>Spoofing the browser's resolver alone gains little.</strong> The browser is directed to an attacker-controlled issuer and discloses the email address to it. It does not disclose the user's credentials: cookies are scoped to the real issuer's origin and are not sent to a different one, and a WebAuthn challenge from the attacker carries the attacker's <code>rpId</code>, so an authenticator will not produce an assertion usable at the real issuer. The attacker can mint an EVT, but its <code>iss</code> is the attacker's identifier, and the RP — resolving the record itself, over its own path — derives the real issuer identifier and rejects the token. The mismatch is what stops it, which is why <a href="#issuer-identifier">Issuer Identifier</a> requires the comparison to be exact.<a href="#section-11.4-3" class="pilcrow">¶</a></p>
+<p id="section-11.4-3"><strong>Spoofing the browser's resolver alone gains little.</strong> The browser is directed to an attacker-controlled issuer and discloses the email address to it. It does not disclose the user's credentials: cookies are scoped to the real issuer's origin and are not sent to a different one. The attacker can mint an EVT, but its <code>iss</code> is the attacker's identifier, and the RP — resolving the record itself, over its own path — derives the real issuer identifier and rejects the token. The mismatch is what stops it, which is why <a href="#issuer-identifier">Issuer Identifier</a> requires the comparison to be exact.<a href="#section-11.4-3" class="pilcrow">¶</a></p>
 <p id="section-11.4-4"><strong>Spoofing the RP's resolver is the attack that matters.</strong> An attacker who controls the RP's view of DNS for the email domain, and who runs an issuer, can present an EVT the RP accepts for any address at that domain. Nothing later in verification catches this: the token is well-formed, correctly signed, and signed by the key the RP was told to trust. This is the residual risk of the design, and it is not mitigated elsewhere in this document.<a href="#section-11.4-4" class="pilcrow">¶</a></p>
 <p id="section-11.4-5">The RP is better placed to address this than the browser. It is a server, resolving on its own infrastructure, and can validate DNSSEC or use a validating resolver over an authenticated channel. RPs SHOULD validate DNSSEC for <code>_email-verification.$EMAIL_DOMAIN</code> where the email domain is signed, and SHOULD resolve through a resolver they trust rather than whatever the host is configured with. Email domain operators publishing this record SHOULD sign their zone.<a href="#section-11.4-5" class="pilcrow">¶</a></p>
 <p id="section-11.4-6">It has been argued that an authentication decision should never depend on data fetched from DNS. The objection is sound as a general rule and this document does not dismiss it. Two things are true alongside it. The delegation is a property of an email domain, and the authoritative source for a property of an email domain is that domain's DNS — the same place SPF, DKIM, and DMARC already sit, and the same records an attacker with this capability could already forge to redirect or authenticate mail for the domain. And moving the delegation to HTTPS would require every email domain to operate a web server, which <a href="#why-dns-delegation">Why DNS Delegation?</a> explains is the barrier this design set out to avoid. The exposure this creates is nonetheless real, unsigned DNS is weaker than HTTPS, and a deployment that cannot obtain DNSSEC on the email domains it accepts is accepting the risk described above.<a href="#section-11.4-6" class="pilcrow">¶</a></p>
@@ -3084,28 +3073,30 @@ Accept-Signature-Alg: Ed25519, ES256
 </li>
         <li class="normal" id="section-14-4.10">Rewrote Email Discovery. It read as though the browser resolved an issuer before any email address was known, which contradicts Issuer Discovery being a DNS lookup on the selected address. Said what the section actually does — populate a chooser — that it is optional, that Push and Pull run against issuers the browser already has a relationship with so no address is needed to reach them, and that an issuer surfacing an account gains no authority to verify it without the DNS delegation. Noted the ordering difference with the W3C API. Addresses issue #4.<a href="#section-14-4.10" class="pilcrow">¶</a>
 </li>
-        <li class="normal" id="section-14-4.11">Added a DNS Delegation subsection to Security Considerations. The delegation rests on an unauthenticated TXT record and the document said nothing about it. Separated the two lookups: spoofing the browser's resolver discloses the email address but yields no token the RP will accept, since cookies and WebAuthn credentials are origin-scoped and the RP resolves the record itself; spoofing the RP's resolver is the attack that matters and is not mitigated elsewhere. Recommended DNSSEC validation by RPs and zone signing by email domain operators, and stated the residual risk. Addresses issue #6.<a href="#section-14-4.11" class="pilcrow">¶</a>
+        <li class="normal" id="section-14-4.11">Added a DNS Delegation subsection to Security Considerations. The delegation rests on an unauthenticated TXT record and the document said nothing about it. Separated the two lookups: spoofing the browser's resolver discloses the email address but yields no token the RP will accept, since cookies are origin-scoped and the RP resolves the record itself; spoofing the RP's resolver is the attack that matters and is not mitigated elsewhere. Recommended DNSSEC validation by RPs and zone signing by email domain operators, and stated the residual risk. Addresses issue #6.<a href="#section-14-4.11" class="pilcrow">¶</a>
 </li>
         <li class="normal" id="section-14-4.12">Made the issuer identifier an HTTPS origin rather than a bare host name, aligning the <code>iss</code> claim with <span>[<a href="#OpenID.Core" class="cite xref">OpenID.Core</a>]</span> and <span>[<a href="#RFC8414" class="cite xref">RFC8414</a>]</span> and with what the browser implementation already enforces. The DNS TXT record still carries a host name; the identifier is derived from it by prefixing <code>https://</code>, and every comparison is byte-for-byte on the derived string. Added an Issuer Identifier section stating the derivation once. Addresses issue #7.<a href="#section-14-4.12" class="pilcrow">¶</a>
 </li>
         <li class="normal" id="section-14-4.13">Added the <code>issuer</code> member to the metadata document and required a fetching party to reject a document whose <code>issuer</code> does not match the identity it was fetched under, per <span>[<a href="#RFC8414" class="cite xref">RFC8414</a>]</span>, Section 3.3. This is the check Signature-Key -08 added for its own discovery, applied here.<a href="#section-14-4.13" class="pilcrow">¶</a>
 </li>
-        <li class="normal" id="section-14-4.14">Made coverage of the <code>cookie</code> component optional, and forbade an issuer from rejecting a request solely because it is not covered. In some browser architectures the Cookie header is attached after the request is constructed and signed, so the value does not exist at signing time and the requirement was unimplementable. Restated the Cookie Binding security property as one an issuer may not assume, and said what is lost when it is absent. Addresses issue #11.<a href="#section-14-4.14" class="pilcrow">¶</a>
+        <li class="normal" id="section-14-4.14">Made coverage of the <code>cookie</code> component RECOMMENDED when the header is available to the signer at signing time, rather than required, and forbade an issuer from rejecting a request solely because it is not covered. In some browser architectures the Cookie header is attached after the request is constructed and signed, so the requirement was unimplementable. Addresses issue #11.<a href="#section-14-4.14" class="pilcrow">¶</a>
 </li>
-        <li class="normal" id="section-14-4.15">
-          <p id="section-14-4.15.1">Required the <code>Content-Digest</code> header (<span>[<a href="#RFC9530" class="cite xref">RFC9530</a>]</span>) on the token request and added <code>content-digest</code> to the covered components. The email address being verified is carried in the request body, which no covered component reached, so the signature attested to a request without attesting to which address it asked for. Required the issuer to recompute the digest against the received bytes rather than rely on the signature over the header alone. Addresses issue #3.<a href="#section-14-4.15.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-14-4.15">Replaced the Email Discovery models with what this protocol requires: candidate addresses come from the W3C Email Verification API, the browser offers only valid email addresses, and from selection onward the address is never altered — it is sent byte-for-byte in the token request, returned byte-for-byte in the <code>email</code> claim, and every email comparison is byte-for-byte. Addresses issues #13 and #24.<a href="#section-14-4.15" class="pilcrow">¶</a>
 </li>
         <li class="normal" id="section-14-4.16">
-          <p id="section-14-4.16.1">draft-hardt-email-verification-01<a href="#section-14-4.16.1" class="pilcrow">¶</a></p>
+          <p id="section-14-4.16.1">Required the <code>Content-Digest</code> header (<span>[<a href="#RFC9530" class="cite xref">RFC9530</a>]</span>) on the token request and added <code>content-digest</code> to the covered components. The email address being verified is carried in the request body, which no covered component reached, so the signature attested to a request without attesting to which address it asked for. Required the issuer to recompute the digest against the received bytes rather than rely on the signature over the header alone. Addresses issue #3.<a href="#section-14-4.16.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="section-14-4.17">
+          <p id="section-14-4.17.1">draft-hardt-email-verification-01<a href="#section-14-4.17.1" class="pilcrow">¶</a></p>
 <ul class="compact normal">
-<li class="compact normal" id="section-14-4.16.2.1">Updated Implementation Status: completed GMail issuer entry, added Chrome and Edge origin trials.<a href="#section-14-4.16.2.1" class="pilcrow">¶</a>
+<li class="compact normal" id="section-14-4.17.2.1">Updated Implementation Status: completed GMail issuer entry, added Chrome and Edge origin trials.<a href="#section-14-4.17.2.1" class="pilcrow">¶</a>
 </li>
           </ul>
 </li>
-        <li class="normal" id="section-14-4.17">
-          <p id="section-14-4.17.1">draft-hardt-email-verification-00<a href="#section-14-4.17.1" class="pilcrow">¶</a></p>
+        <li class="normal" id="section-14-4.18">
+          <p id="section-14-4.18.1">draft-hardt-email-verification-00<a href="#section-14-4.18.1" class="pilcrow">¶</a></p>
 <ul class="compact normal">
-<li class="compact normal" id="section-14-4.17.2.1">Initial draft.<a href="#section-14-4.17.2.1" class="pilcrow">¶</a>
+<li class="compact normal" id="section-14-4.18.2.1">Initial draft.<a href="#section-14-4.18.2.1" class="pilcrow">¶</a>
 </li>
           </ul>
 </li>
