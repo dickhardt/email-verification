@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-08-16T00:02:20.237421+00:00",
+  "timestamp": "2026-08-20T00:03:10.112446+00:00",
   "repo": "dickhardt/email-verification",
   "labels": [
     {
@@ -55,7 +55,7 @@
       "id": "I_kwDOQ071b88AAAABGt8gbQ",
       "title": "Spec is unclear on what a \"syntactically valid email address\" is",
       "url": "https://github.com/dickhardt/email-verification/issues/2",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cbiesinger",
       "authorAssociation": "NONE",
       "assignees": [
@@ -64,8 +64,8 @@
       "labels": [],
       "body": "https://www.ietf.org/archive/id/draft-hardt-email-verification-00.html#section-4.2-6.2\n> Verifying the email field contains a syntactically valid email address\n\nIt is not clear how this spec defines \"syntactically valid email address\".",
       "createdAt": "2026-06-25T16:51:29Z",
-      "updatedAt": "2026-07-10T21:02:38Z",
-      "closedAt": null,
+      "updatedAt": "2026-08-19T14:53:45Z",
+      "closedAt": "2026-08-19T14:53:45Z",
       "comments": [
         {
           "author": "dickhardt",
@@ -81,15 +81,15 @@
       "id": "I_kwDOQ071b88AAAABGt99Jw",
       "title": "Requested email is not part of the signature",
       "url": "https://github.com/dickhardt/email-verification/issues/3",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cbiesinger",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "https://www.ietf.org/archive/id/draft-hardt-email-verification-00.html#name-signature-input-header\n\n> The covered components MUST include @method, @authority, @path, and signature-key. The cookie component MUST be included when the Cookie header is present, and MUST be omitted when it is not (per [[RFC9421](https://www.ietf.org/archive/id/draft-hardt-email-verification-00.html#RFC9421)] Section 2.5). The created parameter MUST be included.\n\nThis does not include `Content-Digest` or any other way of including the email in the signature. This seems unintentional?\n\ncc @yi-gu @samuelgoto\n",
       "createdAt": "2026-06-25T16:54:54Z",
-      "updatedAt": "2026-07-10T20:54:46Z",
-      "closedAt": null,
+      "updatedAt": "2026-08-19T15:04:04Z",
+      "closedAt": "2026-08-19T14:53:45Z",
       "comments": [
         {
           "author": "samuelgoto",
@@ -104,6 +104,13 @@
           "body": "@cbiesinger -- I was under the impression this would be challenging to do in the browser -- Content-Digest would need to be generated and set -- and then it could be included in Signature-Input -- will update in next version. New publications are effectively locked until after IETF.\n",
           "createdAt": "2026-07-10T20:54:46Z",
           "updatedAt": "2026-07-10T20:54:46Z"
+        },
+        {
+          "author": "dickhardt",
+          "authorAssociation": "OWNER",
+          "body": "Addressed in #16 (merged): the token request now carries a `Content-Digest` header (RFC 9530) over the request body, `content-digest` is a required covered component, and the issuer recomputes the digest against the received bytes before acting on the body. The requested email is now bound to the signature.",
+          "createdAt": "2026-08-19T15:04:03Z",
+          "updatedAt": "2026-08-19T15:04:03Z"
         }
       ]
     },
@@ -112,15 +119,15 @@
       "id": "I_kwDOQ071b88AAAABH1sahQ",
       "title": "\u00a72.1 Email Discovery: where do suggested addresses come from?",
       "url": "https://github.com/dickhardt/email-verification/issues/4",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "lonetis",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "\u00a72.1 says:\n\n> Before presenting the user with email address choices, the browser discovers which email accounts have active sessions with an issuer.\n\nThis reads as if the browser resolves an issuer *before* any email is known. But issuer discovery (\u00a73) is a DNS lookup on the email's domain, so it can't run until an email is already selected. The two appear circular unless \u00a72.1's discovery is understood as purely FedCM-based (issuer \u2192 emails via Push/Pull, no DNS involved).\n\nThe companion W3C Email Verification API describes the reverse ordering: the browser suggests addresses from its own autofill store, the user selects one, and only then are DNS issuer discovery and FedCM Accounts Validation run on the selection. There, FedCM is used to *validate* a pick, not to *source* the suggestions.\n\nSo the two documents seem to disagree on the origin of the suggested addresses: \u00a72.1 has FedCM-discovered accounts populating the list pre-selection, while the W3C flow has browser autofill populating it and all issuer/FedCM involvement happening post-selection.",
       "createdAt": "2026-07-06T16:19:35Z",
-      "updatedAt": "2026-07-10T21:07:14Z",
-      "closedAt": null,
+      "updatedAt": "2026-08-19T15:04:05Z",
+      "closedAt": "2026-08-19T14:53:48Z",
       "comments": [
         {
           "author": "dickhardt",
@@ -128,6 +135,13 @@
           "body": "@lonetis \n> \u00a72.1 says:\n\n> Before presenting the user with email address choices, the browser discovers which email accounts have active sessions with an issuer.\n\nthis sentence is confirming the email has an active session with an issuer for the domain -- which makes sense if we only support  there being a cookie -- but does not allow other options we are considering for the issuer to request the user to login when there is no cookie\n\nDNS is always required for the browser and the verifier to know the issuer is truly authoritative for email verification independent of what FedCM accounts say",
           "createdAt": "2026-07-10T21:07:14Z",
           "updatedAt": "2026-07-10T21:07:14Z"
+        },
+        {
+          "author": "dickhardt",
+          "authorAssociation": "OWNER",
+          "body": "Addressed in #20 and simplified further in #17 (both merged). Email Discovery now says: candidate addresses come from the W3C Email Verification API (browser store, FedCM push/pull, or typed) and are out of scope here; the browser offers only valid email addresses; and issuer discovery runs on the domain of whatever address the user selects \u2014 the DNS delegation alone determines the issuer, whatever the source.",
+          "createdAt": "2026-08-19T15:04:05Z",
+          "updatedAt": "2026-08-19T15:04:05Z"
         }
       ]
     },
@@ -160,15 +174,15 @@
       "id": "I_kwDOQ071b88AAAABJdyT8A",
       "title": "Security Considerations around DNS Delegation",
       "url": "https://github.com/dickhardt/email-verification/issues/6",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "dennisjackson",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "Viktor pointed out that the DNS Delegation needs to be checked by the client, but clients struggle to validate DNSSEC or rely on DoH. Spoofed DNS records may lead to credential compromise with a user's mail provider (depending on how clients authenticate). Authentication decisions should only depend on information fetched via HTTPS and never from DNS (as a rule).",
       "createdAt": "2026-07-20T14:58:19Z",
-      "updatedAt": "2026-07-20T14:58:19Z",
-      "closedAt": null,
+      "updatedAt": "2026-08-19T14:53:47Z",
+      "closedAt": "2026-08-19T14:53:47Z",
       "comments": []
     },
     {
@@ -176,15 +190,15 @@
       "id": "I_kwDOQ071b88AAAABJeawEg",
       "title": "Should `iss` should be a full origin?",
       "url": "https://github.com/dickhardt/email-verification/issues/7",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "samuelgoto",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "In this example:\n\nhttps://www.ietf.org/archive/id/draft-hardt-email-verification-00.html#name-payload\n\n```json\n{\n  \"iss\": \"issuer.example\",\n  ...\n}\n```\n\nThe browser spec currently enforces that `iss` is a full origin (meaning, contains also a scheme, `https` specifically), so it expects something like the following:\n\n```json\n{\n  \"iss\": \"https://issuer.example\",\n  ...\n}\n```\n\nI'm not sure which spec needs to change, but this is a difference between what has been implemented and what the spec says ...\n\n... Should `iss` be an origin?\n",
       "createdAt": "2026-07-20T16:17:32Z",
-      "updatedAt": "2026-07-20T16:17:32Z",
-      "closedAt": null,
+      "updatedAt": "2026-08-19T14:53:46Z",
+      "closedAt": "2026-08-19T14:53:46Z",
       "comments": []
     },
     {
@@ -266,15 +280,15 @@
       "id": "I_kwDOQ071b88AAAABKtWM2w",
       "title": "Why is `cookie` included in signature-input",
       "url": "https://github.com/dickhardt/email-verification/issues/11",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "cbiesinger",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "https://dickhardt.github.io/email-verification/draft-hardt-email-verification.html#section-4.1.3\n\nIt is not clear to me what the value is of including this header. Also, this is difficult to implement (at least in Chrome) because the cookie header it not available at the point in time when the request is constructed.",
       "createdAt": "2026-07-29T21:08:00Z",
-      "updatedAt": "2026-07-30T20:05:14Z",
-      "closedAt": null,
+      "updatedAt": "2026-08-19T15:04:06Z",
+      "closedAt": "2026-08-19T14:53:46Z",
       "comments": [
         {
           "author": "dickhardt",
@@ -289,6 +303,13 @@
           "body": "> The cookie is what the issuer is using to authenticate the user\n\nYes but what is the value of including it in the signature...\n\nI would appreciate it being optional, thanks!",
           "createdAt": "2026-07-30T20:05:14Z",
           "updatedAt": "2026-07-30T20:05:14Z"
+        },
+        {
+          "author": "dickhardt",
+          "authorAssociation": "OWNER",
+          "body": "Addressed in #17 (merged): covering `cookie` is RECOMMENDED when the Cookie header is available to the signer at signing time, MUST be omitted when it is not, and an issuer MUST NOT reject a request solely because `cookie` is not covered. Examples no longer show it as a covered component, since the browser's network stack attaches the Cookie header after signing.",
+          "createdAt": "2026-08-19T15:04:06Z",
+          "updatedAt": "2026-08-19T15:04:06Z"
         }
       ]
     },
@@ -328,15 +349,15 @@
       "id": "I_kwDOQ071b88AAAABLogB1g",
       "title": "Should `email` always be the address exactly as provided?",
       "url": "https://github.com/dickhardt/email-verification/issues/13",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "rowan-m",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "This occurred to me when seeing that Gmail was returning `email` in the token in the form `First.Last@gmail.com` when the user had entered `first.last@gmail.com`. (https://github.com/rowan-m/rowan-fyi/issues/58) . This only got picked up because the demo was mistakenly doing a case-sensitive comparison.\n\nHowever, it occurred to me that users might provide an email address that is functionally equivalent if not exactly equal, e.g. `fir.s.t.last@provider.example` or `prefix+first.last@provider.example`.\n\nI think that if the user supplies an email address that the provider validates, the provider should return the email address explicitly as supplied and not a canonical / normalised version of it. This also feels preferable from both a privacy point of view in that no additional information about the identity is shared back with the verifying site and simpler for the verifying site as well since they don't have to consider any provider-specific rules around transforming addresses.",
       "createdAt": "2026-08-05T22:06:51Z",
-      "updatedAt": "2026-08-12T11:19:07Z",
-      "closedAt": null,
+      "updatedAt": "2026-08-19T15:04:08Z",
+      "closedAt": "2026-08-19T15:04:08Z",
       "comments": [
         {
           "author": "dickhardt",
@@ -351,6 +372,13 @@
           "body": "Yeah, case-insensitive comparison seems like an easy inclusion. @samuelgoto also raised this in #24.\n\nFor the wider question, I'm leaning towards it being left as responsibility for the IdP to return an appropriately normalised version of the email address that the RP should consider canonical.\n\nSo, if someone is running their own catch-all domain with deliberate variations for spam tracking, then they can return what they want. A larger provider may choose to return a normalised version, e.g. `fir.s.t.last@example.com` > `first.last@example.com` if they deem it better for their users.",
           "createdAt": "2026-08-12T11:19:07Z",
           "updatedAt": "2026-08-12T11:19:07Z"
+        },
+        {
+          "author": "dickhardt",
+          "authorAssociation": "OWNER",
+          "body": "Addressed in #17 (merged): the address is never altered anywhere in the protocol. The browser offers only valid email addresses (the WHATWG production), sends the selected address byte-for-byte in the token request, and the issuer returns it byte-for-byte in the `email` claim. Every email comparison is byte-for-byte. The Gmail `First.Last@` case round-trips unchanged: what the user selected is what the RP receives.",
+          "createdAt": "2026-08-19T15:04:07Z",
+          "updatedAt": "2026-08-19T15:04:07Z"
         }
       ]
     },
@@ -366,7 +394,7 @@
       "labels": [],
       "body": "In [Token Verification](https://www.ietf.org/archive/id/draft-hardt-email-verification-01.html#name-token-verification), specifically in [EVT Verification](https://www.ietf.org/archive/id/draft-hardt-email-verification-01.html#evt-verification), `email` is required to be present in the \"payload\":\n\n> Extract and validate the iss, iat, cnf, email, and email_verified claims from the payload\n\nThis disallows verifiers (of which there are many) to be forwards compatible with issuers that might want to issue the `email` attribute as a [SD-JWT](https://www.ietf.org/archive/id/draft-fett-oauth-selective-disclosure-jwt-02.html) selective disclosure (rather than a payload).\n\nThis is particularly problematic because it corners the protocol from ever having issuers that issue the `email` attribute as a selective disclosure, because that would require redeploying every verifier before issuers could make use of the feature.\n\nIt is unclear exactly what the use cases are for issuers to having the `email` attribute in selective disclosures (as opposed to the payload), but one of the open design alternatives that we explored was having a variation of the protocol that (a) doesn't contain `email` as an input to the [token request](https://www.ietf.org/archive/id/draft-hardt-email-verification-01.html#name-token-request) and instead (b) asks the issuer to produce \"all emails that the user is logged in to\", allowing the browser/user agent to only selectively disclose the specific email that the user selected. This variation could be used as an alternative to the current imposition that the browser makes for the issuer to expose itself as a FedCM Login Status API provider and expose an [accounts endpoint](https://w3c-fedid.github.io/FedCM/#idp-api-accounts-endpoint) to list \"all emails that the user is logged in to\".\n\nBecause there are a really large number of verifiers, whatever gets ossified first is going to be really hard to change later, so, unless there are drawbacks to having verifiers ALSO accept the `email` attribute in selective disclosures, I'd recommend changing the [EVT verification](https://www.ietf.org/archive/id/draft-hardt-email-verification-01.html#evt-verification) algorithm to allow them so that we can keep this door open if we ever need it.\n\nRelated discussion here: https://github.com/WICG/email-verification/issues/49\n",
       "createdAt": "2026-08-08T18:36:53Z",
-      "updatedAt": "2026-08-14T13:50:26Z",
+      "updatedAt": "2026-08-19T14:23:23Z",
       "closedAt": null,
       "comments": [
         {
@@ -382,6 +410,13 @@
           "body": "Supporting only in SD would be a backwards incompatible change but I think would be worth doing so that we can decouple the token from the email (eg if one wants to use this for handles rather than email).",
           "createdAt": "2026-08-14T13:50:26Z",
           "updatedAt": "2026-08-14T13:50:26Z"
+        },
+        {
+          "author": "dickhardt",
+          "authorAssociation": "OWNER",
+          "body": "@samuelgoto  I don't think the SD-JWT is as useful as you think it might be in the general case. \n\nThe advantages of SD-JWT are:\n- decoupling issuance and and presentation. There has been concern with that capability  #5  as the browser can now share present anywhere it wants, whenever it wants. \n- the browser can know which emails the issuer is authoritative for from the issuer. This may prove useful for issuers that manage mulitple emails for the same user -- but how common is that outside of Google and Hell\u014d?\n\nTo know which issuer to call, the browser must somehow learn the issuer. Currently we are forcing the browser to go to the issuer to learn about the email addresses it supports -- but that is driven by privacy concerns. The verification protocol does not require that -- the browser can learn about an issuer by the user providing an email address. \n\nI don't see where there is much utility to this for the verification complexity it adds. \n",
+          "createdAt": "2026-08-19T14:23:23Z",
+          "updatedAt": "2026-08-19T14:23:23Z"
         }
       ]
     },
@@ -445,16 +480,24 @@
       "id": "I_kwDOQ071b88AAAABMV6s0Q",
       "title": "Be explicit about case insensitive email matching",
       "url": "https://github.com/dickhardt/email-verification/issues/24",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "samuelgoto",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "In section https://www.ietf.org/archive/id/draft-hardt-email-verification-01.html#section-5.3-4.1, where it says:\n\n> The email claim matches the email address being verified\n\nWe should go over explicitly the type of matching that we are making, which, specifically, ignores case sensitivity, so that verifiers don't reject emails that the browser otherwise accepts.",
       "createdAt": "2026-08-11T18:17:14Z",
-      "updatedAt": "2026-08-11T18:17:14Z",
-      "closedAt": null,
-      "comments": []
+      "updatedAt": "2026-08-19T15:04:10Z",
+      "closedAt": "2026-08-19T15:04:10Z",
+      "comments": [
+        {
+          "author": "dickhardt",
+          "authorAssociation": "OWNER",
+          "body": "Addressed in #17 (merged), by removing the need for a matching rule rather than defining one: nothing in the protocol ever alters the address. The browser sends the selected address byte-for-byte, the issuer returns it byte-for-byte in the `email` claim, and every comparison is byte-for-byte. A verifier comparing byte-for-byte can never disagree with the browser, because the same bytes flow through the whole protocol \u2014 case-insensitive matching would only be needed if some party canonicalized, and none does.",
+          "createdAt": "2026-08-19T15:04:09Z",
+          "updatedAt": "2026-08-19T15:04:09Z"
+        }
+      ]
     },
     {
       "number": 25,
@@ -465,10 +508,36 @@
       "author": "samuelgoto",
       "authorAssociation": "NONE",
       "assignees": [],
-      "labels": [],
+      "labels": [
+        "enhancement"
+      ],
       "body": "Currently, `email_verified` allows issuers to assert that the user owns the email, but not whether the email is in a deliverable state, for example, whether the user's inbox is full or not (there are probably a lot more conditions for deliverability).\n\nDeliverability is particularly important for relying parties, which use email not just for login but also for re-engagement (e.g. newsletters, notifications, etc).\n\nWe should consider introducing a mechanism that allows email providers to make some sort of assertion about deliverability.",
       "createdAt": "2026-08-15T15:01:41Z",
-      "updatedAt": "2026-08-15T15:01:41Z",
+      "updatedAt": "2026-08-19T14:36:01Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "dickhardt",
+          "authorAssociation": "OWNER",
+          "body": "lets get feedback from verifiers -- the verifier is needing to trust the signal from the provider -- there is nuance as you call out on what deliverability means -- and some of the states you list are temporal vs it being an email like identifier \n\nThe reality could be that anyone that really wants to know deliverability will send an email ... ",
+          "createdAt": "2026-08-19T14:35:49Z",
+          "updatedAt": "2026-08-19T14:35:49Z"
+        }
+      ]
+    },
+    {
+      "number": 26,
+      "id": "I_kwDOQ071b88AAAABNZkQRw",
+      "title": "Replace WebAuthn authentication with an issuer login URL (FedCM Login Status continuation)",
+      "url": "https://github.com/dickhardt/email-verification/issues/26",
+      "state": "OPEN",
+      "author": "dickhardt",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "## Problem\n\nA token request can arrive with no valid cookie: the user is logged out of the issuer, or never logged in on this device. The spec's current answer is a WebAuthn challenge/response exchange (`webauthn_supported`, `webauthn_challenge`, `webauthn_response`, the `webauthn_state` cookie). Nothing implements it, and it hardwires one authentication method into the protocol.\n\n## Proposal\n\nAdopt the FedCM Login Status continuation instead. The login flow only fixes the session; the token and every error always come from the issuance endpoint, on a verified signed request.\n\n1. The browser sends the normal signed token request. No valid cookie \u2192 the issuer returns **401** with `{\"error\": \"authentication_required\", \"login_url\": \"https://accounts.issuer.example/login\"}`.\n2. The browser opens `login_url` in a browser-controlled popup, first-party context. The user authenticates however the issuer wants \u2014 password, passkey, anything. WebAuthn becomes an implementation detail of the issuer's login page, invisible to this protocol.\n3. The login page signals completion via the FedCM Login Status API (`Set-Login: logged-in` header, or `navigator.login.setStatus(\"logged-in\")`). The browser closes the popup.\n4. The browser retries the token request \u2014 a new signed POST, same key pair, fresh `created`, now carrying the session cookies. The issuer processes it as an ordinary token request and returns the EVT or an error.\n5. If the retry again returns `authentication_required`, the browser stops and surfaces the error to the RP. One retry, no loop.\n\n## What this removes\n\n`webauthn_supported` metadata, the challenge/response round trip, and the `webauthn_state` challenge-state dance. The issuer holds no protocol-visible state: the login popup and the retry are independent, ordinary exchanges. The invariant that an EVT is only ever produced in response to a verified signed token request is preserved \u2014 which is why the FedCM `continue_on` / `IdentityProvider.resolve(token)` model is NOT proposed: it delivers the token from the popup page, outside the signed exchange, and would need the original request's key context carried into the login session.\n\n## Privacy\n\n`login_url` is issuer-origin and carries nothing about the RP, preserving the three-party model. The email address SHOULD NOT appear in `login_url` \u2014 the retry carries it.\n\n## Open questions\n\n- Member on the existing `authentication_required` error, or a distinct `login_required` error code (OIDC's name for this)?\n- Where the popup/`Set-Login` choreography is specified \u2014 it is browser behavior, so likely the W3C Email Verification API, with this document defining only the `login_url` member and the retry semantics.",
+      "createdAt": "2026-08-19T15:13:43Z",
+      "updatedAt": "2026-08-19T15:13:43Z",
       "closedAt": null,
       "comments": []
     }
@@ -507,24 +576,26 @@
       "id": "PR_kwDOQ071b878ENhW",
       "title": "Align with draft-hardt-httpbis-signature-key-08",
       "url": "https://github.com/dickhardt/email-verification/pull/14",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "dickhardt",
       "authorAssociation": "OWNER",
       "assignees": [],
       "labels": [],
       "body": "Signature-Key -08 is not backward compatible with -07, and this draft was written against -07. A token request serialized per -01 of this draft is rejected by an issuer implementing this branch, and vice versa. There is nothing to negotiate over, so both ends of a deployment move together.\n\n## Breaking changes tracked from Signature-Key -08\n\n- **`hwk` `alg` is now REQUIRED and fully specified.** It was forbidden in -07. Added to every `Signature-Key` example.\n- **The polymorphic `EdDSA` identifier is forbidden**, deprecated by RFC 9864. Replaced with `Ed25519` in the browser's key, the default when `signing_alg_values_supported` is absent, the EVT header, the KB-JWT header, and every example including the base64url ones.\n- **The algorithm comes from the key's `alg`**, never derived from `kty` and `crv`. A key whose `kty` or `crv` disagrees with its `alg` is rejected rather than resolved in favor of either.\n- **`hwk` `kid` went from SHOULD NOT to MUST NOT.** The key is inline, so a `kid` selects nothing.\n- **Verifier-side `signature-key` coverage went from SHOULD to MUST.** Coverage was already required of signers here; the issuer-side obligation was missing.\n- **Signers MUST NOT send the `alg` signature parameter** and verifiers MUST ignore it, per RFC 9421 Section 3.3.7.\n- **`unsupported_scheme` added**; unknown-scheme rejection is now mandatory and conformance-testable.\n- **`supported_algorithms` removed from `Signature-Error`** in favor of `Accept-Signature-Alg`.\n\n## Other changes\n\n- `signing_alg_values_supported` must carry fully-specified identifiers, and states what it must not contain: `EdDSA`, `none`, `Prohibited` algorithms, and the symmetric MAC identifiers.\n- The key's `alg` is carried into the EVT `cnf.jwk`, so the RP verifies the KB-JWT under a fully-specified algorithm rather than one derived from the key. The KB-JWT header `alg` must match it, and the RP rejects a KB-JWT where the two disagree.\n- Added the `Signature-Error` response header to signature error responses, with a table mapping each failure case to its code, plus `Accept-Signature-Scheme`, `Accept-Signature-Alg`, and `required_input`.\n- Added an Algorithm Determination subsection to Security Considerations giving the reason for these rules.\n- Document History gained a `-02` entry recording all of the above.\n\nDraft builds clean with `make`.\n\n\ud83e\udd16 Generated with [Claude Code](https://claude.com/claude-code)\n\nhttps://claude.ai/code/session_015fgwvu6PjRsCCum44a3etK",
       "createdAt": "2026-08-07T13:51:53Z",
-      "updatedAt": "2026-08-08T18:08:44Z",
+      "updatedAt": "2026-08-19T14:53:44Z",
       "baseRepository": "dickhardt/email-verification",
       "baseRefName": "main",
       "baseRefOid": "34020d556ea443546527add9305a0496d5e59c6c",
       "headRepository": "dickhardt/email-verification",
       "headRefName": "signature-key-08-alignment",
-      "headRefOid": "93268c7b7a7400e814f767d2b5692b4f699d68e5",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "144701a6f4dbb90f36605c19df8069fbe29bca43",
+      "closedAt": "2026-08-19T14:53:43Z",
+      "mergedAt": "2026-08-19T14:53:43Z",
+      "mergedBy": "dickhardt",
+      "mergeCommit": {
+        "oid": "d85b0fca547ef1d64ee06365f2152ca4b499611f"
+      },
       "comments": [],
       "reviews": [
         {
@@ -552,6 +623,46 @@
               "updatedAt": "2026-08-08T18:08:44Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOQ071b88AAAABKHE3qQ",
+          "commit": {
+            "abbreviatedOid": "d13bf2a"
+          },
+          "author": "dickhardt",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-08-19T14:50:24Z",
+          "updatedAt": "2026-08-19T14:50:24Z",
+          "comments": [
+            {
+              "originalPosition": 120,
+              "body": "It was pre-existing text carried forward by this PR's rewrite. The requirement is now gone: covering `cookie` is RECOMMENDED when the header is available to the signer at signing time, and an issuer MUST NOT reject a request solely because it is not covered. The normative change is in #17; the corrected wording lands here when the stack merges.",
+              "createdAt": "2026-08-19T14:50:24Z",
+              "updatedAt": "2026-08-19T14:50:24Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOQ071b88AAAABKHE4kg",
+          "commit": {
+            "abbreviatedOid": "d13bf2a"
+          },
+          "author": "dickhardt",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-08-19T14:50:25Z",
+          "updatedAt": "2026-08-19T14:50:25Z",
+          "comments": [
+            {
+              "originalPosition": 121,
+              "body": "Agreed it was arbitrary. Changed to 300 seconds in d13bf2a. There is no single established value, but the conventions cluster at minutes: RFC 8725 puts clock-skew leeway at \"no more than a few minutes\", and Kerberos defaults to 5 minutes of allowable skew. Device clocks skew by minutes, not seconds, so 60 seconds would reject real users. The window is not load-bearing for security: a replayed request yields an EVT bound to the original browser's key through `cnf`, so replay gains an attacker no token another party can use. The draft now cites RFC 8725 for the choice.",
+              "createdAt": "2026-08-19T14:50:25Z",
+              "updatedAt": "2026-08-19T14:50:25Z"
+            }
+          ]
         }
       ]
     },
@@ -560,24 +671,26 @@
       "id": "PR_kwDOQ071b878FwXJ",
       "title": "Define \"valid email address\" as the WHATWG production",
       "url": "https://github.com/dickhardt/email-verification/pull/15",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "dickhardt",
       "authorAssociation": "OWNER",
       "assignees": [],
       "labels": [],
       "body": "Closes #2.\n\nThe draft told issuers to verify the `email` field \"contains a syntactically valid email address\" without saying what that means.\n\nRFC 5322 is the obvious citation and the wrong one. It admits comments, folding whitespace, and quoted local parts that no provider issues and no browser accepts from a user, and full implementations disagree at the edges. The WHATWG **valid e-mail address** production is a deliberate narrowing of RFC 5322 written for exactly this problem, and the browser has *already applied it* before the protocol starts \u2014 the user supplies the address through a control validated against that production. Citing it makes the issuer's check and the browser's the same check.\n\nAdds a **Valid Email Address** section defining the term once, applying to the token request `email` field, the EVT `email` claim, and issued private addresses.\n\nThe production is willfully non-compliant with RFC 5322. The draft now says so rather than leaving a reader to discover it, and notes the consequence: an issuer whose users hold addresses outside the production cannot verify them through this protocol.\n\n> **Stacked on #14** \u2014 base is `signature-key-08-alignment`. Merge that first.\n\n\ud83e\udd16 Generated with [Claude Code](https://claude.com/claude-code)\n\nhttps://claude.ai/code/session_015fgwvu6PjRsCCum44a3etK",
       "createdAt": "2026-08-07T14:49:50Z",
-      "updatedAt": "2026-08-08T18:10:09Z",
+      "updatedAt": "2026-08-18T10:37:43Z",
       "baseRepository": "dickhardt/email-verification",
       "baseRefName": "signature-key-08-alignment",
       "baseRefOid": "93268c7b7a7400e814f767d2b5692b4f699d68e5",
       "headRepository": "dickhardt/email-verification",
       "headRefName": "email-syntax-whatwg",
       "headRefOid": "1f59f58ce50e76237a9948eb994c3986f4497709",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2026-08-18T10:37:43Z",
+      "mergedAt": "2026-08-18T10:37:43Z",
+      "mergedBy": "dickhardt",
+      "mergeCommit": {
+        "oid": "0439f742c5e78cbd88e6f6bb580257df35bfcade"
+      },
       "comments": [],
       "reviews": [
         {
@@ -600,24 +713,26 @@
       "id": "PR_kwDOQ071b878Fwrz",
       "title": "Cover the request body with Content-Digest",
       "url": "https://github.com/dickhardt/email-verification/pull/16",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "dickhardt",
       "authorAssociation": "OWNER",
       "assignees": [],
       "labels": [],
       "body": "Closes #3.\n\nThe email address being verified travels in the JSON request body. The covered components were `@method`, `@authority`, `@path`, `signature-key`, and `cookie` \u2014 none of which reach the body. **The signature attested to a request without attesting to which address it asked for.** A party that captured the request could substitute a different address within the 60-second `created` window and the signature would still verify.\n\nChanges:\n\n- The browser MUST send `Content-Digest` (RFC 9530) over the request body; `sha-256` MUST be supported and SHOULD be used.\n- `content-digest` added to the required covered components.\n- The issuer MUST **recompute** the digest against the bytes it received. Verifying the signature over `content-digest` establishes only that the header was signed, not that it describes the body that arrived \u2014 the recomputation is what ties the two together. Stated as an explicit step, and required before acting on the body.\n- Examples updated with a real `sha-256` digest of `{\"email\":\"user@example.com\"}`.\n- Request Integrity bullet in Security Considerations updated to say what the body coverage buys.\n\n> **Stacked on #15** \u2014 base is `email-syntax-whatwg`. Merge #14 \u2192 #15 \u2192 this.\n\n\ud83e\udd16 Generated with [Claude Code](https://claude.com/claude-code)\n\nhttps://claude.ai/code/session_015fgwvu6PjRsCCum44a3etK",
       "createdAt": "2026-08-07T14:50:02Z",
-      "updatedAt": "2026-08-08T18:14:14Z",
+      "updatedAt": "2026-08-19T14:52:02Z",
       "baseRepository": "dickhardt/email-verification",
       "baseRefName": "email-syntax-whatwg",
       "baseRefOid": "1f59f58ce50e76237a9948eb994c3986f4497709",
       "headRepository": "dickhardt/email-verification",
       "headRefName": "content-digest",
-      "headRefOid": "a1a4fce8e42c877ae25915732822eade7b31dcb5",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "7197ae487acf72d76047ff1a0c971ecfdae4c57b",
+      "closedAt": "2026-08-19T14:52:02Z",
+      "mergedAt": "2026-08-19T14:52:02Z",
+      "mergedBy": "dickhardt",
+      "mergeCommit": {
+        "oid": "61baf3d264ecd11f9449f6b21d48796b9fbb4b2d"
+      },
       "comments": [],
       "reviews": [
         {
@@ -645,6 +760,46 @@
               "updatedAt": "2026-08-08T18:14:14Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOQ071b88AAAABKHFCYQ",
+          "commit": {
+            "abbreviatedOid": "93c6151"
+          },
+          "author": "dickhardt",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-08-19T14:50:40Z",
+          "updatedAt": "2026-08-19T14:50:40Z",
+          "comments": [
+            {
+              "originalPosition": 8,
+              "body": "Removed `cookie` from the Signature-Input in every example in 93c6151 \u2014 the examples now show what a browser actually sends. The Cookie header itself stays in the example request; it is just not a covered component. Coverage is not forbidden: #17 makes it RECOMMENDED when the header is available to the signer at signing time, which the browser's network stack architecture does not provide.",
+              "createdAt": "2026-08-19T14:50:40Z",
+              "updatedAt": "2026-08-19T14:50:40Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOQ071b88AAAABKHFD3w",
+          "commit": {
+            "abbreviatedOid": "93c6151"
+          },
+          "author": "dickhardt",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-08-19T14:50:42Z",
+          "updatedAt": "2026-08-19T14:50:42Z",
+          "comments": [
+            {
+              "originalPosition": 51,
+              "body": "That sentence changes in #17: covering `cookie` becomes RECOMMENDED when the header is available at signing time, MUST be omitted when not present, and an issuer MUST NOT reject a request solely because it is not covered. Left out of this PR so #17 keeps a single normative treatment of cookie coverage.",
+              "createdAt": "2026-08-19T14:50:42Z",
+              "updatedAt": "2026-08-19T14:50:42Z"
+            }
+          ]
         }
       ]
     },
@@ -653,25 +808,35 @@
       "id": "PR_kwDOQ071b878FxGX",
       "title": "Make coverage of the cookie component optional",
       "url": "https://github.com/dickhardt/email-verification/pull/17",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "dickhardt",
       "authorAssociation": "OWNER",
       "assignees": [],
       "labels": [],
       "body": "Closes #11.\n\n@cbiesinger's objection is decisive: Chrome cannot produce this. The Cookie header is attached by the network stack *after* the request has been constructed and signed, so the value to be covered does not exist at signing time. As written, the MUST excluded the main browser implementation.\n\nThe property it bought \u2014 binding the authenticating cookie to the request that carries it \u2014 is real, but it is not one the protocol depends on. The user is authenticated by the cookie and the request is bound to the browser's key by the signature, whether or not the two are bound to each other. That answers @cbiesinger's \"what is the value of including it\" directly, in the document.\n\nChanges:\n\n- `cookie` MAY be covered when the Cookie header is present; an issuer MUST NOT reject a request solely because it is not covered, and MUST verify over whatever components the request does list.\n- The **Cookie Binding** bullet in Security Considerations is restated as an optional property rather than a guarantee, naming what is lost when it is absent.\n- Dropped `cookie` from the `Signature-Input` examples, so the canonical form is the one every implementation can produce. The requests still *send* `Cookie:` \u2014 the examples now show exactly the case this PR permits.\n- The WebAuthn note updated to match; nothing in that exchange depended on the coverage.\n\n> **Stacked on #16** \u2014 base is `content-digest`. Merge #14 \u2192 #15 \u2192 #16 \u2192 this.\n\n\ud83e\udd16 Generated with [Claude Code](https://claude.com/claude-code)\n\nhttps://claude.ai/code/session_015fgwvu6PjRsCCum44a3etK",
       "createdAt": "2026-08-07T14:50:19Z",
-      "updatedAt": "2026-08-08T18:17:52Z",
+      "updatedAt": "2026-08-19T19:16:55Z",
       "baseRepository": "dickhardt/email-verification",
       "baseRefName": "content-digest",
-      "baseRefOid": "a1a4fce8e42c877ae25915732822eade7b31dcb5",
+      "baseRefOid": "93c6151cbfcb10b328cf3cd8f77d3a30df6b461e",
       "headRepository": "dickhardt/email-verification",
       "headRefName": "optional-cookie-coverage",
-      "headRefOid": "61dde8d1468505db7400d2a75366b7d64b36d200",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
-      "comments": [],
+      "headRefOid": "a54c4ea05279d2b2383b43608aa1932bb0ed5c3b",
+      "closedAt": "2026-08-19T14:51:58Z",
+      "mergedAt": "2026-08-19T14:51:58Z",
+      "mergedBy": "dickhardt",
+      "mergeCommit": {
+        "oid": "7197ae487acf72d76047ff1a0c971ecfdae4c57b"
+      },
+      "comments": [
+        {
+          "author": "dickhardt",
+          "authorAssociation": "OWNER",
+          "body": "On the scope: the diff here is bigger than the change. This PR sits at the top of a stacked chain, and #18 (iss origin), #19 (DNS delegation), and #20 (email discovery) were merged *into* this branch, so their content shows up in this diff even though each was reviewed in its own PR. The cookie change itself is small: covering `cookie` is RECOMMENDED when the header is available to the signer at signing time, MUST be omitted when the header is absent, and an issuer MUST NOT reject a request solely because it is not covered.\n\nOn WebAuthn: agreed it did not belong here. The WebAuthn note and the WebAuthn clause in the DNS spoofing paragraph are removed in a54c4ea \u2014 the spec's WebAuthn text is now byte-identical to main. WebAuthn (or its replacement) gets its own PR; the direction under consideration is the FedCM mechanism where the issuer provides a login URL when there is no active session, which covers WebAuthn or anything else the issuer wants to use.",
+          "createdAt": "2026-08-19T14:51:41Z",
+          "updatedAt": "2026-08-19T14:51:41Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOQ071b88AAAABI25JBg",
@@ -692,6 +857,86 @@
               "updatedAt": "2026-08-08T18:17:52Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOQ071b88AAAABJ-v_eg",
+          "commit": {
+            "abbreviatedOid": "88c077c"
+          },
+          "author": "samuelgoto",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-08-18T19:01:41Z",
+          "updatedAt": "2026-08-18T19:01:44Z",
+          "comments": [
+            {
+              "originalPosition": 16,
+              "body": "I'm having a hard time parsing this and understanding how that's different from what's written in the W3C Email Verification API spec ... I see you note down below in terms of the difference in ordering but it still unclear to me what you are saying here ....",
+              "createdAt": "2026-08-18T19:01:41Z",
+              "updatedAt": "2026-08-18T19:01:44Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOQ071b88AAAABKHFfuQ",
+          "commit": {
+            "abbreviatedOid": "a54c4ea"
+          },
+          "author": "dickhardt",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-08-19T14:51:21Z",
+          "updatedAt": "2026-08-19T14:51:21Z",
+          "comments": [
+            {
+              "originalPosition": 59,
+              "body": "Removed the note entirely in a54c4ea, along with the WebAuthn clause this stack added to the DNS spoofing paragraph. The spec's WebAuthn text is now byte-identical to main \u2014 WebAuthn changes will come as their own PR.",
+              "createdAt": "2026-08-19T14:51:21Z",
+              "updatedAt": "2026-08-19T14:51:21Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOQ071b88AAAABKHFgjg",
+          "commit": {
+            "abbreviatedOid": "a54c4ea"
+          },
+          "author": "dickhardt",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-08-19T14:51:22Z",
+          "updatedAt": "2026-08-19T14:51:22Z",
+          "comments": [
+            {
+              "originalPosition": 16,
+              "body": "You were right that it was overexplained. Replaced the whole section in a54c4ea with what the protocol actually requires: how the browser assembles candidate addresses is the W3C API's business and out of scope here; the browser MUST NOT offer a string that is not a valid email address (the WHATWG production); and from selection onward the address is never altered \u2014 sent byte-for-byte in the token request, returned byte-for-byte in the `email` claim, compared byte-for-byte everywhere. No canonicalization anywhere, by anyone.\n\nThat last part also resolves #24: there is no case-insensitive matching rule because nothing ever changes the case \u2014 the same bytes flow through the whole protocol, so a verifier comparing byte-for-byte can never disagree with the browser. It resolves #13 the same way.",
+              "createdAt": "2026-08-19T14:51:22Z",
+              "updatedAt": "2026-08-19T14:51:22Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOQ071b88AAAABKJYS2g",
+          "commit": {
+            "abbreviatedOid": "a54c4ea"
+          },
+          "author": "samuelgoto",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-08-19T19:16:52Z",
+          "updatedAt": "2026-08-19T19:16:55Z",
+          "comments": [
+            {
+              "originalPosition": 21,
+              "body": "Shouldn't we also have this \"byte for byte\" semantic in the EVT Creation section?\n\nhttps://dickhardt.github.io/email-verification/draft-hardt-email-verification.html#section-5.2-2.2",
+              "createdAt": "2026-08-19T19:16:52Z",
+              "updatedAt": "2026-08-19T19:16:55Z"
+            }
+          ]
         }
       ]
     },
@@ -700,24 +945,26 @@
       "id": "PR_kwDOQ071b878F0gx",
       "title": "Make the issuer identifier an HTTPS origin",
       "url": "https://github.com/dickhardt/email-verification/pull/18",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "dickhardt",
       "authorAssociation": "OWNER",
       "assignees": [],
       "labels": [],
       "body": "Closes #7.\n\n@samuelgoto flagged that the browser spec enforces `https://issuer.example` while the draft says `issuer.example`. Resolved in favor of the **origin**, matching the `iss` claim of OpenID Connect and the issuer of RFC 8414 \u2014 the values this one has to be comparable to. It's also what's already shipping.\n\n**The DNS record keeps a host name.** A TXT record holding `https://` is redundant when no other scheme is permitted, and a scheme in a DNS record is not a DNS-shaped value. Instead the identifier is *derived*: `https://` + host, no port, no path, no trailing slash. New **Issuer Identifier** section states that derivation once, so it isn't re-implied at each use, and requires every comparison to be byte-for-byte on the derived string \u2014 no scheme defaulting, port normalization, or trailing-slash tolerance.\n\nResolution now reads:\n\n1. DNS TXT \u2192 `issuer.example`\n2. Issuer identifier \u2192 `https://issuer.example`\n3. Fetch `https://issuer.example/.well-known/email-verification`\n4. Metadata `issuer` MUST equal `https://issuer.example`\n5. EVT `iss` MUST equal `https://issuer.example`\n\nStep 4 is new. Added the `issuer` member to the metadata document and required a fetching party to reject a document whose `issuer` does not match the identity it was fetched under \u2014 the RFC 8414 \u00a73.3 check. Signature-Key -08 added exactly this for its own discovery after issue #12 there; the same gap existed here, and it's what stops a document served at one identity from claiming another.\n\nRecomputed the base64url EVT payload example.\n\n> **Stacked on #17** \u2014 base is `optional-cookie-coverage`. Merge #14 \u2192 #15 \u2192 #16 \u2192 #17 \u2192 this.\n\n\ud83e\udd16 Generated with [Claude Code](https://claude.com/claude-code)\n\nhttps://claude.ai/code/session_015fgwvu6PjRsCCum44a3etK",
       "createdAt": "2026-08-07T14:52:22Z",
-      "updatedAt": "2026-08-07T14:52:23Z",
+      "updatedAt": "2026-08-18T15:06:24Z",
       "baseRepository": "dickhardt/email-verification",
       "baseRefName": "optional-cookie-coverage",
       "baseRefOid": "61dde8d1468505db7400d2a75366b7d64b36d200",
       "headRepository": "dickhardt/email-verification",
       "headRefName": "iss-origin",
-      "headRefOid": "5e690b55f11e7f24fc30e1d8e299f3f677520c83",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "394361e4fa1d5ce80fe1b8502f899635900c8f8e",
+      "closedAt": "2026-08-18T15:06:24Z",
+      "mergedAt": "2026-08-18T15:06:24Z",
+      "mergedBy": "dickhardt",
+      "mergeCommit": {
+        "oid": "88c077ca193ceecdccd5cc219f8c6fe3ee53b64f"
+      },
       "comments": [],
       "reviews": []
     },
@@ -726,50 +973,101 @@
       "id": "PR_kwDOQ071b878F3FA",
       "title": "Add Security Considerations for DNS delegation",
       "url": "https://github.com/dickhardt/email-verification/pull/19",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "dickhardt",
       "authorAssociation": "OWNER",
       "assignees": [],
       "labels": [],
       "body": "Closes #6.\n\n@dennisjackson raised this from Viktor's point: the delegation rests on an unauthenticated DNS TXT record and the document said nothing about it. Design Rationale defended DNS delegation on deployment grounds only.\n\n**The two lookups are not equally valuable to an attacker,** and separating them is most of the answer. Both the browser and the RP resolve the record independently.\n\n*Spoofing the browser's resolver alone gains little.* The browser is sent to an attacker-controlled issuer and discloses the email address. It does **not** disclose credentials \u2014 cookies are scoped to the real issuer's origin and are not sent to a different one, and a WebAuthn challenge from the attacker carries the attacker's `rpId`, so no assertion usable at the real issuer is produced. This answers the \"depending on how clients authenticate\" clause in the original report directly. The attacker can mint an EVT, but the RP resolves the record itself and rejects an `iss` it did not derive. The exact-comparison requirement from #18 is what makes that work.\n\n*Spoofing the RP's resolver is the attack that matters.* The resulting token is well-formed, correctly signed, and signed by the key the RP was told to trust. Nothing later in verification catches it. Stated as the residual risk of the design rather than left implied.\n\nRecommends DNSSEC validation by RPs \u2014 they're servers, resolving on their own infrastructure, and are far better placed for it than a browser \u2014 and zone signing by email domain operators.\n\nOn Viktor's general rule that authentication decisions should never depend on DNS: the PR neither dismisses nor concedes it. The delegation is a property of an email domain; DNS is where properties of email domains live, alongside SPF, DKIM, and DMARC, which an attacker with this same capability could already forge for the same domain. And moving it to HTTPS reintroduces the web-hosting barrier the design set out to avoid. The text still says plainly that unsigned DNS is weaker than HTTPS and that a deployment without DNSSEC is accepting the risk.\n\n> **Stacked on #18** \u2014 base is `iss-origin`. Merge #14 \u2192 #15 \u2192 #16 \u2192 #17 \u2192 #18 \u2192 this.\n\n\ud83e\udd16 Generated with [Claude Code](https://claude.com/claude-code)\n\nhttps://claude.ai/code/session_015fgwvu6PjRsCCum44a3etK",
       "createdAt": "2026-08-07T14:53:57Z",
-      "updatedAt": "2026-08-07T14:53:57Z",
+      "updatedAt": "2026-08-19T14:51:24Z",
       "baseRepository": "dickhardt/email-verification",
       "baseRefName": "iss-origin",
       "baseRefOid": "5e690b55f11e7f24fc30e1d8e299f3f677520c83",
       "headRepository": "dickhardt/email-verification",
       "headRefName": "dns-security",
-      "headRefOid": "ca743bad113ab3c84ec3bd0a358df963b0bd9e29",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "150f002b6b6449a02b0c5f904b6c18ea5958047d",
+      "closedAt": "2026-08-18T15:03:16Z",
+      "mergedAt": "2026-08-18T15:03:16Z",
+      "mergedBy": "dickhardt",
+      "mergeCommit": {
+        "oid": "394361e4fa1d5ce80fe1b8502f899635900c8f8e"
+      },
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOQ071b88AAAABI25e9Q",
+          "commit": {
+            "abbreviatedOid": "150f002"
+          },
+          "author": "samuelgoto",
+          "authorAssociation": "NONE",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-08-08T18:20:31Z",
+          "updatedAt": "2026-08-18T19:02:31Z",
+          "comments": [
+            {
+              "originalPosition": 10,
+              "body": "```suggestion\n**Spoofing the browser's resolver alone gains little.** The browser is directed to an attacker-controlled issuer and discloses the email address to it. It does not disclose the user's credentials: cookies are scoped to the real issuer's origin and are not sent to a different one. The attacker can mint an EVT, but its `iss` is the attacker's identifier, and the RP \u2014 resolving the record itself, over its own path \u2014 derives the real issuer identifier and rejects the token. The mismatch is what stops it, which is why [Issuer Identifier](#issuer-identifier) requires the comparison to be exact.\n```\n\nCan we remove the references to WebAuthn from this PR since this isn't actually something that is supported at the moment?",
+              "createdAt": "2026-08-08T18:20:31Z",
+              "updatedAt": "2026-08-18T19:02:31Z"
+            },
+            {
+              "originalPosition": 10,
+              "body": "Was this addressed?",
+              "createdAt": "2026-08-18T19:02:23Z",
+              "updatedAt": "2026-08-18T19:02:31Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOQ071b88AAAABKHFhtA",
+          "commit": {
+            "abbreviatedOid": "150f002"
+          },
+          "author": "dickhardt",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-08-19T14:51:23Z",
+          "updatedAt": "2026-08-19T14:51:23Z",
+          "comments": [
+            {
+              "originalPosition": 10,
+              "body": "Yes \u2014 applied in a54c4ea on optional-cookie-coverage (this branch had already merged into it, so the fix lands there). The WebAuthn clause is out of the spoofing paragraph and the spec's WebAuthn text now matches main exactly.",
+              "createdAt": "2026-08-19T14:51:23Z",
+              "updatedAt": "2026-08-19T14:51:24Z"
+            }
+          ]
+        }
+      ]
     },
     {
       "number": 20,
       "id": "PR_kwDOQ071b878F41u",
       "title": "Clarify what Email Discovery is and is not",
       "url": "https://github.com/dickhardt/email-verification/pull/20",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "dickhardt",
       "authorAssociation": "OWNER",
       "assignees": [],
       "labels": [],
       "body": "Closes #4.\n\n@lonetis is right that \u00a72.1 and \u00a73 read as circular. The opening sentence \u2014 \"Before presenting the user with email address choices, the browser discovers which email accounts have active sessions with an issuer\" \u2014 reads as resolving an issuer before any address is known, while Issuer Discovery is a DNS lookup *on* the selected address.\n\nThey aren't circular; they're different operations, and the text never said so.\n\n- **Email Discovery populates a chooser.** That's all. It is not Issuer Discovery, it does not establish who is authoritative for a domain, and it is **optional** \u2014 a browser offering addresses from its own store, or taking one the user types, enters at Email Acquisition with no discovery step.\n- **Push and Pull run against issuers the browser already has a relationship with.** That's why no email address is needed to reach them, and where the apparent circularity dissolves.\n- **The substantive point, which was missing entirely:** an issuer surfacing an account through Push or Pull gains *no* authority to verify it. `_email-verification.example.com` decides that. An address an issuer volunteered is subject to the same DNS lookup as one the user typed. This is @dickhardt's \"DNS is always required for the browser and the verifier to know the issuer is truly authoritative, independent of what FedCM accounts say\" \u2014 now in the document.\n\nAlso added a note for the ordering difference with the W3C API that @lonetis identified, alongside the two W3C divergence notes already in the text. Both orderings arrive at the same place, so this is a description to reconcile rather than a conflict to resolve.\n\n> **Stacked on #19** \u2014 base is `dns-security`. Merge #14 \u2192 #15 \u2192 #16 \u2192 #17 \u2192 #18 \u2192 #19 \u2192 this.\n\n\ud83e\udd16 Generated with [Claude Code](https://claude.com/claude-code)\n\nhttps://claude.ai/code/session_015fgwvu6PjRsCCum44a3etK",
       "createdAt": "2026-08-07T14:55:00Z",
-      "updatedAt": "2026-08-08T18:22:59Z",
+      "updatedAt": "2026-08-19T14:51:25Z",
       "baseRepository": "dickhardt/email-verification",
       "baseRefName": "dns-security",
       "baseRefOid": "ca743bad113ab3c84ec3bd0a358df963b0bd9e29",
       "headRepository": "dickhardt/email-verification",
       "headRefName": "email-discovery-clarity",
       "headRefOid": "1009af558efe4a90aef8fe4240b2696aa45d751e",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2026-08-18T10:39:38Z",
+      "mergedAt": "2026-08-18T10:39:37Z",
+      "mergedBy": "dickhardt",
+      "mergeCommit": {
+        "oid": "150f002b6b6449a02b0c5f904b6c18ea5958047d"
+      },
       "comments": [],
       "reviews": [
         {
@@ -791,8 +1089,54 @@
               "updatedAt": "2026-08-08T18:22:59Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOQ071b88AAAABKHFjCg",
+          "commit": {
+            "abbreviatedOid": "1009af5"
+          },
+          "author": "dickhardt",
+          "authorAssociation": "OWNER",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2026-08-19T14:51:25Z",
+          "updatedAt": "2026-08-19T14:51:25Z",
+          "comments": [
+            {
+              "originalPosition": 16,
+              "body": "That section is gone \u2014 replaced in a54c4ea with a short statement that candidate addresses come from the W3C Email Verification API (out of scope here) and that issuer discovery runs on whatever address the user selects. The push/pull models live in the W3C spec where they belong.",
+              "createdAt": "2026-08-19T14:51:25Z",
+              "updatedAt": "2026-08-19T14:51:25Z"
+            }
+          ]
         }
       ]
+    },
+    {
+      "number": 27,
+      "id": "PR_kwDOQ071b88AAAABATKvJA",
+      "title": "Remove WebAuthn authentication",
+      "url": "https://github.com/dickhardt/email-verification/pull/27",
+      "state": "OPEN",
+      "author": "dickhardt",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "Removes the WebAuthn Authentication section, the `webauthn_supported` metadata member and example line, the WebAuthn challenge/response exchange (including the `webauthn_state` cookie dance), the token-request bullet, and the WebAuthn reference. Nothing implements this, and it hardwired one authentication method into the protocol (raised in review of #17 and #19).\n\nA token request without a valid session now returns the existing `authentication_required` error, which gets an explicit anchor.\n\nThe replacement is under discussion in #26: the issuer returns a login URL, the browser opens it in a first-party popup, completion is signaled via the FedCM Login Status API, and the browser retries the signed token request. The login flow only fixes the session \u2014 the token and every error always come from the issuance endpoint, so how the user authenticates (WebAuthn or anything else) is the login page's business, not the protocol's.\n\n\ud83e\udd16 Generated with [Claude Code](https://claude.com/claude-code)\n\nhttps://claude.ai/code/session_012Qrs6Z9yLd8SGRdKroZpwN",
+      "createdAt": "2026-08-19T15:14:37Z",
+      "updatedAt": "2026-08-19T15:14:37Z",
+      "baseRepository": "dickhardt/email-verification",
+      "baseRefName": "main",
+      "baseRefOid": "d85b0fca547ef1d64ee06365f2152ca4b499611f",
+      "headRepository": "dickhardt/email-verification",
+      "headRefName": "remove-webauthn",
+      "headRefOid": "16d15bd18964ac85aff25eb7bf811e3e7e02b2b0",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
