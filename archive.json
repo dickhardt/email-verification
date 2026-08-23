@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-08-20T00:03:10.112446+00:00",
+  "timestamp": "2026-08-23T00:02:07.704466+00:00",
   "repo": "dickhardt/email-verification",
   "labels": [
     {
@@ -157,7 +157,7 @@
       "labels": [],
       "body": "A comment I raised in the side-meeting: \n\nThe current draft is a bit underspecified in terms of the privacy and security properties it's trying to achieve. For example, the decision to use a browser-based key to sign the RP's nonce means that sucessful logins to a RP may not be 1:1 with requests to the issuer. \n\nConcretely, an attacker who can perform the Issuance process once and receive a valid credential for a public key they control can then respond to arbitary challenges until the credential expires. If the client were using SSO style flow this would not be possible without the Issuer noticing (it seems strange that djackson has made 100 logins to different sites in the last minute). This would be prevented if the RP's nonce were also signed by the Issuer. If there are privacy concerns with exposing this to the Issuer (e.g. identifying the RP), a blind signature might be the right solution. ",
       "createdAt": "2026-07-20T14:47:13Z",
-      "updatedAt": "2026-08-07T14:55:26Z",
+      "updatedAt": "2026-08-20T13:20:30Z",
       "closedAt": null,
       "comments": [
         {
@@ -166,6 +166,13 @@
           "body": "Before changing anything here I want to separate two things in this report, because I think one is a concrete defect and the other is a design question that deserves discussion rather than a patch.\n\n**The concrete part.** The EVT has no `exp` claim. Verification says only \"verify `iat` is within an acceptable time window\" \u2014 in both the browser's and the RP's steps \u2014 and never says what that window is. So the credential lifetime your analysis turns on isn't just long, it's unspecified, and two RPs can disagree about whether the same token is live. That looks like a straightforward fix: add `exp`, have the issuer set it, and say what an RP does with it. I don't think anyone will object.\n\n**The design question, which is the one I'd like discussion on.** \"Successful logins to an RP may not be 1:1 with requests to the issuer\" is true, and it is what the three-party model buys. The issuer not seeing 100 logins in a minute is the same property as the issuer not learning which RP the user visited. Making the issuer sign the RP's nonce would restore its visibility into presentation, and would cost exactly the privacy the design exists to provide. Your blind signature suggestion is the interesting thread precisely because it's the only version that might give both \u2014 but it's a substantial change and I'd want to know whether the resulting property is worth it before designing to it.\n\nSo, questions I'd like input on:\n\n1. **How long should an EVT live?** If it's short enough \u2014 tens of seconds, roughly the span of one verification interaction \u2014 does the multi-presentation window close far enough to matter? The browser obtains the EVT and mints the KB-JWT immediately; there's no legitimate reason for a gap.\n\n2. **Should an EVT be single-use?** Nothing currently says one EVT can't be presented to many RPs. A requirement that the holder use each EVT for exactly one RP would kill the \"respond to arbitrary challenges\" case directly, without the issuer learning anything. It's enforced by the browser rather than checked by the issuer, which is weaker \u2014 but the attacker in your scenario is running their own software anyway, so it's worth being explicit about what a rule on the holder actually buys against them.\n\n3. **What is the residual threat if both are in place?** An attacker who completes issuance once, against their own account, holds a credential for an address they genuinely control. They can present it to several RPs within the lifetime. What's the concrete harm that isn't already available to someone who simply runs issuance per RP?\n\n4. **Is blind signing worth prototyping?** If the answers above leave a real gap, this is where I'd go next, and I'd want to scope it as its own piece of work.\n\n@dennisjackson \u2014 does splitting it this way match what you were getting at, or does the visibility point stand on its own independent of the lifetime question? Anyone else with a view on 1 and 2 in particular, that's the part I'd like to settle first.",
           "createdAt": "2026-08-07T14:55:26Z",
           "updatedAt": "2026-08-07T14:55:26Z"
+        },
+        {
+          "author": "dickhardt",
+          "authorAssociation": "OWNER",
+          "body": "@dennisjackson -- would love to get more of your thoughts on this. ",
+          "createdAt": "2026-08-20T13:20:30Z",
+          "updatedAt": "2026-08-20T13:20:30Z"
         }
       ]
     },
@@ -540,6 +547,44 @@
       "updatedAt": "2026-08-19T15:13:43Z",
       "closedAt": null,
       "comments": []
+    },
+    {
+      "number": 28,
+      "id": "I_kwDOQ071b88AAAABNhsg7A",
+      "title": "Make `kid` optional in EVT header",
+      "url": "https://github.com/dickhardt/email-verification/issues/28",
+      "state": "OPEN",
+      "author": "agektmr",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "Developers bump into this issue on Gmail missing `kid`:\nhttps://github.com/WICG/email-verification/issues/43\n\n@samuelgoto pointed out this is expected and `kid` should be \"optional\".",
+      "createdAt": "2026-08-20T11:08:39Z",
+      "updatedAt": "2026-08-21T07:32:03Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "dickhardt",
+          "authorAssociation": "OWNER",
+          "body": "@agektmr how does the verifier reliably determine which key in the jwks to use to verify? ",
+          "createdAt": "2026-08-20T13:19:06Z",
+          "updatedAt": "2026-08-20T13:19:06Z"
+        },
+        {
+          "author": "agektmr",
+          "authorAssociation": "NONE",
+          "body": "Loop through all of the keys in jwks.",
+          "createdAt": "2026-08-21T03:57:37Z",
+          "updatedAt": "2026-08-21T03:57:37Z"
+        },
+        {
+          "author": "dickhardt",
+          "authorAssociation": "OWNER",
+          "body": "Before we make kid optional, worth checking whether that\u2019s actually the right call. I pulled JWKS from a few major OIDC issuers \u2014 Google\u2019s own standard id_token JWKS, Firebase\u2019s securetoken, Microsoft\u2019s Azure AD v2, and GitLab \u2014 every single key across all of them carries a kid. The only JWKS I found without kid on any key is the one from #43 \u2014 Google\u2019s EVT-specific signer \u2014 and per that thread, that\u2019s a signing-infra limitation Google\u2019s own team said they\u2019re fixing, not a deliberate design choice.\n\nGiven that, I\u2019d lean toward making kid required in the EVT header rather than optional-with-a-fallback-algorithm. That matches what every other JWKS in the wild already does, keeps verifiers simple (exact match, no \u201ctry every key\u201d loop with its own edge cases), and puts the burden back on Google to finish the infra fix they already said was coming \u2014 rather than baking a permanent workaround into the spec for what looks like a temporary gap.",
+          "createdAt": "2026-08-21T07:32:03Z",
+          "updatedAt": "2026-08-21T07:32:03Z"
+        }
+      ]
     }
   ],
   "pulls": [
