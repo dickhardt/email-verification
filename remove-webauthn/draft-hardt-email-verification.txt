@@ -1724,9 +1724,9 @@ Table of Contents
       authentication method into the protocol.  A request without a
       valid session returns authentication_required.  An issuer-provided
       login URL using the FedCM Login Status continuation is being
-      explored as a replacement (issue #26); that flow is an exploration
-      only, dependent on the browser developing an acceptable user
-      experience for the login popup.
+      explored as a replacement; that flow is an exploration only,
+      dependent on the browser developing an acceptable user experience
+      for the login popup.
 
    *  Widened the created acceptance window from 60 to 300 seconds.
       Device clocks skew by minutes, not seconds, and the window is not
