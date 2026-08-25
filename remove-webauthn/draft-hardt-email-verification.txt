@@ -5,8 +5,8 @@
 TBD                                                             D. Hardt
 Internet-Draft                                                     Hellō
 Intended status: Standards Track                                 S. Goto
-Expires: 20 February 2027                                         Google
-                                                          19 August 2026
+Expires: 26 February 2027                                         Google
+                                                          25 August 2026
 
 
                       Email Verification Protocol
@@ -64,7 +64,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 20 February 2027.
+   This Internet-Draft will expire on 26 February 2027.
 
 Copyright Notice
 
@@ -1722,9 +1722,11 @@ Table of Contents
       webauthn_supported metadata member, and the WebAuthn challenge/
       response exchange.  Nothing implements it, and it hardwired one
       authentication method into the protocol.  A request without a
-      valid session returns authentication_required.  The replacement
-      under discussion is an issuer-provided login URL using the FedCM
-      Login Status continuation; see issue #26.
+      valid session returns authentication_required.  An issuer-provided
+      login URL using the FedCM Login Status continuation is being
+      explored as a replacement (issue #26); that flow is an exploration
+      only, dependent on the browser developing an acceptable user
+      experience for the login popup.
 
    *  Widened the created acceptance window from 60 to 300 seconds.
       Device clocks skew by minutes, not seconds, and the window is not
