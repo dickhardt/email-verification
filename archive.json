@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-08-23T00:02:07.704466+00:00",
+  "timestamp": "2026-08-25T00:02:52.177939+00:00",
   "repo": "dickhardt/email-verification",
   "labels": [
     {
@@ -394,15 +394,15 @@
       "id": "I_kwDOQ071b88AAAABL-saTQ",
       "title": "Consider allowing `email` to be an attribute from a selective disclosure rather than in the issuer's JWT",
       "url": "https://github.com/dickhardt/email-verification/issues/21",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "samuelgoto",
       "authorAssociation": "NONE",
       "assignees": [],
       "labels": [],
       "body": "In [Token Verification](https://www.ietf.org/archive/id/draft-hardt-email-verification-01.html#name-token-verification), specifically in [EVT Verification](https://www.ietf.org/archive/id/draft-hardt-email-verification-01.html#evt-verification), `email` is required to be present in the \"payload\":\n\n> Extract and validate the iss, iat, cnf, email, and email_verified claims from the payload\n\nThis disallows verifiers (of which there are many) to be forwards compatible with issuers that might want to issue the `email` attribute as a [SD-JWT](https://www.ietf.org/archive/id/draft-fett-oauth-selective-disclosure-jwt-02.html) selective disclosure (rather than a payload).\n\nThis is particularly problematic because it corners the protocol from ever having issuers that issue the `email` attribute as a selective disclosure, because that would require redeploying every verifier before issuers could make use of the feature.\n\nIt is unclear exactly what the use cases are for issuers to having the `email` attribute in selective disclosures (as opposed to the payload), but one of the open design alternatives that we explored was having a variation of the protocol that (a) doesn't contain `email` as an input to the [token request](https://www.ietf.org/archive/id/draft-hardt-email-verification-01.html#name-token-request) and instead (b) asks the issuer to produce \"all emails that the user is logged in to\", allowing the browser/user agent to only selectively disclose the specific email that the user selected. This variation could be used as an alternative to the current imposition that the browser makes for the issuer to expose itself as a FedCM Login Status API provider and expose an [accounts endpoint](https://w3c-fedid.github.io/FedCM/#idp-api-accounts-endpoint) to list \"all emails that the user is logged in to\".\n\nBecause there are a really large number of verifiers, whatever gets ossified first is going to be really hard to change later, so, unless there are drawbacks to having verifiers ALSO accept the `email` attribute in selective disclosures, I'd recommend changing the [EVT verification](https://www.ietf.org/archive/id/draft-hardt-email-verification-01.html#evt-verification) algorithm to allow them so that we can keep this door open if we ever need it.\n\nRelated discussion here: https://github.com/WICG/email-verification/issues/49\n",
       "createdAt": "2026-08-08T18:36:53Z",
-      "updatedAt": "2026-08-19T14:23:23Z",
-      "closedAt": null,
+      "updatedAt": "2026-08-24T16:55:22Z",
+      "closedAt": "2026-08-24T16:55:22Z",
       "comments": [
         {
           "author": "dickhardt",
@@ -424,6 +424,13 @@
           "body": "@samuelgoto  I don't think the SD-JWT is as useful as you think it might be in the general case. \n\nThe advantages of SD-JWT are:\n- decoupling issuance and and presentation. There has been concern with that capability  #5  as the browser can now share present anywhere it wants, whenever it wants. \n- the browser can know which emails the issuer is authoritative for from the issuer. This may prove useful for issuers that manage mulitple emails for the same user -- but how common is that outside of Google and Hell\u014d?\n\nTo know which issuer to call, the browser must somehow learn the issuer. Currently we are forcing the browser to go to the issuer to learn about the email addresses it supports -- but that is driven by privacy concerns. The verification protocol does not require that -- the browser can learn about an issuer by the user providing an email address. \n\nI don't see where there is much utility to this for the verification complexity it adds. \n",
           "createdAt": "2026-08-19T14:23:23Z",
           "updatedAt": "2026-08-19T14:23:23Z"
+        },
+        {
+          "author": "samuelgoto",
+          "authorAssociation": "NONE",
+          "body": "\n> This variation could be used as an alternative to the current imposition that the browser makes for the issuer to expose itself as a FedCM Login Status API provider and expose an [accounts endpoint](https://w3c-fedid.github.io/FedCM/#idp-api-accounts-endpoint) to list \"all emails that the user is logged in to\".\n\n@dickhardt and I chatted over VC about this and he raised a good point: this can be accomplished by having the issuer return a list of JWT+KB tokens (rather than a single one) while still maintaining compatibility with verifiers.\n\nI think that addresses my biggest requirement: finding a way to change how we issue EVTs without having to redeploy verifiers.\n\n> I don't see where there is much utility to this for the verification complexity it adds.\n\nI think this is raising another independent point, I'll kick off another issue to track this.",
+          "createdAt": "2026-08-24T16:55:21Z",
+          "updatedAt": "2026-08-24T16:55:21Z"
         }
       ]
     },
@@ -560,7 +567,7 @@
       "labels": [],
       "body": "Developers bump into this issue on Gmail missing `kid`:\nhttps://github.com/WICG/email-verification/issues/43\n\n@samuelgoto pointed out this is expected and `kid` should be \"optional\".",
       "createdAt": "2026-08-20T11:08:39Z",
-      "updatedAt": "2026-08-21T07:32:03Z",
+      "updatedAt": "2026-08-24T17:02:00Z",
       "closedAt": null,
       "comments": [
         {
@@ -583,8 +590,31 @@
           "body": "Before we make kid optional, worth checking whether that\u2019s actually the right call. I pulled JWKS from a few major OIDC issuers \u2014 Google\u2019s own standard id_token JWKS, Firebase\u2019s securetoken, Microsoft\u2019s Azure AD v2, and GitLab \u2014 every single key across all of them carries a kid. The only JWKS I found without kid on any key is the one from #43 \u2014 Google\u2019s EVT-specific signer \u2014 and per that thread, that\u2019s a signing-infra limitation Google\u2019s own team said they\u2019re fixing, not a deliberate design choice.\n\nGiven that, I\u2019d lean toward making kid required in the EVT header rather than optional-with-a-fallback-algorithm. That matches what every other JWKS in the wild already does, keeps verifiers simple (exact match, no \u201ctry every key\u201d loop with its own edge cases), and puts the burden back on Google to finish the infra fix they already said was coming \u2014 rather than baking a permanent workaround into the spec for what looks like a temporary gap.",
           "createdAt": "2026-08-21T07:32:03Z",
           "updatedAt": "2026-08-21T07:32:03Z"
+        },
+        {
+          "author": "samuelgoto",
+          "authorAssociation": "NONE",
+          "body": "didn't we agree on this issue https://github.com/WICG/email-verification/issues/43#issuecomment-4963934519 that `kid` is optional (and spec compliant)?",
+          "createdAt": "2026-08-24T17:02:00Z",
+          "updatedAt": "2026-08-24T17:02:00Z"
         }
       ]
+    },
+    {
+      "number": 29,
+      "id": "I_kwDOQ071b88AAAABOCuU8Q",
+      "title": "Remove references (e.g. parsing) to SD-JWT",
+      "url": "https://github.com/dickhardt/email-verification/issues/29",
+      "state": "OPEN",
+      "author": "samuelgoto",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "This issue came up as part of this discussion https://github.com/dickhardt/email-verification/issues/21#issuecomment-5398510999\n\nWe should decide whether we want to tell verifiers to parse the EVT as a full SD-JWT or not (e.g. should parsing fail if the holder decides to add things to the selective disclosure list).\n\nIf we decide not to support SD-JWTs, then we should say so, and allow verifiers to fail when the verifier doesn't parse the EVT as an SD-JWT.\n\nIf we do decide to say that the EVT is an SD-JWT than we should reuse the parsing algorithms (and existing libraries) of SD-JWT.\n\nEither option works for me, to address this I just want the spec to be clear about whether the EVT is, in fact, a valid SD-JWT (and requires parsing it as such) or if the EVT is, in fact, a JWT and KB separated by a `~` (e.g. doesn't support having multiple `~`s).\n\n",
+      "createdAt": "2026-08-24T16:59:37Z",
+      "updatedAt": "2026-08-24T17:00:48Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
