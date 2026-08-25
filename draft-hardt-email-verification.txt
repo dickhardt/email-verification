@@ -5,8 +5,8 @@
 TBD                                                             D. Hardt
 Internet-Draft                                                     Hellō
 Intended status: Standards Track                                 S. Goto
-Expires: 20 February 2027                                         Google
-                                                          19 August 2026
+Expires: 26 February 2027                                         Google
+                                                          25 August 2026
 
 
                       Email Verification Protocol
@@ -64,7 +64,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 20 February 2027.
+   This Internet-Draft will expire on 26 February 2027.
 
 Copyright Notice
 
@@ -124,53 +124,49 @@ Table of Contents
      6.3.  SD-JWT Compatibility
      6.4.  KB-JWT Creation
      6.5.  KB-JWT Verification
-   7.  WebAuthn Authentication
-     7.1.  WebAuthn Challenge Response
-     7.2.  WebAuthn Response
-     7.3.  WebAuthn Verification
-   8.  Private Email Addresses
-     8.1.  Request Parameters
-     8.2.  Example Requests
-     8.3.  Requirements
-     8.4.  Issuer Flexibility
-     8.5.  Example EVT Payload
-   9.  Error Responses
-     9.1.  Invalid Content-Type Header
-     9.2.  Invalid Sec-Fetch-Dest Header
-     9.3.  Invalid or Missing HTTP Message Signature
-     9.4.  Authentication Required
-     9.5.  Invalid Parameters
-     9.6.  Private Email Not Supported
-     9.7.  Invalid Directed Email
-     9.8.  Server Errors
-   10. Privacy Considerations
-     10.1.  Reduced Friction Tradeoff
-     10.2.  Timing Correlation by Email Providers
-     10.3.  RP Correlation via Email Addresses
-     10.4.  Issuer Knowledge
-     10.5.  RP Knowledge
-     10.6.  Browser Storage
-   11. Security Considerations
-     11.1.  HTTP Message Signature Security
-     11.2.  Signature-Key hwk Scheme
-     11.3.  Fully-Specified Algorithms
-     11.4.  DNS Delegation
-     11.5.  Email Existence Probing
-       11.5.1.  Uniform Error Responses
-       11.5.2.  Timing Attack Mitigations
-       11.5.3.  Additional Mitigations
-   12. Design Rationale
-     12.1.  Why Not Solve Email Like SMS OTP?
-     12.2.  Why the Three-Party Model?
-     12.3.  Why SD-JWT?
-     12.4.  Why DNS Delegation?
-     12.5.  Why JWKS Over DKIM Keys?
-     12.6.  Why HTTP Message Signatures Rather Than Request JWT?
-   13. Implementation Status
-   14. Document History
-   15. References
-     15.1.  Normative References
-     15.2.  Informative References
+   7.  Private Email Addresses
+     7.1.  Request Parameters
+     7.2.  Example Requests
+     7.3.  Requirements
+     7.4.  Issuer Flexibility
+     7.5.  Example EVT Payload
+   8.  Error Responses
+     8.1.  Invalid Content-Type Header
+     8.2.  Invalid Sec-Fetch-Dest Header
+     8.3.  Invalid or Missing HTTP Message Signature
+     8.4.  Authentication Required
+     8.5.  Invalid Parameters
+     8.6.  Private Email Not Supported
+     8.7.  Invalid Directed Email
+     8.8.  Server Errors
+   9.  Privacy Considerations
+     9.1.  Reduced Friction Tradeoff
+     9.2.  Timing Correlation by Email Providers
+     9.3.  RP Correlation via Email Addresses
+     9.4.  Issuer Knowledge
+     9.5.  RP Knowledge
+     9.6.  Browser Storage
+   10. Security Considerations
+     10.1.  HTTP Message Signature Security
+     10.2.  Signature-Key hwk Scheme
+     10.3.  Fully-Specified Algorithms
+     10.4.  DNS Delegation
+     10.5.  Email Existence Probing
+       10.5.1.  Uniform Error Responses
+       10.5.2.  Timing Attack Mitigations
+       10.5.3.  Additional Mitigations
+   11. Design Rationale
+     11.1.  Why Not Solve Email Like SMS OTP?
+     11.2.  Why the Three-Party Model?
+     11.3.  Why SD-JWT?
+     11.4.  Why DNS Delegation?
+     11.5.  Why JWKS Over DKIM Keys?
+     11.6.  Why HTTP Message Signatures Rather Than Request JWT?
+   12. Implementation Status
+   13. Document History
+   14. References
+     14.1.  Normative References
+     14.2.  Informative References
    Appendix A.  Acknowledgments
    Authors' Addresses
 
@@ -350,8 +346,6 @@ Table of Contents
           as the user selected it
        *  See Private Email Addresses (#private-email) for parameters to
           request private email addresses
-       *  See WebAuthn Authentication (#webauthn-authentication) for
-          parameters to respond to a WebAuthn challenge
 
    POST /email-verification/issuance HTTP/1.1
    Host: accounts.issuer.example
@@ -384,10 +378,9 @@ Table of Contents
        (#request-verification).
 
    2.  The issuer checks if the cookies represent a logged-in user who
-       controls the requested email address.  If the issuer supports
-       WebAuthn (webauthn_supported: true) and cookies are not present
-       or invalid, the issuer MAY return a WebAuthn challenge (see
-       WebAuthn Authentication (#webauthn-authentication)).
+       controls the requested email address.  If they do not, the issuer
+       returns an authentication_required error (see Authentication
+       Required (#authentication-required)).
 
    3.  If authentication succeeds, the issuer creates an EVT per EVT
        Creation (#evt-creation) and returns it as the value of
@@ -533,10 +526,6 @@ Table of Contents
       document's requirements on the conveyed key apply.  If omitted,
       Ed25519 is the default.  Ed25519 SHOULD be included in the
       supported algorithms list.
-   *  _webauthn_supported_ - OPTIONAL.  Boolean indicating whether the
-      issuer supports WebAuthn authentication as an alternative to
-      cookies.  If true, the issuer may return a WebAuthn challenge when
-      cookies are not present or invalid.  Defaults to false.
    *  _private_email_supported_ - OPTIONAL.  Boolean indicating whether
       the issuer supports generating private email addresses.  Defaults
       to false.
@@ -548,7 +537,6 @@ Table of Contents
      "issuance_endpoint": "https://accounts.issuer.example/email-verification/issuance",
      "jwks_uri": "https://accounts.issuer.example/email-verification/jwks",
      "signing_alg_values_supported": ["Ed25519", "ES256"],
-     "webauthn_supported": true,
      "private_email_supported": true
    }
 
@@ -955,91 +943,7 @@ Table of Contents
    9.  Verify the KB-JWT signature using the public key from the EVT's
        cnf.jwk claim, under the algorithm named by that key's alg member
 
-7.  WebAuthn Authentication
-
-   When the issuer supports WebAuthn (webauthn_supported: true in
-   metadata) and a token request lacks valid authentication cookies, the
-   issuer MAY return a WebAuthn challenge to authenticate the user.
-   This enables email verification even when the user is not logged into
-   the issuer via cookies, using any WebAuthn-compatible credential
-   (passkeys, security keys, platform authenticators).
-
-7.1.  WebAuthn Challenge Response
-
-   Instead of returning an error or an EVT, the issuer returns a
-   WebAuthn challenge.  The issuer MAY include Set-Cookie headers to
-   maintain challenge state:
-
-   *HTTP 401 Unauthorized*
-
-   HTTP/1.1 401 Unauthorized
-   Content-Type: application/json
-   Set-Cookie: webauthn_state=...; Secure; HttpOnly; SameSite=None; Max-Age=300
-
-   {
-     "webauthn_challenge": {
-       "challenge": "dGVzdC1jaGFsbGVuZ2UtZGF0YQ",
-       "timeout": 60000,
-       "rpId": "issuer.example",
-       "allowCredentials": [
-         {
-           "type": "public-key",
-           "id": "Y3JlZGVudGlhbC1pZA"
-         }
-       ],
-       "userVerification": "preferred"
-     }
-   }
-
-   The webauthn_challenge object follows the structure of
-   PublicKeyCredentialRequestOptions as defined in [WebAuthn].
-
-   The browser MUST process any Set-Cookie headers in the response.  The
-   issuer can use cookies to maintain challenge state, enabling
-   stateless verification of the WebAuthn response.  Alternatively, the
-   issuer MAY store challenges server-side with a short TTL.
-
-7.2.  WebAuthn Response
-
-   After the browser obtains a WebAuthn assertion (this mechanism is
-   being defined by the W3C ([EVP-Browser])), it sends a new request to
-   the issuance endpoint with the webauthn_response.  The browser MUST
-   include any cookies set by the challenge response:
-
-   POST /email-verification/issuance HTTP/1.1
-   Host: accounts.issuer.example
-   Cookie: webauthn_state=...
-   Content-Type: application/json
-   Sec-Fetch-Dest: email-verification
-   Content-Digest: sha-256=:...:
-   Signature-Input: sig=("@method" "@authority" "@path" "content-digest" "signature-key");created=1692345600
-   Signature: sig=:...:
-   Signature-Key: sig=hwk;kty="OKP";crv="Ed25519";x="JrQLj5P_89iXES9-vFgrIy29clF9CC_oPPsw3c5D0bs";alg="Ed25519"
-
-   {
-     "email": "user@example.com",
-     "webauthn_response": {
-       "id": "Y3JlZGVudGlhbC1pZA",
-       "rawId": "Y3JlZGVudGlhbC1pZA",
-       "response": {
-         "authenticatorData": "...",
-         "clientDataJSON": "...",
-         "signature": "..."
-       },
-       "type": "public-key"
-     }
-   }
-
-   The webauthn_response object follows the structure of
-   PublicKeyCredential as defined in [WebAuthn].
-
-7.3.  WebAuthn Verification
-
-   The issuer verifies the WebAuthn response against its stored
-   credentials for the email address.  If verification succeeds, the
-   issuer returns the EVT as described in EVT Issuance (#evt-issuance).
-
-8.  Private Email Addresses
+7.  Private Email Addresses
 
    Private email addresses allow users to provide site-specific email
    addresses to RPs, preventing RP-to-RP correlation of users by email
@@ -1057,7 +961,7 @@ Table of Contents
    private email or reuse an existing one by passing it in
    directed_email.
 
-8.1.  Request Parameters
+7.1.  Request Parameters
 
    The token request body supports one of the following parameters for
    private email addresses (mutually exclusive):
@@ -1070,7 +974,7 @@ Table of Contents
       email address if it is valid and linked to the email in the
       request.
 
-8.2.  Example Requests
+7.2.  Example Requests
 
    Request for a new private email address:
 
@@ -1086,7 +990,7 @@ Table of Contents
      "directed_email": "u7x9k2m4@privaterelay.example"
    }
 
-8.3.  Requirements
+7.3.  Requirements
 
    *  The private email MUST be a valid email address that the issuer
       can route to the user's actual mailbox
@@ -1101,7 +1005,7 @@ Table of Contents
    *  The EVT MUST include is_private_email: true when a private email
       address is issued
 
-8.4.  Issuer Flexibility
+7.4.  Issuer Flexibility
 
    The domain of the private email address does not need to match the
    domain of the user's actual email address.  Additionally, the iss
@@ -1120,7 +1024,7 @@ Table of Contents
    (e.g., me@dickhardt.example) where the domain itself is a unique
    identifier that would otherwise reveal the user's identity.
 
-8.5.  Example EVT Payload
+7.5.  Example EVT Payload
 
    When a private email is issued, the EVT contains the private address
    in the email claim and includes is_private_email: true:
@@ -1149,19 +1053,19 @@ Table of Contents
    See Privacy Considerations (#privacy-considerations) for privacy
    analysis of private email addresses.
 
-9.  Error Responses
+8.  Error Responses
 
    If the issuer cannot process the token request successfully, it MUST
    return an appropriate HTTP status code with a JSON error response
    containing an error field and optionally an error_description field.
 
-9.1.  Invalid Content-Type Header
+8.1.  Invalid Content-Type Header
 
    When the request does not include the required Content-Type:
    application/json header, the server MUST return the 415 HTTP response
    code.
 
-9.2.  Invalid Sec-Fetch-Dest Header
+8.2.  Invalid Sec-Fetch-Dest Header
 
    When the request does not include the required Sec-Fetch-Dest: email-
    verification header:
@@ -1176,7 +1080,7 @@ Table of Contents
    The error_description SHOULD specify that the Sec-Fetch-Dest header
    is missing or invalid.
 
-9.3.  Invalid or Missing HTTP Message Signature
+8.3.  Invalid or Missing HTTP Message Signature
 
    When the HTTP Message Signature is missing, malformed, or
    verification fails, the issuer MUST return the error field
@@ -1219,7 +1123,7 @@ Table of Contents
    issuer MUST NOT return a Signature-Error header naming a failure the
    body contradicts.
 
-9.4.  Authentication Required
+8.4.  Authentication Required
 
    When the request lacks valid authentication cookies, contains
    expired/invalid cookies, or the authenticated user does not have
@@ -1232,7 +1136,7 @@ Table of Contents
      "error_description": "User must be authenticated and have control of the requested email address"
    }
 
-9.5.  Invalid Parameters
+8.5.  Invalid Parameters
 
    When the request body is malformed, missing the email field, or
    contains invalid values:
@@ -1244,7 +1148,7 @@ Table of Contents
      "error_description": "Invalid or malformed request body"
    }
 
-9.6.  Private Email Not Supported
+8.6.  Private Email Not Supported
 
    When the request includes private_email or directed_email but the
    issuer does not support private email addresses
@@ -1257,7 +1161,7 @@ Table of Contents
      "error_description": "This issuer does not support private email addresses"
    }
 
-9.7.  Invalid Directed Email
+8.7.  Invalid Directed Email
 
    When the request includes directed_email but the private email
    address is invalid or not linked to the email address in the request:
@@ -1269,7 +1173,7 @@ Table of Contents
      "error_description": "The directed_email is invalid or not linked to this email address"
    }
 
-9.8.  Server Errors
+8.8.  Server Errors
 
    For internal server errors or temporary unavailability:
 
@@ -1280,12 +1184,12 @@ Table of Contents
      "error_description": "Temporary server error, please try again later"
    }
 
-10.  Privacy Considerations
+9.  Privacy Considerations
 
    This section analyzes the privacy properties of the Email
    Verification Protocol, following the guidance in [RFC6973].
 
-10.1.  Reduced Friction Tradeoff
+9.1.  Reduced Friction Tradeoff
 
    By reducing friction in email verification, EVP makes it easier for
    users to provide their email address to more sites.  This convenience
@@ -1300,7 +1204,7 @@ Table of Contents
    email address, giving users a privacy-preserving option without
    additional friction.
 
-10.2.  Timing Correlation by Email Providers
+9.2.  Timing Correlation by Email Providers
 
    The three-party model (see Protocol Flow (#protocol-flow)) prevents
    the issuer from learning which RP requested verification.  When the
@@ -1310,7 +1214,7 @@ Table of Contents
    only when email is actually sent—not at verification time.  This
    dulls timing correlation.
 
-10.3.  RP Correlation via Email Addresses
+9.3.  RP Correlation via Email Addresses
 
    Private email addresses prevent RPs from correlating users across
    sites.  Additional benefits:
@@ -1322,7 +1226,7 @@ Table of Contents
    email routing, users can revoke or filter mail to specific addresses
    without affecting their primary inbox.
 
-10.4.  Issuer Knowledge
+9.4.  Issuer Knowledge
 
    The issuer learns certain information through the protocol:
 
@@ -1342,23 +1246,23 @@ Table of Contents
    4.  *Email traffic*: When RPs send email to private addresses, the
        issuer (operating the relay) learns about those communications.
 
-10.5.  RP Knowledge
+9.5.  RP Knowledge
 
    The RP can infer whether the user is logged into the issuer: the RP
    receives an EVT when the user is logged in, and receives an error
    when the user is not.  This is inherent to any authentication-based
    verification scheme.
 
-10.6.  Browser Storage
+9.6.  Browser Storage
 
    The browser MAY store the private email address per RP origin to
    enable account continuity by passing it as directed_email in future
    requests.  This is analogous to how browsers store usernames and
    passwords for sites.
 
-11.  Security Considerations
+10.  Security Considerations
 
-11.1.  HTTP Message Signature Security
+10.1.  HTTP Message Signature Security
 
    The use of HTTP Message Signatures ([RFC9421]) provides several
    security benefits:
@@ -1392,7 +1296,7 @@ Table of Contents
        scheme without invalidating the signature; see Signature-Key
        Integrity in [I-D.hardt-httpbis-signature-key].
 
-11.2.  Signature-Key hwk Scheme
+10.2.  Signature-Key hwk Scheme
 
    The hwk (Header Web Key) scheme provides:
 
@@ -1407,7 +1311,7 @@ Table of Contents
        verification flow, limiting the correlation potential across
        different verification attempts.
 
-11.3.  Fully-Specified Algorithms
+10.3.  Fully-Specified Algorithms
 
    Every algorithm identifier in this protocol is fully specified: it
    names the signature operation completely, including curve and hash
@@ -1426,7 +1330,7 @@ Table of Contents
    and on the KB-JWT, whose alg is fixed by the cnf.jwk it is verified
    against (see KB-JWT Structure (#kb-structure)).
 
-11.4.  DNS Delegation
+10.4.  DNS Delegation
 
    The delegation from an email domain to an issuer is carried in an
    unauthenticated DNS TXT record (DNS Delegation (#dns-delegation)).
@@ -1481,7 +1385,7 @@ Table of Contents
    deployment that cannot obtain DNSSEC on the email domains it accepts
    is accepting the risk described above.
 
-11.5.  Email Existence Probing
+10.5.  Email Existence Probing
 
    Any software—not just browsers—can send requests to an issuer's
    issuance endpoint.  An attacker could attempt to use this to probe
@@ -1492,7 +1396,7 @@ Table of Contents
    2.  *Account enumeration*: Determine which email addresses have
        accounts at specific issuers.
 
-11.5.1.  Uniform Error Responses
+10.5.1.  Uniform Error Responses
 
    To prevent probing, issuers MUST NOT return different error responses
    based on whether an email address exists.  The
@@ -1506,7 +1410,7 @@ Table of Contents
    This ensures attackers cannot distinguish between "email exists" and
    "email does not exist" based on error responses.
 
-11.5.2.  Timing Attack Mitigations
+10.5.2.  Timing Attack Mitigations
 
    Response timing can also reveal whether an email address exists.  If
    the issuer performs a database lookup only when the email exists, or
@@ -1521,7 +1425,7 @@ Table of Contents
    *  *Response delay normalization*: Add delays to normalize response
       times across all error conditions to a consistent baseline.
 
-11.5.3.  Additional Mitigations
+10.5.3.  Additional Mitigations
 
    *  *User interaction required*: The browser API requires user gesture
       and consent before initiating verification, preventing automated
@@ -1539,9 +1443,9 @@ Table of Contents
    Issuers SHOULD implement appropriate rate limiting and abuse
    detection.
 
-12.  Design Rationale
+11.  Design Rationale
 
-12.1.  Why Not Solve Email Like SMS OTP?
+11.1.  Why Not Solve Email Like SMS OTP?
 
    The WebOTP API and autocomplete="one-time-code" standards
    dramatically reduced friction for SMS verification.  A natural
@@ -1583,7 +1487,7 @@ Table of Contents
    reveals more about the RP to the email provider than SMS verification
    reveals to the carrier.
 
-12.2.  Why the Three-Party Model?
+11.2.  Why the Three-Party Model?
 
    A simpler design would have the issuer create a token directly for
    the RP, with the RP as the audience.  This is how social login works:
@@ -1602,7 +1506,7 @@ Table of Contents
    architectural complexity of the three-party model is justified by
    this privacy benefit.
 
-12.3.  Why SD-JWT?
+11.3.  Why SD-JWT?
 
    The EVT uses the SD-JWT structure (specifically, the key binding
    capability from SD-JWT+KB) rather than a plain JWT.  This choice
@@ -1620,7 +1524,7 @@ Table of Contents
        disclosure, the SD-JWT structure allows future extensions without
        changing the token format.
 
-12.4.  Why DNS Delegation?
+11.4.  Why DNS Delegation?
 
    The mail domain delegates email verification to an issuer via a DNS
    TXT record rather than a .well-known file.  This choice aligns with
@@ -1639,7 +1543,7 @@ Table of Contents
        email (MX, SPF, DKIM, DMARC).  Adding another TXT record fits
        existing workflows.
 
-12.5.  Why JWKS Over DKIM Keys?
+11.5.  Why JWKS Over DKIM Keys?
 
    The issuer publishes signing keys via a JWKS endpoint rather than
    reusing DKIM keys.  While DKIM keys are already associated with email
@@ -1656,7 +1560,7 @@ Table of Contents
    3.  *Operational familiarity*: Developers implementing EVP are likely
        familiar with JWKS from OAuth/OIDC work.
 
-12.6.  Why HTTP Message Signatures Rather Than Request JWT?
+11.6.  Why HTTP Message Signatures Rather Than Request JWT?
 
    The original design used a JWT signed by the browser to carry the
    email address and browser's public key.  The HTTP Message Signatures
@@ -1672,7 +1576,7 @@ Table of Contents
    4.  *Simpler Key Distribution*: The Signature-Key header provides a
        standardized way to distribute keys inline with the request
 
-13.  Implementation Status
+12.  Implementation Status
 
    _Note: This section is to be removed before publishing as an RFC._
 
@@ -1705,7 +1609,7 @@ Table of Contents
       (https://developer.microsoft.com/en-us/microsoft-edge/origin-
       trials/trials/683027d2-a798-460f-9b35-03a95002d9af).
 
-14.  Document History
+13.  Document History
 
    _Note: This section is to be removed before publishing as an RFC._
 
@@ -1814,6 +1718,16 @@ Table of Contents
       rather than rely on the signature over the header alone.
       Addresses issue #3.
 
+   *  Removed the WebAuthn Authentication section, the
+      webauthn_supported metadata member, and the WebAuthn challenge/
+      response exchange.  Nothing implements it, and it hardwired one
+      authentication method into the protocol.  A request without a
+      valid session returns authentication_required.  An issuer-provided
+      login URL using the FedCM Login Status continuation is being
+      explored as a replacement; that flow is an exploration only,
+      dependent on the browser developing an acceptable user experience
+      for the login popup.
+
    *  Widened the created acceptance window from 60 to 300 seconds.
       Device clocks skew by minutes, not seconds, and the window is not
       load-bearing for security: a replayed request yields an EVT bound
@@ -1829,9 +1743,9 @@ Table of Contents
 
       -  Initial draft.
 
-15.  References
+14.  References
 
-15.1.  Normative References
+14.1.  Normative References
 
    [I-D.hardt-httpbis-signature-key]
               Hardt, D. and T. Meunier, "HTTP Signature Keys", Work in
@@ -1880,7 +1794,7 @@ Table of Contents
               <https://html.spec.whatwg.org/multipage/input.html#valid-
               e-mail-address>.
 
-15.2.  Informative References
+14.2.  Informative References
 
    [EVP-Browser]
               WICG, "Email Verification API", 2025,
@@ -1905,11 +1819,6 @@ Table of Contents
               Current Practices", BCP 225, RFC 8725,
               DOI 10.17487/RFC8725, February 2020,
               <https://www.rfc-editor.org/info/rfc8725>.
-
-   [WebAuthn] Jones, M., Kumar, A., and E. Lundberg, "Web
-              Authentication: An API for accessing Public Key
-              Credentials - Level 3", W3C Recommendation, 2023,
-              <https://www.w3.org/TR/webauthn-3/>.
 
 Appendix A.  Acknowledgments
 
