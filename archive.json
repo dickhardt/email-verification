@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-08-25T00:02:52.177939+00:00",
+  "timestamp": "2026-08-27T01:05:21.435509+00:00",
   "repo": "dickhardt/email-verification",
   "labels": [
     {
@@ -549,9 +549,9 @@
       "authorAssociation": "OWNER",
       "assignees": [],
       "labels": [],
-      "body": "## Problem\n\nA token request can arrive with no valid cookie: the user is logged out of the issuer, or never logged in on this device. The spec's current answer is a WebAuthn challenge/response exchange (`webauthn_supported`, `webauthn_challenge`, `webauthn_response`, the `webauthn_state` cookie). Nothing implements it, and it hardwires one authentication method into the protocol.\n\n## Proposal\n\nAdopt the FedCM Login Status continuation instead. The login flow only fixes the session; the token and every error always come from the issuance endpoint, on a verified signed request.\n\n1. The browser sends the normal signed token request. No valid cookie \u2192 the issuer returns **401** with `{\"error\": \"authentication_required\", \"login_url\": \"https://accounts.issuer.example/login\"}`.\n2. The browser opens `login_url` in a browser-controlled popup, first-party context. The user authenticates however the issuer wants \u2014 password, passkey, anything. WebAuthn becomes an implementation detail of the issuer's login page, invisible to this protocol.\n3. The login page signals completion via the FedCM Login Status API (`Set-Login: logged-in` header, or `navigator.login.setStatus(\"logged-in\")`). The browser closes the popup.\n4. The browser retries the token request \u2014 a new signed POST, same key pair, fresh `created`, now carrying the session cookies. The issuer processes it as an ordinary token request and returns the EVT or an error.\n5. If the retry again returns `authentication_required`, the browser stops and surfaces the error to the RP. One retry, no loop.\n\n## What this removes\n\n`webauthn_supported` metadata, the challenge/response round trip, and the `webauthn_state` challenge-state dance. The issuer holds no protocol-visible state: the login popup and the retry are independent, ordinary exchanges. The invariant that an EVT is only ever produced in response to a verified signed token request is preserved \u2014 which is why the FedCM `continue_on` / `IdentityProvider.resolve(token)` model is NOT proposed: it delivers the token from the popup page, outside the signed exchange, and would need the original request's key context carried into the login session.\n\n## Privacy\n\n`login_url` is issuer-origin and carries nothing about the RP, preserving the three-party model. The email address SHOULD NOT appear in `login_url` \u2014 the retry carries it.\n\n## Open questions\n\n- Member on the existing `authentication_required` error, or a distinct `login_required` error code (OIDC's name for this)?\n- Where the popup/`Set-Login` choreography is specified \u2014 it is browser behavior, so likely the W3C Email Verification API, with this document defining only the `login_url` member and the retry semantics.",
+      "body": "## Problem\n\nA token request can arrive with no valid cookie: the user is logged out of the issuer, or never logged in on this device. The spec's current answer is a WebAuthn challenge/response exchange (`webauthn_supported`, `webauthn_challenge`, `webauthn_response`, the `webauthn_state` cookie). Nothing implements it, and it hardwires one authentication method into the protocol.\n\n## Proposal\n\n**Status: exploration only.** This is not a committed design. Adoption depends on the browser developing an acceptable user experience for the first-party login popup.\n\nAdopt the FedCM Login Status continuation instead. The login flow only fixes the session; the token and every error always come from the issuance endpoint, on a verified signed request.\n\n1. The browser sends the normal signed token request. No valid cookie \u2192 the issuer returns **401** with `{\"error\": \"authentication_required\", \"login_url\": \"https://accounts.issuer.example/login\"}`.\n2. The browser opens `login_url` in a browser-controlled popup, first-party context. The user authenticates however the issuer wants \u2014 password, passkey, anything. WebAuthn becomes an implementation detail of the issuer's login page, invisible to this protocol.\n3. The login page signals completion via the FedCM Login Status API (`Set-Login: logged-in` header, or `navigator.login.setStatus(\"logged-in\")`). The browser closes the popup.\n4. The browser retries the token request \u2014 a new signed POST, same key pair, fresh `created`, now carrying the session cookies. The issuer processes it as an ordinary token request and returns the EVT or an error.\n5. If the retry again returns `authentication_required`, the browser stops and surfaces the error to the RP. One retry, no loop.\n\n## What this removes\n\n`webauthn_supported` metadata, the challenge/response round trip, and the `webauthn_state` challenge-state dance. The issuer holds no protocol-visible state: the login popup and the retry are independent, ordinary exchanges. The invariant that an EVT is only ever produced in response to a verified signed token request is preserved \u2014 which is why the FedCM `continue_on` / `IdentityProvider.resolve(token)` model is NOT proposed: it delivers the token from the popup page, outside the signed exchange, and would need the original request's key context carried into the login session.\n\n## Privacy\n\n`login_url` is issuer-origin and carries nothing about the RP, preserving the three-party model. The email address SHOULD NOT appear in `login_url` \u2014 the retry carries it.\n\n## Open questions\n\n- Member on the existing `authentication_required` error, or a distinct `login_required` error code (OIDC's name for this)?\n- Where the popup/`Set-Login` choreography is specified \u2014 it is browser behavior, so likely the W3C Email Verification API, with this document defining only the `login_url` member and the retry semantics.\n",
       "createdAt": "2026-08-19T15:13:43Z",
-      "updatedAt": "2026-08-19T15:13:43Z",
+      "updatedAt": "2026-08-25T16:17:30Z",
       "closedAt": null,
       "comments": []
     },
@@ -567,7 +567,7 @@
       "labels": [],
       "body": "Developers bump into this issue on Gmail missing `kid`:\nhttps://github.com/WICG/email-verification/issues/43\n\n@samuelgoto pointed out this is expected and `kid` should be \"optional\".",
       "createdAt": "2026-08-20T11:08:39Z",
-      "updatedAt": "2026-08-24T17:02:00Z",
+      "updatedAt": "2026-08-26T16:41:38Z",
       "closedAt": null,
       "comments": [
         {
@@ -597,6 +597,20 @@
           "body": "didn't we agree on this issue https://github.com/WICG/email-verification/issues/43#issuecomment-4963934519 that `kid` is optional (and spec compliant)?",
           "createdAt": "2026-08-24T17:02:00Z",
           "updatedAt": "2026-08-24T17:02:00Z"
+        },
+        {
+          "author": "dickhardt",
+          "authorAssociation": "OWNER",
+          "body": "I gave it as an option -- but that was mainly to get us past Google's jwks being non compliant -- pushing complexity in verification to the verifiers vs the issuer having the kid seems the wrong direction. ",
+          "createdAt": "2026-08-25T15:33:04Z",
+          "updatedAt": "2026-08-25T15:33:04Z"
+        },
+        {
+          "author": "samuelgoto",
+          "authorAssociation": "NONE",
+          "body": "> but that was mainly to get us past Google's jwks being non compliant \n\nDidn't you say in https://github.com/WICG/email-verification/issues/43#issue-4863628458 that `kid` is optional as in:\n\n> omit kid from the EVT protected header entirely (RFC 7515 \u00a74.1.4 \u2014 it is OPTIONAL), or\n\n",
+          "createdAt": "2026-08-26T16:41:38Z",
+          "updatedAt": "2026-08-26T16:41:38Z"
         }
       ]
     },
@@ -612,9 +626,17 @@
       "labels": [],
       "body": "This issue came up as part of this discussion https://github.com/dickhardt/email-verification/issues/21#issuecomment-5398510999\n\nWe should decide whether we want to tell verifiers to parse the EVT as a full SD-JWT or not (e.g. should parsing fail if the holder decides to add things to the selective disclosure list).\n\nIf we decide not to support SD-JWTs, then we should say so, and allow verifiers to fail when the verifier doesn't parse the EVT as an SD-JWT.\n\nIf we do decide to say that the EVT is an SD-JWT than we should reuse the parsing algorithms (and existing libraries) of SD-JWT.\n\nEither option works for me, to address this I just want the spec to be clear about whether the EVT is, in fact, a valid SD-JWT (and requires parsing it as such) or if the EVT is, in fact, a JWT and KB separated by a `~` (e.g. doesn't support having multiple `~`s).\n\n",
       "createdAt": "2026-08-24T16:59:37Z",
-      "updatedAt": "2026-08-24T17:00:48Z",
+      "updatedAt": "2026-08-25T15:40:23Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "dickhardt",
+          "authorAssociation": "OWNER",
+          "body": "I agree the current language leans on recommending an SD-JWT library -- and my research since then shows there are not lots of those and SD-JWT support is not in any of the major libraries. \n\nI'd lean towards explaining the processing steps and that it happens to be a valid SD-JWT with no disclosures. \n\nGiven that, do we want to drop the issuer including the `~` at the end of the EVT? That was an artifact of wanting SD-JWT compatibility. The final token is the same `<EVT>~<KB>`. \n\nNote that the EVT is NOT the final token -- it is the token from the issuer. ",
+          "createdAt": "2026-08-25T15:40:23Z",
+          "updatedAt": "2026-08-25T15:40:23Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -1192,24 +1214,26 @@
       "id": "PR_kwDOQ071b88AAAABATKvJA",
       "title": "Remove WebAuthn authentication",
       "url": "https://github.com/dickhardt/email-verification/pull/27",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "dickhardt",
       "authorAssociation": "OWNER",
       "assignees": [],
       "labels": [],
-      "body": "Removes the WebAuthn Authentication section, the `webauthn_supported` metadata member and example line, the WebAuthn challenge/response exchange (including the `webauthn_state` cookie dance), the token-request bullet, and the WebAuthn reference. Nothing implements this, and it hardwired one authentication method into the protocol (raised in review of #17 and #19).\n\nA token request without a valid session now returns the existing `authentication_required` error, which gets an explicit anchor.\n\nThe replacement is under discussion in #26: the issuer returns a login URL, the browser opens it in a first-party popup, completion is signaled via the FedCM Login Status API, and the browser retries the signed token request. The login flow only fixes the session \u2014 the token and every error always come from the issuance endpoint, so how the user authenticates (WebAuthn or anything else) is the login page's business, not the protocol's.\n\n\ud83e\udd16 Generated with [Claude Code](https://claude.com/claude-code)\n\nhttps://claude.ai/code/session_012Qrs6Z9yLd8SGRdKroZpwN",
+      "body": "Removes the WebAuthn Authentication section, the `webauthn_supported` metadata member and example line, the WebAuthn challenge/response exchange (including the `webauthn_state` cookie dance), the token-request bullet, and the WebAuthn reference. Nothing implements this, and it hardwired one authentication method into the protocol (raised in review of #17 and #19).\n\nA token request without a valid session now returns the existing `authentication_required` error, which gets an explicit anchor.\n\nA possible replacement is being explored in #26: the issuer returns a login URL, the browser opens it in a first-party popup, completion is signaled via the FedCM Login Status API, and the browser retries the signed token request. **That login URL flow is an exploration, not a committed design \u2014 it depends on the browser developing an acceptable user experience for the first-party login popup.** This PR does not adopt it; it only removes WebAuthn. The login flow only fixes the session \u2014 the token and every error always come from the issuance endpoint, so how the user authenticates (WebAuthn or anything else) is the login page's business, not the protocol's.\n\n\ud83e\udd16 Generated with [Claude Code](https://claude.com/claude-code)\n\nhttps://claude.ai/code/session_012Qrs6Z9yLd8SGRdKroZpwN\n",
       "createdAt": "2026-08-19T15:14:37Z",
-      "updatedAt": "2026-08-19T15:14:37Z",
+      "updatedAt": "2026-08-25T16:54:05Z",
       "baseRepository": "dickhardt/email-verification",
       "baseRefName": "main",
       "baseRefOid": "d85b0fca547ef1d64ee06365f2152ca4b499611f",
       "headRepository": "dickhardt/email-verification",
       "headRefName": "remove-webauthn",
-      "headRefOid": "16d15bd18964ac85aff25eb7bf811e3e7e02b2b0",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "745166d7a9e33e46cdb7f9fc81db58c883c7d0de",
+      "closedAt": "2026-08-25T16:54:03Z",
+      "mergedAt": "2026-08-25T16:54:02Z",
+      "mergedBy": "dickhardt",
+      "mergeCommit": {
+        "oid": "1d302dad1d4b8072bf757b7023f6a2c3652e1569"
+      },
       "comments": [],
       "reviews": []
     }
