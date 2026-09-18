@@ -5,8 +5,8 @@
 TBD                                                             D. Hardt
 Internet-Draft                                                     Hellō
 Intended status: Standards Track                                 S. Goto
-Expires: 26 February 2027                                         Google
-                                                          25 August 2026
+Expires: 22 March 2027                                            Google
+                                                       18 September 2026
 
 
                       Email Verification Protocol
@@ -64,7 +64,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 26 February 2027.
+   This Internet-Draft will expire on 22 March 2027.
 
 Copyright Notice
 
@@ -1750,9 +1750,9 @@ Table of Contents
    [I-D.hardt-httpbis-signature-key]
               Hardt, D. and T. Meunier, "HTTP Signature Keys", Work in
               Progress, Internet-Draft, draft-hardt-httpbis-signature-
-              key-08, 5 August 2026,
+              key-09, 13 September 2026,
               <https://datatracker.ietf.org/doc/html/draft-hardt-
-              httpbis-signature-key-08>.
+              httpbis-signature-key-09>.
 
    [I-D.ietf-oauth-selective-disclosure-jwt]
               Fett, D., Yasuda, K., and B. Campbell, "Selective
