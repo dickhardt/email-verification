@@ -1,5 +1,5 @@
 LIBDIR := lib
-CHARTER := charter-ietf-evp-00-00
+CHARTER := charter-ietf-eav-00-00
 GHPAGES_EXTRA := $(CHARTER).html
 include $(LIBDIR)/main.mk
 
@@ -15,4 +15,4 @@ endif
 # Editor's copy of the draft WG charter (not an Internet-Draft).
 latest:: $(CHARTER).html
 $(CHARTER).html: $(CHARTER).md charter-head.inc
-	$(mmark) -html -head charter-head.inc $< | sed -e "s,<title></title>,<title>EVP WG Draft Charter</title>," > $@
+	$(mmark) -html -head charter-head.inc $< | sed -e "s,<title></title>,<title>EAV WG Draft Charter</title>," > $@

@@ -1,13 +1,13 @@
-# EVP WG — Draft Charter
+# EAV WG — Draft Charter
 
-2026-09-18 · @Someone
+2026-09-18 · @DickHardt
 
 ## Working Group
 
 | Field | Value |
 | --- | --- |
-| Name | Email Verification Protocols |
-| Acronym | evp |
+| Name | Email Address Verification |
+| Acronym | eav |
 | Area | Applications and Real-Time (ART) |
 | Responsible AD | Andy Newton |
 | Mailing list | [evp-discuss@ietf.org](https://mailman3.ietf.org/mailman3/lists/evp-discuss.ietf.org/) |
