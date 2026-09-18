@@ -20,3 +20,4 @@ draft-hardt-email-verification.xml
 package-lock.json
 report.xml
 .DS_Store
+/notes/
