@@ -64,3 +64,4 @@ jobs:
         path: |
           draft-*.html
           draft-*.txt
+          charter-*.html

@@ -11,6 +11,13 @@ This is the working area for the individual Internet-Draft, "Email Verification 
 
 This document defines the Email Verification Protocol (EVP), which enables web applications to verify that a user controls an email address without sending a verification email. The protocol uses a three-party model where the browser intermediates between the relying party and an issuer, providing both improved user experience and privacy protection.
 
+## Draft Charter
+
+A draft charter for an Email Address Verification (EAV) working group:
+
+* [Editor's Copy](https://dickhardt.github.io/email-verification/charter-ietf-eav-00-00.html)
+* [Source](https://github.com/dickhardt/email-verification/blob/main/charter-ietf-eav-00-00.md)
+
 ## Related Work
 
 * [Browser API (W3C WICG)](https://github.com/WICG/email-verification-protocol) - Browser API aspects
