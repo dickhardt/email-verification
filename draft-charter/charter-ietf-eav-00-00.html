@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>EAV WG Draft Charter</title>
+  <meta name="GENERATOR" content="github.com/mmarkdown/mmark Mmark Markdown Processor - mmark.miek.nl">
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body { font-family: -apple-system, system-ui, "Segoe UI", Roboto, sans-serif; line-height: 1.5; max-width: 50em; margin: 2em auto; padding: 0 1em; color: #222; }
+table { border-collapse: collapse; margin: 1em 0; }
+th, td { border: 1px solid #ccc; padding: 0.4em 0.6em; text-align: left; vertical-align: top; }
+th { background: #f4f4f4; }
+code { font-size: 0.9em; }
+a { color: #0645ad; }
+</style>
+</head>
+<body>
+
+<h1 id="eav-wg-draft-charter">EAV WG — Draft Charter</h1>
+
+<p>2026-09-18 · @DickHardt</p>
+
+<h2 id="working-group">Working Group</h2>
+
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>Name</td>
+<td>Email Address Verification</td>
+</tr>
+
+<tr>
+<td>Acronym</td>
+<td>eav</td>
+</tr>
+
+<tr>
+<td>Area</td>
+<td>Applications and Real-Time (ART)</td>
+</tr>
+
+<tr>
+<td>Responsible AD</td>
+<td>Andy Newton</td>
+</tr>
+
+<tr>
+<td>Mailing list</td>
+<td><a href="https://mailman3.ietf.org/mailman3/lists/evp-discuss.ietf.org/">evp-discuss@ietf.org</a></td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="problem-statement">Problem Statement</h2>
+
+<p>The working group will develop mechanisms that let the user&rsquo;s browser or operating system complete email address verification for web and native applications, so the user does not retrieve a one-time passcode (OTP) from their mailbox and re-enter it.</p>
+
+<p>Web and native applications verify that a user controls an email address by sending a message containing an OTP or a link. The user switches to a mail client, waits for delivery, finds the message (possibly in spam), and returns the code. Many users abandon the flow at this step.</p>
+
+<p>The user acts as the messenger, so any site that asks for the code can phish it. The email provider also learns which relying party (RP) the user is interacting with, because the verification message is sent from the RP&rsquo;s domain.</p>
+
+<h2 id="prior-work-sms-one-time-codes">Prior Work: SMS One-Time Codes</h2>
+
+<p>Phone number verification had the same problem. Browser and platform vendors addressed it by binding the code to the website or app it was issued for, so software can deliver it and refuse to offer it anywhere else. The OTP-Token work applies that model to email.</p>
+
+<table>
+<thead>
+<tr>
+<th>Specification</th>
+<th>Venue or platform</th>
+<th>Binding and delivery</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td><a href="https://wicg.github.io/sms-one-time-codes/">Origin-bound one-time codes delivered via SMS</a></td>
+<td>W3C WICG, Draft CG Report, March 2021</td>
+<td>The last line of the SMS is <code>@&lt;top-level host&gt; #&lt;code&gt;</code>, optionally followed by <code>@&lt;embedded host&gt;</code> for a cross-origin iframe. The browser offers the code only when the document&rsquo;s origin is same origin or same site with the bound host.</td>
+</tr>
+
+<tr>
+<td><a href="https://wicg.github.io/web-otp/">WebOTP API</a></td>
+<td>W3C WICG, Draft CG Report, April 2021</td>
+<td><code>navigator.credentials.get({otp: {transport: [&quot;sms&quot;]}})</code> resolves to an <code>OTPCredential</code> whose <code>code</code> the browser took from an origin-bound message. Controlled by the <code>otp-credentials</code> permissions policy feature.</td>
+</tr>
+
+<tr>
+<td><a href="https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#attr-fe-autocomplete-one-time-code"><code>autocomplete=&quot;one-time-code&quot;</code></a></td>
+<td>WHATWG HTML</td>
+<td>Autofill field name marking an input as a one-time code field.</td>
+</tr>
+
+<tr>
+<td><a href="https://developer.apple.com/documentation/security/enabling-autofill-for-domain-bound-sms-codes">Domain-bound codes</a></td>
+<td>Apple, iOS 14 and macOS Big Sur</td>
+<td>Uses the WICG format. AutoFill offers the code in Safari when the site matches the bound domain, and in an app when the domain is one of the app&rsquo;s associated domains. Apps mark the field with <code>UITextContentType.oneTimeCode</code>.</td>
+</tr>
+
+<tr>
+<td><a href="https://developers.google.com/identity/sms-retriever/verify">SMS Retriever API</a></td>
+<td>Android</td>
+<td>The message includes an 11-character hash derived from the app&rsquo;s package name and signing certificate. The platform hands the message to that app without SMS read permission.</td>
+</tr>
+</tbody>
+</table>
+<p>WebOTP anticipates transports other than SMS and names email as one. The WICG SMS format mitigates phishing only; it does not address SMS spoofing, SIM swapping, or interception. macOS 26 already offers AutoFill for one-time codes detected in messages received by Mail.</p>
+
+<p>Email gives the WG two things SMS does not: a header section users do not normally see, which can carry the binding and a high-entropy <code>token</code>, and sender authentication through DKIM and DMARC.</p>
+
+<h2 id="scope">Scope</h2>
+
+<p>The WG will start from two proposals, EVP and OTP-Token, described below. Neither depends on the other: an email domain can deploy either, both, or neither, and an RP falls back to sending a message when neither is available. The WG may also evaluate other proposals that let the user&rsquo;s browser or operating system verify an email address without the user retrieving an OTP, and adopt those that meet the goals of this charter.</p>
+
+<h3 id="email-verification-protocol-evp">Email Verification Protocol (EVP)</h3>
+
+<p>No message is sent. An email domain delegates verification to an issuer through a DNS record. The browser or operating system authenticates to the issuer with the user&rsquo;s existing session and obtains an issuer-signed Email Verification Token (EVT) that carries its public key in a <code>cnf</code> claim. The browser or operating system presents the EVT to the RP with a Key Binding JWT (KB-JWT) bound to the RP&rsquo;s origin and an RP-supplied nonce.</p>
+
+<p>The WG will specify:</p>
+
+<ul>
+<li>issuer discovery: the DNS delegation record, the issuer identifier, and the issuer metadata document</li>
+<li>the token request from the browser or operating system to the issuer, signed with HTTP Message Signatures [RFC9421], with a Content-Digest [RFC9530] over the request body</li>
+<li>the EVT and KB-JWT formats, compatible with SD-JWT key binding, and the verification procedures for the browser or operating system and the RP</li>
+<li>the KB-JWT audience when the RP is a native application, expressed through the application&rsquo;s association with a web origin</li>
+<li>private, per-RP email addresses that an issuer returns in place of the user&rsquo;s address</li>
+<li>error responses</li>
+<li>the set of email addresses the protocol can verify, including the treatment of internationalized addresses [RFC6531]</li>
+</ul>
+
+<p>The protocol will not reveal the RP&rsquo;s identity to the issuer. An EVT+KB presented to one RP will not be accepted by another. Issuer responses will not reveal, by content or timing, whether an address exists.</p>
+
+<p>An EVT asserts that the user controls the address. It does not assert that the address can receive mail.</p>
+
+<p>The security considerations will analyze the reliance on DNS for delegation and state when RPs and email domains are expected to use DNSSEC [RFC4033].</p>
+
+<h3 id="otp-token-email-header-field">OTP-Token email header field</h3>
+
+<p>A sender places the OTP in a machine-readable header field bound to an origin [RFC6454], alongside the human-readable code in the message body. A recipient Mail User Agent (rMUA) [RFC5598] can pass the code to the browser or operating system, which offers it only to a web page or native application that matches the origin. A native application matches through its association with the origin, as with domain-bound SMS codes. This covers email domains that do not operate an EVP issuer.</p>
+
+<p>The WG will specify the field&rsquo;s syntax as a Structured Field [RFC9651], its <code>origin</code> and <code>token</code> parameters, and its parsing rules, including header unfolding [RFC5322]. The optional <code>token</code> parameter carries a high-entropy value that lets an RP distinguish automated delivery from a code a user typed.</p>
+
+<p>Recipients whose software does not process the field will see no change in how the human-readable code works.</p>
+
+<h2 id="out-of-scope">Out of Scope</h2>
+
+<ul>
+<li>The browser API: how the user selects an address, how the RP supplies the nonce, and how the EVT+KB reaches the RP. The W3C Email Verification API defines these.</li>
+<li>Platform APIs through which native applications request verification, and platform mechanisms that associate an application with a web origin, such as Apple Associated Domains and Android Digital Asset Links.</li>
+<li>Interfaces between rMUAs and browsers or operating systems for passing an OTP.</li>
+<li>How the user authenticates to the issuer. The WG will define only how the issuer signals that authentication is required.</li>
+<li>Changes to SMTP, DKIM, SPF, or DMARC.</li>
+<li>Rules for email address equivalence or canonicalization.</li>
+<li>General discovery of public keys for email-address identifiers.</li>
+<li>Identity attributes other than the email address.</li>
+<li>RP policy on how a verified address is used, such as for account recovery or as an authentication factor.</li>
+</ul>
+
+<h2 id="coordination">Coordination</h2>
+
+<p>The WG will keep EVP&rsquo;s issuer discovery and token request consistent with the <a href="https://github.com/WICG/email-verification">W3C WICG Email Verification API</a>, so a single issuer deployment serves both specifications. The two currently differ on the issuer well-known file and the token request format.</p>
+
+<table>
+<thead>
+<tr>
+<th>Group</th>
+<th>Topic</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>W3C WICG</td>
+<td>Email Verification API, the companion browser API; WebOTP and origin-bound SMS codes, which an email transport extends</td>
+</tr>
+
+<tr>
+<td>W3C FedID WG</td>
+<td>FedCM and the Login Status API, used for account discovery</td>
+</tr>
+
+<tr>
+<td>W3C WebAppSec</td>
+<td>Credential Management, which WebOTP extends; Fetch Metadata and the <code>Sec-Fetch-Dest: email-verification</code> value</td>
+</tr>
+
+<tr>
+<td>WHATWG HTML</td>
+<td><code>autocomplete</code> tokens, including <code>one-time-code</code> and <code>email-verification-token</code></td>
+</tr>
+
+<tr>
+<td>MAILMAINT</td>
+<td>The OTP-Token header field</td>
+</tr>
+
+<tr>
+<td>DMARC</td>
+<td>Whether OTP-Token&rsquo;s <code>origin</code> is checked against a DMARC-aligned sender domain</td>
+</tr>
+
+<tr>
+<td>DNSOP</td>
+<td>The underscored DNS node name used for delegation</td>
+</tr>
+</tbody>
+</table>
+<p>The documents will request IANA registrations for:</p>
+
+<ul>
+<li><code>_email-verification</code> in the Underscored and Globally Scoped DNS Node Names registry [RFC8552]</li>
+<li><code>email-verification</code> in the Well-Known URIs registry [RFC8615]</li>
+<li>the <code>application/evt+jwt</code> media type</li>
+<li>new claims in the JSON Web Token Claims registry</li>
+<li><code>OTP-Token</code> in the Message Header Field Names registry [RFC3864]</li>
+</ul>
+
+<h2 id="deliverables">Deliverables</h2>
+
+<table>
+<thead>
+<tr>
+<th>Document</th>
+<th>Status</th>
+<th>Starting point</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>Email Verification Protocol</td>
+<td>Proposed Standard</td>
+<td><a href="https://dickhardt.github.io/email-verification/draft-hardt-email-verification.html">draft-hardt-email-verification</a></td>
+</tr>
+
+<tr>
+<td>The OTP-Token Email Header Field</td>
+<td>Proposed Standard</td>
+<td><a href="https://datatracker.ietf.org/doc/draft-goto-otp-token/">draft-goto-otp-token</a></td>
+</tr>
+</tbody>
+</table>
+<p>The WG may adopt additional Proposed Standard documents for other proposals that meet the goals in the Scope section.</p>
+
+<h2 id="milestones">Milestones</h2>
+
+<p>Targets are months after chartering.</p>
+
+<table>
+<thead>
+<tr>
+<th>Month</th>
+<th>Milestone</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>2</td>
+<td>Adopt Email Verification Protocol as WG document</td>
+</tr>
+
+<tr>
+<td>2</td>
+<td>Adopt OTP-Token Email Header Field as WG document</td>
+</tr>
+
+<tr>
+<td>9</td>
+<td>WGLC on Email Verification Protocol</td>
+</tr>
+
+<tr>
+<td>9</td>
+<td>WGLC on OTP-Token Email Header Field</td>
+</tr>
+
+<tr>
+<td>12</td>
+<td>Submit OTP-Token Email Header Field to IESG</td>
+</tr>
+
+<tr>
+<td>12</td>
+<td>Submit Email Verification Protocol to IESG</td>
+</tr>
+</tbody>
+</table>
+
+</body>
+</html>
+
