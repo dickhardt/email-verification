@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-08-27T01:05:21.435509+00:00",
+  "timestamp": "2026-09-20T00:00:51.008126+00:00",
   "repo": "dickhardt/email-verification",
   "labels": [
     {
@@ -1233,6 +1233,34 @@
       "mergedBy": "dickhardt",
       "mergeCommit": {
         "oid": "1d302dad1d4b8072bf757b7023f6a2c3652e1569"
+      },
+      "comments": [],
+      "reviews": []
+    },
+    {
+      "number": 30,
+      "id": "PR_kwDOQ071b88AAAABEGC-gw",
+      "title": "Add draft EAV WG charter with HTML editor's copy",
+      "url": "https://github.com/dickhardt/email-verification/pull/30",
+      "state": "MERGED",
+      "author": "dickhardt",
+      "authorAssociation": "OWNER",
+      "assignees": [],
+      "labels": [],
+      "body": "- Adds `charter-ietf-eav-00-00.md`, a draft charter for an Email Address Verification (EAV) WG.\n- `Makefile`: builds `charter-ietf-eav-00-00.html` with `mmark -html` as part of `make`, and publishes it to gh-pages through `GHPAGES_EXTRA`. `charter-head.inc` holds the page styling.\n- `README.md`: new Draft Charter section linking the editor's copy and source.\n- `ghpages.yml`: includes the charter HTML in the build artifact.\n\nAfter merge the editor's copy is at https://dickhardt.github.io/email-verification/charter-ietf-eav-00-00.html\n\n\ud83e\udd16 Generated with [Claude Code](https://claude.com/claude-code)",
+      "createdAt": "2026-09-18T14:30:09Z",
+      "updatedAt": "2026-09-18T14:53:42Z",
+      "baseRepository": "dickhardt/email-verification",
+      "baseRefName": "main",
+      "baseRefOid": "1d302dad1d4b8072bf757b7023f6a2c3652e1569",
+      "headRepository": "dickhardt/email-verification",
+      "headRefName": "draft-charter",
+      "headRefOid": "ed5491684d99ef5cc0db6b8450502d9d15611098",
+      "closedAt": "2026-09-18T14:53:41Z",
+      "mergedAt": "2026-09-18T14:53:41Z",
+      "mergedBy": "dickhardt",
+      "mergeCommit": {
+        "oid": "aba8f53866ec640843c781170dc71050bc18ed4d"
       },
       "comments": [],
       "reviews": []
