@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-09-20T00:00:51.008126+00:00",
+  "timestamp": "2026-10-15T01:55:20.785592+00:00",
   "repo": "dickhardt/email-verification",
   "labels": [
     {
@@ -635,6 +635,30 @@
           "body": "I agree the current language leans on recommending an SD-JWT library -- and my research since then shows there are not lots of those and SD-JWT support is not in any of the major libraries. \n\nI'd lean towards explaining the processing steps and that it happens to be a valid SD-JWT with no disclosures. \n\nGiven that, do we want to drop the issuer including the `~` at the end of the EVT? That was an artifact of wanting SD-JWT compatibility. The final token is the same `<EVT>~<KB>`. \n\nNote that the EVT is NOT the final token -- it is the token from the issuer. ",
           "createdAt": "2026-08-25T15:40:23Z",
           "updatedAt": "2026-08-25T15:40:23Z"
+        }
+      ]
+    },
+    {
+      "number": 31,
+      "id": "I_kwDOQ071b88AAAABW0OU6g",
+      "title": "EdDSA prohibition misaligns with GMail and demo implementation",
+      "url": "https://github.com/dickhardt/email-verification/issues/31",
+      "state": "OPEN",
+      "author": "cqjjjzr",
+      "authorAssociation": "NONE",
+      "assignees": [],
+      "labels": [],
+      "body": "The latest version of the draft prohibits `EdDSA` in the `signing_alg_values_supported`, but both GMail and the demo impl violates this.\n\nhttps://accounts.google.com/.well-known/email-verification : \n\n```\n{\n  \"issuer\": \"https://accounts.google.com\",\n  \"issuance_endpoint\": \"https://accounts.google.com/gsi/email-verification/issue\",\n  \"jwks_uri\": \"https://verifiablecredentials-pa.googleapis.com/.well-known/vc-public-jwks\",\n  \"signing_alg_values_supported\": [\"EdDSA\"]\n}\n```\n\nhttps://rowan.fyi/.well-known/email-verification :\n```\n{\n    \"issuer\": \"https://rowan.fyi\",\n    \"issuance_endpoint\": \"https://rowan.fyi/made/email-provider/issuance\",\n    \"jwks_uri\": \"https://rowan.fyi/made/email-provider/jwks\",\n    \"signing_alg_values_supported\": [\n        \"Ed25519\",\n        \"EdDSA\"\n    ],\n    \"private_email_supported\": false\n}\n```",
+      "createdAt": "2026-10-13T07:09:43Z",
+      "updatedAt": "2026-10-13T07:29:53Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "cqjjjzr",
+          "authorAssociation": "NONE",
+          "body": "Also, `alg` was mandated by the latest -02 draft, but Chrome 155 + Origin Trial doesn't set one in the signature.",
+          "createdAt": "2026-10-13T07:29:53Z",
+          "updatedAt": "2026-10-13T07:29:53Z"
         }
       ]
     }
