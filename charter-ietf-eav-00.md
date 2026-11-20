@@ -2,7 +2,7 @@
 
 Revision 00-01 · 2026-11-20 · Revises 00-00, the text of [charter-ietf-evp-00-00](https://datatracker.ietf.org/doc/charter-ietf-evp/00-00/) presented at the IETF 127 BoF
 
-Web and native applications verify that a user controls an email address by sending a message containing a one-time code or link, which the user retrieves from their mailbox and returns to the application. Many users abandon the flow at this step. Because the user carries the code, any site that asks for it can phish it. Because the message is sent from the application's domain, the email provider learns which application the user is interacting with.
+Web and native applications verify that a user controls an email address by sending a message containing a one-time code or link, which the user retrieves from their mailbox and returns to the application. Many users abandon the flow at this step. Because the user carries the code, any site that asks for it can phish it.
 
 Browser and mobile platform vendors addressed the same problem for SMS by binding one-time codes to the website or application they were issued for, so the platform can deliver the code and refuse to offer it anywhere else (W3C WICG Origin-bound One-time Codes Delivered via SMS, and the WebOTP API). Email has no equivalent.
 
@@ -21,7 +21,6 @@ Mechanisms the WG specifies will support both global and directed email addresse
 In evaluating mechanisms, the WG will consider:
 
 - resistance to phishing, by binding the result to the requesting web origin or application
-- whether the email provider learns which application requested verification
 - whether applications can correlate a user across applications by the verified address
 - whether the mechanism reveals if an address exists
 - support for native applications as well as web applications
