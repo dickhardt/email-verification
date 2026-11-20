@@ -1,5 +1,5 @@
 LIBDIR := lib
-CHARTER := charter-ietf-eav-00-00
+CHARTER := charter-ietf-eav-00
 GHPAGES_EXTRA := $(CHARTER).html
 include $(LIBDIR)/main.mk
 

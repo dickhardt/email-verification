@@ -15,8 +15,8 @@ This document defines the Email Verification Protocol (EVP), which enables web a
 
 A draft charter for an Email Address Verification (EAV) working group:
 
-* [Editor's Copy](https://dickhardt.github.io/email-verification/charter-ietf-eav-00-00.html)
-* [Source](https://github.com/dickhardt/email-verification/blob/main/charter-ietf-eav-00-00.md)
+* [Editor's Copy](https://dickhardt.github.io/email-verification/charter-ietf-eav-00.html)
+* [Source](https://github.com/dickhardt/email-verification/blob/main/charter-ietf-eav-00.md)
 
 ## Related Work
 
