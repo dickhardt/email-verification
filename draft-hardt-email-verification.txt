@@ -5,8 +5,8 @@
 TBD                                                             D. Hardt
 Internet-Draft                                                     Hellō
 Intended status: Standards Track                                 S. Goto
-Expires: 22 March 2027                                            Google
-                                                       18 September 2026
+Expires: 24 May 2027                                              Google
+                                                        20 November 2026
 
 
                       Email Verification Protocol
@@ -64,7 +64,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 22 March 2027.
+   This Internet-Draft will expire on 24 May 2027.
 
 Copyright Notice
 
